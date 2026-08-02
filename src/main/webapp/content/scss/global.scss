@@ -3,6 +3,103 @@
 @import 'bootstrap/scss/variables';
 
 /* ==============================================================
+Jojo Addison design tokens — ported verbatim from
+jojoaddison-consultancy-demo.html. Every component styles off these
+CSS custom properties; theming is driven by data-theme on <html>
+(see app/core/theme/theme.service.ts).
+===============================================================*/
+:root {
+  color-scheme: light;
+  --plane: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --surface-2: #ffffff;
+  --surface-sunk: #f1f2ec;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.18);
+
+  --brand: #0d6b2f;
+  --brand-deep: #08511f;
+  --brand-soft: #e8f3ea;
+  --brand-ink: #ffffff;
+  --accent: #f2d024;
+  --accent-soft: #fdf6d3;
+  --accent-ink: #3a3000;
+
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --seq-100: #cde2fb;
+  --seq-250: #86b6ef;
+  --seq-400: #3987e5;
+  --seq-550: #1c5cab;
+
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --success-text: #006300;
+
+  --shadow-1: 0 1px 2px rgba(11, 11, 11, 0.05), 0 1px 3px rgba(11, 11, 11, 0.04);
+  --shadow-2: 0 8px 24px rgba(11, 11, 11, 0.08), 0 2px 6px rgba(11, 11, 11, 0.04);
+  --shadow-3: 0 24px 60px rgba(11, 11, 11, 0.16);
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, sfmono-regular, 'SF Mono', menlo, consolas, monospace;
+  --maxw: 1200px;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --plane: #0d0d0d;
+  --surface-1: #1a1a19;
+  --surface-2: #212120;
+  --surface-sunk: #141413;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  --brand: #2fbf63;
+  --brand-deep: #8fe0ac;
+  --brand-soft: #122b1a;
+  --brand-ink: #06210f;
+  --accent: #ffe14d;
+  --accent-soft: #2c2708;
+  --accent-ink: #1a1600;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --seq-100: #184f95;
+  --seq-250: #256abf;
+  --seq-400: #3987e5;
+  --seq-550: #86b6ef;
+
+  --success-text: #0ca30c;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 24px 60px rgba(0, 0, 0, 0.7);
+}
+
+/* Base plane — the whole app lives on the themed surface. */
+body {
+  background: var(--plane);
+  color: var(--text-primary);
+  font-family: var(--font);
+}
+
+/* ==============================================================
 Bootstrap tweaks
 ===============================================================*/
 

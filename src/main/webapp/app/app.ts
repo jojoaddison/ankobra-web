@@ -7,6 +7,7 @@ import { NgbDatepickerConfig } from '@ng-bootstrap/ng-bootstrap/datepicker';
 import dayjs from 'dayjs/esm';
 
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
+import { ThemeService } from 'app/core/theme/theme.service';
 
 import { fontAwesomeIcons } from './config/font-awesome-icons';
 import Main from './layouts/main/main';
@@ -21,11 +22,13 @@ export default class App {
   private readonly applicationConfigService = inject(ApplicationConfigService);
   private readonly iconLibrary = inject(FaIconLibrary);
   private readonly dpConfig = inject(NgbDatepickerConfig);
+  private readonly themeService = inject(ThemeService);
 
   constructor() {
     this.applicationConfigService.setEndpointPrefix(SERVER_API_URL);
     registerLocaleData(locale);
     this.iconLibrary.addIcons(...fontAwesomeIcons);
     this.dpConfig.minDate = { year: dayjs().subtract(100, 'year').year(), month: 1, day: 1 };
+    this.themeService.init();
   }
 }

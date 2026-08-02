@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-This is a **greenfield repo with no application code yet** — no `package.json`, `pom.xml`, `.jhipster/`, or JDL, and no commits on `main` (all three tracked files are staged, not committed). It currently holds only the brief and the design/content reference:
+The **JHipster 9.1.0 monolith has been generated** (commit `c47564d`) from `app.jdl` — Java 25, Spring Boot 4.0.6, Angular 21, PostgreSQL, JWT. Verified: `./mvnw clean compile` and `npm run webapp:build:dev` both pass. Remaining work is the bespoke UI: port the demo's design tokens + time-of-day theming, build the public marketing front, then the portal/CMS views, then seed data + role-scoping tests (see the phased TODO list). The originating reference files remain the spec:
 
 | File                                | Role                                                                                                                                                                                                          |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
