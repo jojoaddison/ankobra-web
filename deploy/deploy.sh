@@ -433,13 +433,15 @@ else
   fail "/api/admin/users answered ${admin_code} to an anonymous request — expected 401"
 fi
 
-# The public contact endpoint must accept unauthenticated POSTs (permitAll). A GET is the wrong
-# method, so 405 confirms it is routed and reachable; a 401 here would mean the permitAll was lost.
-enquiry_code="$(remote "curl -s -o /dev/null -w '%{http_code}' -m 10 http://127.0.0.1:${APP_PORT}/api/public/enquiries" || echo "000")"
-if [[ "$enquiry_code" == "405" ]]; then
-  ok "internal  /api/public/enquiries is public (405 to GET, i.e. routed and permitted)"
+# The public contact endpoint must accept unauthenticated POSTs (permitAll). Spring Security returns
+# 401 *before* method routing, so a GET (which the permitAll does not cover) is 401 and proves
+# nothing. POST an empty body instead: it clears security (not 401) and reaches the controller, where
+# @Valid rejects it with 400 — so 400 confirms both permitAll and routing, without creating a Lead.
+enquiry_code="$(remote "curl -s -o /dev/null -w '%{http_code}' -m 10 -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:${APP_PORT}/api/public/enquiries" || echo "000")"
+if [[ "$enquiry_code" == "400" ]]; then
+  ok "internal  /api/public/enquiries accepts anonymous POSTs (400 to an empty body = permitted + validated)"
 else
-  warn "/api/public/enquiries answered ${enquiry_code} to a GET — expected 405 (method not allowed)"
+  warn "/api/public/enquiries answered ${enquiry_code} to an empty POST — expected 400 (permitted, then validation rejects)"
 fi
 
 # Public: through nginx and TLS, from this machine. Skipped when the site is not published yet.
