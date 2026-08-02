@@ -1,51 +1,40 @@
 import { beforeEach, describe, expect, it, vitest } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-
-import { TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
-
-import { AccountService } from 'app/core/auth/account.service';
+import { Router, provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import Home from './home';
 
-describe('Home Component', () => {
+describe('Home Component (marketing)', () => {
   let comp: Home;
   let fixture: ComponentFixture<Home>;
-  let mockAccountService: AccountService;
-  let mockRouter: Router;
+  let router: Router;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [TranslateModule.forRoot()],
-      providers: [
-        {
-          provide: AccountService,
-          useValue: {
-            isAuthenticated: vitest.fn(),
-          },
-        },
-      ],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(Home);
     comp = fixture.componentInstance;
-    mockAccountService = TestBed.inject(AccountService);
-    mockAccountService.identity = vitest.fn(() => of(null));
-
-    mockRouter = TestBed.inject(Router);
-    vitest.spyOn(mockRouter, 'navigate');
+    router = TestBed.inject(Router);
+    vitest.spyOn(router, 'navigate').mockResolvedValue(true);
   });
 
-  describe('login', () => {
-    it('should navigate to /login on login', () => {
-      // WHEN
-      comp.login();
+  it('should render the marketing page', () => {
+    fixture.detectChanges();
+    expect(comp).toBeTruthy();
+  });
 
-      // THEN
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
-    });
+  it('should navigate to /login when launching the portal', () => {
+    (comp as any).launchPortal();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('should switch the active service tab', () => {
+    (comp as any).selectTab('training');
+    expect((comp as any).activeTab()).toBe('training');
+    expect((comp as any).activeItems().length).toBeGreaterThan(0);
   });
 });

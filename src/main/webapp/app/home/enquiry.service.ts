@@ -17,7 +17,7 @@ export class EnquiryService {
   private readonly http = inject(HttpClient);
   private readonly resourceUrl = inject(ApplicationConfigService).getEndpointFor('api/public/enquiries');
 
-  submit(enquiry: Enquiry): Observable<void> {
-    return this.http.post<void>(this.resourceUrl, enquiry);
+  submit(enquiry: Enquiry): Observable<{}> {
+    return this.http.post(this.resourceUrl, enquiry);
   }
 }

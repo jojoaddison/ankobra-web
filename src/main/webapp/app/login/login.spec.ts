@@ -74,7 +74,7 @@ describe('Login', () => {
       expect(mockAccountService.isAuthenticated).toHaveBeenCalled();
     });
 
-    it('should navigate to home page on Init if authenticated=true', () => {
+    it('should navigate to portal on Init if authenticated=true', () => {
       // GIVEN
       mockAccountService.identity = vitest.fn(() => of(null));
       mockAccountService.isAuthenticated = () => true;
@@ -83,7 +83,7 @@ describe('Login', () => {
       comp.ngOnInit();
 
       // THEN
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/portal']);
     });
   });
 
@@ -124,7 +124,7 @@ describe('Login', () => {
       // THEN
       expect(comp.authenticationError()).toEqual(false);
       expect(mockLoginService.login).toHaveBeenCalledWith(credentials);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/portal']);
     });
 
     it('should authenticate the user but not navigate to home page if authentication process is already routing to cached url from localstorage', () => {

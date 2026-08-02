@@ -30,8 +30,6 @@ export default class Portal {
   protected readonly sidebarCollapsed = signal(false);
   protected readonly search = signal('');
 
-  private readonly loginService = inject(LoginService);
-
   protected readonly displayName = computed(() => {
     const a = this.account();
     if (!a) {
@@ -83,6 +81,8 @@ export default class Portal {
       ],
     },
   ];
+
+  private readonly loginService = inject(LoginService);
 
   protected toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);

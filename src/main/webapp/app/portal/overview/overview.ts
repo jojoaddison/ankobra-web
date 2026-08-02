@@ -45,8 +45,8 @@ export default class Overview {
   ];
 
   // Delivery hours by month × two service pillars (from the demo HOURS fixture).
-  private readonly months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-  private readonly hours: number[][] = [
+  protected readonly months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+  protected readonly hours: number[][] = [
     [420, 260],
     [468, 305],
     [512, 288],
@@ -58,10 +58,10 @@ export default class Overview {
   ];
 
   // Tickets raised vs resolved, last 12 weeks (from the demo TREND fixture).
-  private readonly raised = [14, 17, 12, 19, 23, 18, 21, 26, 22, 19, 24, 20];
-  private readonly resolved = [12, 16, 14, 17, 20, 19, 18, 24, 25, 21, 22, 23];
+  protected readonly raised = [14, 17, 12, 19, 23, 18, 21, 26, 22, 19, 24, 20];
+  protected readonly resolved = [12, 16, 14, 17, 20, 19, 18, 24, 25, 21, 22, 23];
 
-  private readonly revenue = [
+  protected readonly revenue = [
     { name: 'Bespoke solutions', value: 524000 },
     { name: 'Enterprise integration', value: 340000 },
     { name: 'Digital transformation', value: 196000 },

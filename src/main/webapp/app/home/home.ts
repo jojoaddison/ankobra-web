@@ -51,12 +51,7 @@ export default class Home implements OnInit, OnDestroy {
   protected readonly sending = signal(false);
   protected readonly sent = signal(false);
 
-  private readonly router = inject(Router);
-  private readonly fb = inject(FormBuilder);
-  private readonly enquiryService = inject(EnquiryService);
-  private termTimer?: ReturnType<typeof setTimeout>;
-
-  protected readonly contactForm = this.fb.group({
+  protected readonly contactForm = inject(FormBuilder).group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(160)]],
     need: ['BESPOKE_SOLUTION'],
@@ -269,6 +264,10 @@ export default class Home implements OnInit, OnDestroy {
     { value: 'ISO_AUDIT', label: 'Information systems audit (ISO)' },
     { value: 'OTHER', label: 'Something else' },
   ];
+
+  private readonly router = inject(Router);
+  private readonly enquiryService = inject(EnquiryService);
+  private termTimer?: ReturnType<typeof setTimeout>;
 
   private readonly terminalScript = [
     '// engagement lifecycle',
