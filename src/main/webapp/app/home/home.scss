@@ -69,6 +69,12 @@ Jojo Addison — public marketing front. Styles off design tokens (global.scss).
     font-size: 19px;
     display: inline-flex;
     align-items: center;
+    .logo-wordmark {
+      height: 36px;
+      width: auto;
+      display: block;
+      border-radius: var(--r-sm);
+    }
     .br {
       color: var(--text-muted);
     }

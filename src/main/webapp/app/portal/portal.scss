@@ -64,6 +64,14 @@ Jojo Addison — authenticated portal shell. Styles off design tokens (global.sc
     font-weight: 700;
     font-size: 16px;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    .logo-wordmark {
+      height: 30px;
+      width: auto;
+      display: block;
+      border-radius: var(--r-sm);
+    }
     .br {
       color: var(--text-muted);
     }
