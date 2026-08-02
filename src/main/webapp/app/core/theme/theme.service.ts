@@ -72,7 +72,11 @@ export class ThemeService {
 
   private apply(theme: Theme): void {
     this.theme.set(theme);
-    this.document.documentElement.setAttribute('data-theme', theme);
+    const root = this.document.documentElement;
+    root.setAttribute('data-theme', theme);
+    // Drive Bootstrap 5.3 colour modes too, so the JHipster admin/entity pages
+    // (plain Bootstrap tables, forms, cards) follow the same light/dark switch.
+    root.setAttribute('data-bs-theme', theme);
   }
 
   /** In automatic mode, re-evaluate exactly when the clock next crosses 06:00 or 18:00. */

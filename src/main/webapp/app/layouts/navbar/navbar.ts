@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -11,7 +11,6 @@ import { environment } from 'environments/environment';
 import { LANGUAGES } from 'app/config/language.constants';
 import { AccountService } from 'app/core/auth/account.service';
 import { StateStorageService } from 'app/core/auth/state-storage.service';
-import { ProfileService } from 'app/layouts/profiles/profile.service';
 import { LoginService } from 'app/login/login.service';
 import HasAnyAuthorityDirective from 'app/shared/auth/has-any-authority.directive';
 import { TranslateDirective } from 'app/shared/language';
@@ -39,22 +38,17 @@ import ActiveMenuDirective from './active-menu.directive';
     TranslateModule,
   ],
 })
-export default class Navbar implements OnInit {
-  readonly inProduction = signal(true);
+export default class Navbar {
   readonly isNavbarCollapsed = signal(true);
   readonly languages = LANGUAGES;
-  readonly openAPIEnabled = signal(false);
   readonly version: string;
   readonly account = inject(AccountService).account;
   /** The public marketing home renders its own header, so the JHipster navbar is hidden there. */
   readonly hidden = signal(false);
-  /** Entity management (the CMS + entity CRUD) is admin-only. */
-  readonly isAdmin = computed(() => this.account()?.authorities.includes('ROLE_ADMIN') ?? false);
 
   private readonly loginService = inject(LoginService);
   private readonly translateService = inject(TranslateService);
   private readonly stateStorageService = inject(StateStorageService);
-  private readonly profileService = inject(ProfileService);
   private readonly router = inject(Router);
 
   constructor() {
@@ -70,13 +64,6 @@ export default class Navbar implements OnInit {
     this.hidden.set(ownsChrome(this.router.url));
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe(e => {
       this.hidden.set(ownsChrome(e.urlAfterRedirects));
-    });
-  }
-
-  ngOnInit(): void {
-    this.profileService.getProfileInfo().subscribe(profileInfo => {
-      this.inProduction.set(profileInfo.inProduction ?? true);
-      this.openAPIEnabled.set(profileInfo.openAPIEnabled ?? false);
     });
   }
 
