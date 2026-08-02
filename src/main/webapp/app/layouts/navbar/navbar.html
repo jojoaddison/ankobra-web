@@ -185,15 +185,16 @@
             </a>
             <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="admin-menu">
               <li>
-                <a class="dropdown-item" routerLink="/portal" routerLinkActive="active" (click)="collapseNavbar()" data-cy="portal">
+                <a
+                  class="dropdown-item"
+                  routerLink="/admin"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  (click)="collapseNavbar()"
+                  data-cy="adminDashboard"
+                >
                   <fa-icon icon="tachometer-alt" [fixedWidth]="true" />
-                  <span>Client Portal</span>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/cms" routerLinkActive="active" (click)="collapseNavbar()" data-cy="cms">
-                  <fa-icon icon="database" [fixedWidth]="true" />
-                  <span>Content management</span>
+                  <span>Dashboard</span>
                 </a>
               </li>
               <li><hr class="dropdown-divider" /></li>

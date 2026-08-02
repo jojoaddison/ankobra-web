@@ -3,6 +3,11 @@ import { Routes } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: '',
+    loadComponent: () => import('./admin-home/admin-home'),
+    title: 'global.menu.admin.main',
+  },
+  {
     path: 'docs',
     loadComponent: () => import('./docs/docs'),
     title: 'global.menu.admin.apidocs',
