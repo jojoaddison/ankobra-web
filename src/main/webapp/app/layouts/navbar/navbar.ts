@@ -62,10 +62,12 @@ export default class Navbar implements OnInit {
     } else {
       this.version = '';
     }
-    const isHome = (url: string): boolean => url === '/' || url === '' || url.startsWith('/?') || url.startsWith('/#');
-    this.hidden.set(isHome(this.router.url));
+    // The marketing home and the portal both render their own chrome, so the JHipster navbar is hidden there.
+    const ownsChrome = (url: string): boolean =>
+      url === '/' || url === '' || url.startsWith('/?') || url.startsWith('/#') || url.startsWith('/portal');
+    this.hidden.set(ownsChrome(this.router.url));
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe(e => {
-      this.hidden.set(isHome(e.urlAfterRedirects));
+      this.hidden.set(ownsChrome(e.urlAfterRedirects));
     });
   }
 

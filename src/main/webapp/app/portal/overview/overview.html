@@ -1,0 +1,77 @@
+<div class="view">
+  <div class="view-head">
+    <div>
+      <h1>Delivery overview</h1>
+      <p class="sub">Portfolio health, delivery capacity and support trend at a glance.</p>
+    </div>
+  </div>
+
+  <!-- ============ KPIs ============ -->
+  <div class="kpis">
+    @for (k of kpis; track k.label) {
+      <div class="kpi">
+        <div class="kpi-label">{{ k.label }}</div>
+        <div class="kpi-value">{{ k.value }}</div>
+        <div class="kpi-delta" [class]="k.tone">{{ k.delta }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- ============ CHARTS ============ -->
+  <div class="charts">
+    <div class="panel chart-card">
+      <div class="chart-head">
+        <h3>Delivery hours by month</h3>
+        <div class="legend">
+          @for (l of hoursLegend; track l.label) {
+            <span class="lg"><i [style.background]="l.color"></i>{{ l.label }}</span>
+          }
+        </div>
+      </div>
+      <svg class="chart" [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH" preserveAspectRatio="xMidYMid meet" role="img">
+        @for (b of hoursBars; track $index) {
+          <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" [attr.fill]="b.fill" rx="2" />
+        }
+        @for (t of hoursLabels; track t.label) {
+          <text [attr.x]="t.x" [attr.y]="chartH - 8" text-anchor="middle" class="axis-txt">{{ t.label }}</text>
+        }
+      </svg>
+    </div>
+
+    <div class="panel chart-card">
+      <div class="chart-head">
+        <h3>Tickets — raised vs resolved</h3>
+        <div class="legend">
+          @for (l of trendLegend; track l.label) {
+            <span class="lg"><i [style.background]="l.color"></i>{{ l.label }}</span>
+          }
+        </div>
+      </div>
+      <svg class="chart" [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH" preserveAspectRatio="xMidYMid meet" role="img">
+        <path [attr.d]="raisedLine" fill="none" stroke="var(--series-2)" stroke-width="2.5" />
+        <path [attr.d]="resolvedLine" fill="none" stroke="var(--series-3)" stroke-width="2.5" />
+        @for (p of trendPoints.raised; track $index) {
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="var(--series-2)" />
+        }
+        @for (p of trendPoints.resolved; track $index) {
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="var(--series-3)" />
+        }
+      </svg>
+    </div>
+
+    <div class="panel chart-card wide">
+      <div class="chart-head">
+        <h3>Revenue by pillar</h3>
+      </div>
+      <div class="revenue">
+        @for (r of revenueRows; track r.name) {
+          <div class="rev-row">
+            <div class="rev-name">{{ r.name }}</div>
+            <div class="rev-track"><div class="rev-fill" [style.width.%]="r.w"></div></div>
+            <div class="rev-value">{{ r.value }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

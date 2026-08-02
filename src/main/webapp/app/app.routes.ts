@@ -34,6 +34,11 @@ const routes: Routes = [
     title: 'login.title',
   },
   {
+    path: 'portal',
+    canActivate: [UserRouteAccessService],
+    loadChildren: () => import('./portal/portal.routes'),
+  },
+  {
     path: '',
     loadChildren: () => import('./entities/entity.routes'),
   },
