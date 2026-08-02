@@ -1,0 +1,44 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131056"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "A quantity of a catalogue item on a quote (rate snapshotted at add time).",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "quantity",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "1"
+    },
+    {
+      "fieldName": "rate",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    }
+  ],
+  "name": "QuoteLine",
+  "relationships": [
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "serviceItem",
+      "relationshipName": "item",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "otherEntityField": "reference",
+      "otherEntityName": "quote",
+      "otherEntityRelationshipName": "line",
+      "relationshipName": "quote",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

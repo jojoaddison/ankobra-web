@@ -1,0 +1,66 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (lead(); as leadRef) {
+      <div>
+        <h2 data-cy="leadDetailsHeading"><span jhiTranslate="jojoaddisonApp.lead.detail.title">Lead</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ leadRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.lead.name">Name</span></dt>
+          <dd>
+            <span>{{ leadRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.lead.email">Email</span></dt>
+          <dd>
+            <span>{{ leadRef.email }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.lead.need">Need</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.EnquiryType.' + (leadRef.need ?? 'null')">{{
+              {
+                null: '',
+                BESPOKE_SOLUTION: 'BESPOKE_SOLUTION',
+                DIGITAL_TRANSFORMATION: 'DIGITAL_TRANSFORMATION',
+                CAPACITY_BUILDING: 'CAPACITY_BUILDING',
+                ENTERPRISE_INTEGRATION: 'ENTERPRISE_INTEGRATION',
+                ISO_AUDIT: 'ISO_AUDIT',
+                OTHER: 'OTHER',
+              }[leadRef.need ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.lead.message">Message</span></dt>
+          <dd>
+            <span>{{ leadRef.message }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.lead.createdDate">Created Date</span></dt>
+          <dd>
+            <span>{{ leadRef.createdDate | formatMediumDatetime }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.lead.status">Status</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.LeadStatus.' + (leadRef.status ?? 'null')">{{
+              { null: '', NEW: 'NEW', CONTACTED: 'CONTACTED', QUALIFIED: 'QUALIFIED', CLOSED: 'CLOSED' }[leadRef.status ?? 'null']
+            }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/lead', leadRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

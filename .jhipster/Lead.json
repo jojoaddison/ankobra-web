@@ -1,0 +1,46 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131059"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "Lead captured from the public contact form.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "email",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "160"
+    },
+    {
+      "fieldName": "need",
+      "fieldType": "EnquiryType",
+      "fieldTypeDocumentation": "Contact-form \"What do you need?\" options.",
+      "fieldValues": "BESPOKE_SOLUTION,DIGITAL_TRANSFORMATION,CAPACITY_BUILDING,ENTERPRISE_INTEGRATION,ISO_AUDIT,OTHER"
+    },
+    {
+      "fieldName": "message",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "createdDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "LeadStatus",
+      "fieldValues": "NEW,CONTACTED,QUALIFIED,CLOSED"
+    }
+  ],
+  "name": "Lead",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -1,0 +1,56 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131057"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "Training course offered as part of capacity building.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "160"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "300"
+    },
+    {
+      "fieldName": "moduleCount",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "fieldName": "mode",
+      "fieldType": "DeliveryMode",
+      "fieldValues": "VIRTUAL,IN_HOUSE"
+    },
+    {
+      "fieldName": "labBased",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "enrolledCount",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "fieldName": "progress",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min", "max"],
+      "fieldValidateRulesMax": "100",
+      "fieldValidateRulesMin": "0"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Course",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

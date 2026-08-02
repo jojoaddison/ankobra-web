@@ -1,0 +1,74 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (ticket(); as ticketRef) {
+      <div>
+        <h2 data-cy="ticketDetailsHeading"><span jhiTranslate="jojoaddisonApp.ticket.detail.title">Ticket</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ ticketRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.reference">Reference</span></dt>
+          <dd>
+            <span>{{ ticketRef.reference }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.subject">Subject</span></dt>
+          <dd>
+            <span>{{ ticketRef.subject }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.priority">Priority</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.Status.' + (ticketRef.priority ?? 'null')">{{
+              { null: '', GOOD: 'GOOD', WARN: 'WARN', SERIOUS: 'SERIOUS', CRIT: 'CRIT', DONE: 'DONE' }[ticketRef.priority ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.openedAt">Opened At</span></dt>
+          <dd>
+            <span>{{ ticketRef.openedAt | formatMediumDatetime }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.slaHours">Sla Hours</span></dt>
+          <dd>
+            <span>{{ ticketRef.slaHours }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.state">State</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.TicketState.' + (ticketRef.state ?? 'null')">{{
+              { null: '', OPEN: 'OPEN', CLOSED: 'CLOSED' }[ticketRef.state ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.owner">Owner</span></dt>
+          <dd>
+            @if (ticket()!.owner) {
+              <div>
+                <a [routerLink]="['/team-member', ticket()!.owner?.id, 'view']">{{ ticketRef.owner?.name }}</a>
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.ticket.client">Client</span></dt>
+          <dd>
+            @if (ticket()!.client) {
+              <div>
+                <a [routerLink]="['/client', ticket()!.client?.id, 'view']">{{ ticketRef.client?.name }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/ticket', ticketRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

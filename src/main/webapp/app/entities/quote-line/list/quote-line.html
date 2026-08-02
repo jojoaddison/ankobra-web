@@ -1,0 +1,118 @@
+<div>
+  <h2 id="page-heading" data-cy="QuoteLineHeading">
+    <span jhiTranslate="jojoaddisonApp.quoteLine.home.title">Quote Lines</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading()">
+        <fa-icon icon="sync" [animation]="isLoading() ? 'spin' : undefined" />
+        <span jhiTranslate="jojoaddisonApp.quoteLine.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-quote-line"
+        [routerLink]="['/quote-line/new']"
+      >
+        <fa-icon icon="plus" />
+        <span jhiTranslate="jojoaddisonApp.quoteLine.home.createLabel">Create a new Quote Line</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  @if (quoteLines().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="jojoaddisonApp.quoteLine.home.notFound">No Quote Lines found</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="quantity">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.quoteLine.quantity">Quantity</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="rate">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.quoteLine.rate">Rate</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="item.name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.quoteLine.item">Item</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="quote.reference">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.quoteLine.quote">Quote</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (quoteLine of quoteLines(); track trackId(quoteLine)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/quote-line', quoteLine.id, 'view']">{{ quoteLine.id }}</a>
+              </td>
+              <td>{{ quoteLine.quantity }}</td>
+              <td>{{ quoteLine.rate }}</td>
+              <td>
+                @if (quoteLine.item) {
+                  <div>
+                    <a [routerLink]="['/service-item', quoteLine.item.id, 'view']">{{ quoteLine.item.name }}</a>
+                  </div>
+                }
+              </td>
+              <td>
+                @if (quoteLine.quote) {
+                  <div>
+                    <a [routerLink]="['/quote', quoteLine.quote.id, 'view']">{{ quoteLine.quote.reference }}</a>
+                  </div>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/quote-line', quoteLine.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                  </a>
+
+                  <a [routerLink]="['/quote-line', quoteLine.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(quoteLine)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

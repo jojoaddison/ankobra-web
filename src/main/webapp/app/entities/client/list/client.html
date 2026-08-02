@@ -1,0 +1,212 @@
+<div>
+  <h2 id="page-heading" data-cy="ClientHeading">
+    <span jhiTranslate="jojoaddisonApp.client.home.title">Clients</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading()">
+        <fa-icon icon="sync" [animation]="isLoading() ? 'spin' : undefined" />
+        <span jhiTranslate="jojoaddisonApp.client.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-client"
+        [routerLink]="['/client/new']"
+      >
+        <fa-icon icon="plus" />
+        <span jhiTranslate="jojoaddisonApp.client.home.createLabel">Create a new Client</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  <jhi-filter [filters]="filters" />
+
+  @if (clients().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="jojoaddisonApp.client.home.notFound">No Clients found</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.client.name">Name</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="sector">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.client.sector">Sector</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="clientSince">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.client.clientSince">Client Since</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="health">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.client.health">Health</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="totalSpend">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.client.totalSpend">Total Spend</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="user.login">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.client.user">User</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (client of clients(); track trackId(client)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/client', client.id, 'view']">{{ client.id }}</a>
+              </td>
+              <td>{{ client.name }}</td>
+              <td [jhiTranslate]="'jojoaddisonApp.Market.' + (client.sector ?? 'null')">
+                {{
+                  {
+                    null: '',
+                    BANKING_FINANCE_INSURANCE: 'BANKING_FINANCE_INSURANCE',
+                    REAL_ESTATE: 'REAL_ESTATE',
+                    OIL_AND_GAS: 'OIL_AND_GAS',
+                    HAULAGE_TRANSPORTATION: 'HAULAGE_TRANSPORTATION',
+                    HEALTH_HOSPITALITY: 'HEALTH_HOSPITALITY',
+                    DEFENCE_NATIONAL_SECURITY: 'DEFENCE_NATIONAL_SECURITY',
+                    COMMUNICATION: 'COMMUNICATION',
+                    TRANSPORTATION: 'TRANSPORTATION',
+                    HEALTH_EDUCATION: 'HEALTH_EDUCATION',
+                    AGRICULTURE: 'AGRICULTURE',
+                    INSTITUTIONS_COMMISSIONS_AUTHORITIES: 'INSTITUTIONS_COMMISSIONS_AUTHORITIES',
+                    PRIVATE_RESIDENCES_BUSINESSES: 'PRIVATE_RESIDENCES_BUSINESSES',
+                    RETAIL_DISTRIBUTION: 'RETAIL_DISTRIBUTION',
+                  }[client.sector ?? 'null']
+                }}
+              </td>
+              <td>{{ client.clientSince }}</td>
+              <td [jhiTranslate]="'jojoaddisonApp.Status.' + (client.health ?? 'null')">
+                {{ { null: '', GOOD: 'GOOD', WARN: 'WARN', SERIOUS: 'SERIOUS', CRIT: 'CRIT', DONE: 'DONE' }[client.health ?? 'null'] }}
+              </td>
+              <td>{{ client.totalSpend }}</td>
+              <td>
+                {{ client.user?.login }}
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <button
+                    type="submit"
+                    [routerLink]="['/project']"
+                    [queryParams]="{ 'filter[clientId.in]': client.id }"
+                    class="btn btn-info btn-sm"
+                    data-cy="filterOtherEntityButton"
+                  >
+                    <fa-icon icon="eye" />
+                    <span
+                      class="d-none d-md-inline"
+                      jhiTranslate="entity.action.show"
+                      [translateValues]="{ otherEntity: ('jojoaddisonApp.client.project' | translate) }"
+                      >Show Project</span
+                    >
+                  </button>
+                  <button
+                    type="submit"
+                    [routerLink]="['/ticket']"
+                    [queryParams]="{ 'filter[clientId.in]': client.id }"
+                    class="btn btn-info btn-sm"
+                    data-cy="filterOtherEntityButton"
+                  >
+                    <fa-icon icon="eye" />
+                    <span
+                      class="d-none d-md-inline"
+                      jhiTranslate="entity.action.show"
+                      [translateValues]="{ otherEntity: ('jojoaddisonApp.client.ticket' | translate) }"
+                      >Show Ticket</span
+                    >
+                  </button>
+                  <button
+                    type="submit"
+                    [routerLink]="['/quote']"
+                    [queryParams]="{ 'filter[clientId.in]': client.id }"
+                    class="btn btn-info btn-sm"
+                    data-cy="filterOtherEntityButton"
+                  >
+                    <fa-icon icon="eye" />
+                    <span
+                      class="d-none d-md-inline"
+                      jhiTranslate="entity.action.show"
+                      [translateValues]="{ otherEntity: ('jojoaddisonApp.client.quote' | translate) }"
+                      >Show Quote</span
+                    >
+                  </button>
+                  <a [routerLink]="['/client', client.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                  </a>
+
+                  <a [routerLink]="['/client', client.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(client)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (clients().length > 0) {
+    <div>
+      <div class="d-flex justify-content-center">
+        <jhi-item-count [params]="{ page: page(), totalItems: totalItems(), itemsPerPage: itemsPerPage() }" />
+      </div>
+
+      <div class="d-flex justify-content-center">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="page()"
+          [pageSize]="itemsPerPage()"
+          [maxSize]="5"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          (pageChange)="navigateToPage($event)"
+        />
+      </div>
+    </div>
+  }
+</div>

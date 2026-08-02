@@ -1,0 +1,43 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131052"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "Ordered step on a project timeline (done / now / next).",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "160"
+    },
+    {
+      "fieldName": "state",
+      "fieldType": "MilestoneState",
+      "fieldTypeDocumentation": "Ordered milestone state on a project timeline.",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "DONE,NOW,NEXT"
+    },
+    {
+      "fieldName": "position",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    }
+  ],
+  "name": "Milestone",
+  "relationships": [
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "project",
+      "otherEntityRelationshipName": "milestone",
+      "relationshipName": "project",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

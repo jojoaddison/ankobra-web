@@ -1,0 +1,29 @@
+{
+  "jojoaddisonApp": {
+    "quote": {
+      "home": {
+        "title": "Quotes",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Quote",
+        "createOrEditLabel": "Create or edit a Quote",
+        "notFound": "No Quotes found"
+      },
+      "created": "A new Quote is created with identifier {{ param }}",
+      "updated": "A Quote is updated with identifier {{ param }}",
+      "deleted": "A Quote is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Quote {{ id }}?"
+      },
+      "detail": {
+        "title": "Quote"
+      },
+      "id": "ID",
+      "reference": "Reference",
+      "title": "Title",
+      "createdDate": "Created Date",
+      "status": "Status",
+      "line": "Line",
+      "client": "Client"
+    }
+  }
+}

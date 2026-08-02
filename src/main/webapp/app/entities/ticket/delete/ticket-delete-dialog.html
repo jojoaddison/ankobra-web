@@ -1,0 +1,24 @@
+@if (ticket) {
+  <form name="deleteForm" (ngSubmit)="confirmDelete(ticket.id!)">
+    <div class="modal-header">
+      <h4 class="modal-title" data-cy="ticketDeleteDialogHeading" jhiTranslate="entity.delete.title">Confirm delete operation</h4>
+    </div>
+
+    <div class="modal-body">
+      <jhi-alert-error />
+      <p id="jhi-delete-ticket-heading" jhiTranslate="jojoaddisonApp.ticket.delete.question" [translateValues]="{ id: ticket.id }">
+        Are you sure you want to delete Ticket {{ ticket.id }}?
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cancel()">
+        <fa-icon icon="ban" />&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+      </button>
+
+      <button id="jhi-confirm-delete-ticket" data-cy="entityConfirmDeleteButton" type="submit" class="btn btn-danger">
+        <fa-icon icon="times" />&nbsp;<span jhiTranslate="entity.action.delete">Delete</span>
+      </button>
+    </div>
+  </form>
+}

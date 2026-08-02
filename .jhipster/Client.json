@@ -1,0 +1,74 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131050"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "A consultancy client. A client's portal user is scoped to only this client's data.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "sector",
+      "fieldType": "Market",
+      "fieldTypeDocumentation": "Sectors served (the 12 markets from the demo, + Retail & Distribution used by a client).",
+      "fieldValues": "BANKING_FINANCE_INSURANCE,REAL_ESTATE,OIL_AND_GAS,HAULAGE_TRANSPORTATION,HEALTH_HOSPITALITY,DEFENCE_NATIONAL_SECURITY,COMMUNICATION,TRANSPORTATION,HEALTH_EDUCATION,AGRICULTURE,INSTITUTIONS_COMMISSIONS_AUTHORITIES,PRIVATE_RESIDENCES_BUSINESSES,RETAIL_DISTRIBUTION"
+    },
+    {
+      "fieldName": "clientSince",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "health",
+      "fieldType": "Status",
+      "fieldTypeDocumentation": "Shared status vocabulary. Rendered On track / At risk / Delayed / Blocked / Delivered\\nfor projects & clients, and reused as ticket priority Low / Medium / High / Critical.",
+      "fieldValues": "GOOD,WARN,SERIOUS,CRIT,DONE"
+    },
+    {
+      "fieldName": "totalSpend",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Client",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "login",
+      "otherEntityName": "user",
+      "relationshipName": "user",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-one",
+      "relationshipWithBuiltInEntity": true
+    },
+    {
+      "otherEntityName": "project",
+      "otherEntityRelationshipName": "client",
+      "relationshipName": "project",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "ticket",
+      "otherEntityRelationshipName": "client",
+      "relationshipName": "ticket",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "quote",
+      "otherEntityRelationshipName": "client",
+      "relationshipName": "quote",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

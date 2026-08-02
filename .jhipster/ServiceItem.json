@@ -1,0 +1,54 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131054"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "A line in the service catalogue that the quote builder composes.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "160"
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "400"
+    },
+    {
+      "fieldName": "rate",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required", "min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "fieldName": "unit",
+      "fieldType": "RateUnit",
+      "fieldTypeDocumentation": "Catalogue rate unit (per phase / per module / per month / ...).",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "PER_PHASE,PER_PROCESS,PER_SCOPE,PER_MODULE,PER_INTEGRATION,PER_ENVIRONMENT,PER_MONTH,PER_DATASET,PER_COHORT"
+    },
+    {
+      "fieldName": "serviceGroup",
+      "fieldType": "CatalogueGroup",
+      "fieldTypeDocumentation": "Service-catalogue grouping — matches the Consultancy / Solutions / Training tabs (+ Services).",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "CONSULTANCY,SOLUTIONS,SERVICES,TRAINING"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "ServiceItem",
+  "pagination": "pagination",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

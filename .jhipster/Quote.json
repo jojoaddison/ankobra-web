@@ -1,0 +1,53 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131055"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "An estimate assembled from catalogue items.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "reference",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "160"
+    },
+    {
+      "fieldName": "createdDate",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "QuoteStatus",
+      "fieldValues": "DRAFT,SENT,ACCEPTED,DECLINED"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Quote",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityName": "quoteLine",
+      "otherEntityRelationshipName": "quote",
+      "relationshipName": "line",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "client",
+      "otherEntityRelationshipName": "quote",
+      "relationshipName": "client",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

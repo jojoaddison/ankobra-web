@@ -1,0 +1,9 @@
+export enum CatalogueGroup {
+  CONSULTANCY = 'CONSULTANCY',
+
+  SOLUTIONS = 'SOLUTIONS',
+
+  SERVICES = 'SERVICES',
+
+  TRAINING = 'TRAINING',
+}

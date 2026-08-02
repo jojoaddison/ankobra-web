@@ -1,0 +1,99 @@
+{
+  "annotations": {
+    "changelogDate": "20260802131051"
+  },
+  "applications": ["jojoaddison"],
+  "documentation": "A delivery engagement.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "reference",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "160"
+    },
+    {
+      "fieldName": "pillar",
+      "fieldType": "ServicePillar",
+      "fieldTypeDocumentation": "Project service pillar (the four pillars + Consultancy from the demo portfolio).",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "BESPOKE_SOLUTIONS,DIGITAL_TRANSFORMATION,CAPACITY_BUILDING,ENTERPRISE_INTEGRATION,CONSULTANCY"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "Status",
+      "fieldTypeDocumentation": "Shared status vocabulary. Rendered On track / At risk / Delayed / Blocked / Delivered\\nfor projects & clients, and reused as ticket priority Low / Medium / High / Critical.",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "GOOD,WARN,SERIOUS,CRIT,DONE"
+    },
+    {
+      "fieldName": "progress",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["min", "max"],
+      "fieldValidateRulesMax": "100",
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "fieldName": "dueDate",
+      "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "delivered",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "budget",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "fieldName": "spent",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["min"],
+      "fieldValidateRulesMin": "0"
+    },
+    {
+      "fieldName": "techStack",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "255"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Project",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityName": "milestone",
+      "otherEntityRelationshipName": "project",
+      "relationshipName": "milestone",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "teamMember",
+      "relationshipName": "lead",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "client",
+      "otherEntityRelationshipName": "project",
+      "relationshipName": "client",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

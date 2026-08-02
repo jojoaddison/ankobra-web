@@ -1,0 +1,52 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (milestone(); as milestoneRef) {
+      <div>
+        <h2 data-cy="milestoneDetailsHeading"><span jhiTranslate="jojoaddisonApp.milestone.detail.title">Milestone</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ milestoneRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.milestone.title">Title</span></dt>
+          <dd>
+            <span>{{ milestoneRef.title }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.milestone.state">State</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.MilestoneState.' + (milestoneRef.state ?? 'null')">{{
+              { null: '', DONE: 'DONE', NOW: 'NOW', NEXT: 'NEXT' }[milestoneRef.state ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.milestone.position">Position</span></dt>
+          <dd>
+            <span>{{ milestoneRef.position }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.milestone.project">Project</span></dt>
+          <dd>
+            @if (milestone()!.project) {
+              <div>
+                <a [routerLink]="['/project', milestone()!.project?.id, 'view']">{{ milestoneRef.project?.name }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/milestone', milestoneRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

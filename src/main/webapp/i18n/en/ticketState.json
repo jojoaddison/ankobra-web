@@ -1,0 +1,9 @@
+{
+  "jojoaddisonApp": {
+    "TicketState": {
+      "null": "",
+      "OPEN": "OPEN",
+      "CLOSED": "CLOSED"
+    }
+  }
+}

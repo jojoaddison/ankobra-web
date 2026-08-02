@@ -1,0 +1,12 @@
+{
+  "jojoaddisonApp": {
+    "Status": {
+      "null": "",
+      "GOOD": "GOOD",
+      "WARN": "WARN",
+      "SERIOUS": "SERIOUS",
+      "CRIT": "CRIT",
+      "DONE": "DONE"
+    }
+  }
+}

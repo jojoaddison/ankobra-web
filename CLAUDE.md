@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **greenfield repo with no application code yet** — no `package.json`, `pom.xml`, `.jhipster/`, or JDL, and no commits on `main` (all three tracked files are staged, not committed). It currently holds only the brief and the design/content reference:
 
-| File | Role |
-| --- | --- |
-| `create-web-app-prompt.txt` | The brief. Build a **JHipster monolith** with a public marketing front and a CMS/portal; author a **JDL file for the models before implementation**; plan in phases + TODO lists; ask questions where unsure. |
-| `jojoaddison-consultancy-demo.html` | Single-file, dependency-free HTML/CSS/JS prototype of both halves of the app. **The authoritative source for design tokens, layout, copy and the domain model.** |
-| `jojoaddison-consultancy.pdf` | 2020 company profile — background content source. |
+| File                                | Role                                                                                                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create-web-app-prompt.txt`         | The brief. Build a **JHipster monolith** with a public marketing front and a CMS/portal; author a **JDL file for the models before implementation**; plan in phases + TODO lists; ask questions where unsure. |
+| `jojoaddison-consultancy-demo.html` | Single-file, dependency-free HTML/CSS/JS prototype of both halves of the app. **The authoritative source for design tokens, layout, copy and the domain model.**                                              |
+| `jojoaddison-consultancy.pdf`       | 2020 company profile — background content source.                                                                                                                                                             |
 
 Do not treat the demo HTML as code to port line-by-line; treat it as the spec. Extract tokens, IA, and entity shapes from it.
 
@@ -22,15 +22,15 @@ Node and JHipster are managed by **nvm**, which `~/.bashrc` sources but non-inte
 export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; nvm use v22.22.2
 ```
 
-**Do not install node, npm, or generator-jhipster — they are already here.** `generator-jhipster` is installed under six nvm node versions, and the newest node is *not* the newest JHipster:
+**Do not install node, npm, or generator-jhipster — they are already here.** `generator-jhipster` is installed under six nvm node versions, and the newest node is _not_ the newest JHipster:
 
-| nvm node | generator-jhipster |
-| --- | --- |
-| **v22.22.2** | **9.1.0** ← use this one |
-| v24.13.0, v24.3.0 | 8.11.0 |
-| v20.18.0 | 8.7.1 |
-| v22.17.0 | 8.0.0 |
-| v16.20.2 | 7.9.3 |
+| nvm node          | generator-jhipster       |
+| ----------------- | ------------------------ |
+| **v22.22.2**      | **9.1.0** ← use this one |
+| v24.13.0, v24.3.0 | 8.11.0                   |
+| v20.18.0          | 8.7.1                    |
+| v22.17.0          | 8.0.0                    |
+| v16.20.2          | 7.9.3                    |
 
 nvm's `default` alias is `stable` → v24.18.0, which has **no** jhipster at all. JHipster 9.1.0 requires node `^22.18.0 || >=24.11.0`, so v22.22.2 is the intended pairing.
 
@@ -44,7 +44,11 @@ The chosen stack is exactly what generator-jhipster 9.1.0 targets; verified agai
 - **Auth: JWT** — self-contained token auth (JHipster default). The demo's client-vs-consultant split maps onto authorities: consultants are staff (a `ROLE_CONSULTANT`/admin-like authority seeing all data), clients (`ROLE_USER`) are scoped to their own `Client` and its projects/tickets. No external identity server.
 - **Angular 21** — pinned by the `angular` generator (`@angular/common` 21.2.14, `@angular/cli` 21.2.12). Select with `--client-framework angular`.
 - **Spring Boot 4.0.6** — shipped as `generators/spring-boot/resources/spring-boot-dependencies-4.json`. The generator flips to it via a computed `springBoot4` default = `!(databaseTypeSql && reactive) && !databaseTypeCouchbase`. **A non-reactive SQL monolith gets Spring Boot 4 automatically** — the 3.5.14 set (`spring-boot-dependencies.json`) is only the fallback for reactive-SQL / Couchbase. Do not pick a reactive stack, or you silently drop to Boot 3.5.
-- **Java 25** — supported but NOT the default. `JAVA_COMPATIBLE_VERSIONS = ['21', '25']` (generator default 21), so pass `--java-version 25` explicitly. The ambient `JAVA_HOME` is JDK **26**, which is outside the compatible list — `check-java` will reject it. Point the build and shell at `/usr/lib/jvm/java-25-openjdk-amd64` (or `jdk-25.0.2-oracle-x64`) for this project.
+- **Java 25** — supported but NOT the default. `JAVA_COMPATIBLE_VERSIONS = ['21', '25']` (generator default 21). It is NOT a JDL config key and NOT a `jhipster app` CLI flag; set it by seeding `.yo-rc.json` with `"javaVersion": "25"` before generating (it overrides the `RECOMMENDED_JAVA_VERSION = '21'` default). **Use `JAVA_HOME=/usr/lib/jvm/jdk-25.0.2-oracle-x64` — the full Oracle JDK.** `/usr/lib/jvm/java-25-openjdk-amd64` is a **JRE with no `javac`**, so Maven falls through PATH to the ambient JDK 26 and fails with "release version 25 not supported". The ambient `JAVA_HOME` (JDK 26) is outside the compatible list, so always override it for this project:
+
+  ```bash
+  export JAVA_HOME=/usr/lib/jvm/jdk-25.0.2-oracle-x64; export PATH="$JAVA_HOME/bin:$PATH"
+  ```
 
 ## Design system contract
 
@@ -82,7 +86,7 @@ The JDL should be derived from the demo's in-memory fixtures, which already carr
 - `TEAM` — consultant name, initials, role, qualification, bio.
 - Aggregates for the overview: `HOURS` (delivery hours by month × pillar), `TREND` (tickets raised vs resolved, 12 weeks), `REVENUE` (by pillar).
 
-Status vocabulary is shared across projects, clients and tickets — `good | warn | serious | crit | done` rendered as *On track / At risk / Delayed / Blocked / Delivered*, and reused as ticket priority *Low / Medium / High / Critical*. Model it as one enum.
+Status vocabulary is shared across projects, clients and tickets — `good | warn | serious | crit | done` rendered as _On track / At risk / Delayed / Blocked / Delivered_, and reused as ticket priority _Low / Medium / High / Critical_. Model it as one enum.
 
 ## Working style for this project
 

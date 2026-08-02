@@ -1,0 +1,97 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (project(); as projectRef) {
+      <div>
+        <h2 data-cy="projectDetailsHeading"><span jhiTranslate="jojoaddisonApp.project.detail.title">Project</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ projectRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.reference">Reference</span></dt>
+          <dd>
+            <span>{{ projectRef.reference }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.name">Name</span></dt>
+          <dd>
+            <span>{{ projectRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.pillar">Pillar</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.ServicePillar.' + (projectRef.pillar ?? 'null')">{{
+              {
+                null: '',
+                BESPOKE_SOLUTIONS: 'BESPOKE_SOLUTIONS',
+                DIGITAL_TRANSFORMATION: 'DIGITAL_TRANSFORMATION',
+                CAPACITY_BUILDING: 'CAPACITY_BUILDING',
+                ENTERPRISE_INTEGRATION: 'ENTERPRISE_INTEGRATION',
+                CONSULTANCY: 'CONSULTANCY',
+              }[projectRef.pillar ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.status">Status</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.Status.' + (projectRef.status ?? 'null')">{{
+              { null: '', GOOD: 'GOOD', WARN: 'WARN', SERIOUS: 'SERIOUS', CRIT: 'CRIT', DONE: 'DONE' }[projectRef.status ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.progress">Progress</span></dt>
+          <dd>
+            <span>{{ projectRef.progress }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.dueDate">Due Date</span></dt>
+          <dd>
+            <span>{{ projectRef.dueDate | formatMediumDate }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.delivered">Delivered</span></dt>
+          <dd>
+            <span>{{ projectRef.delivered }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.budget">Budget</span></dt>
+          <dd>
+            <span>{{ projectRef.budget }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.spent">Spent</span></dt>
+          <dd>
+            <span>{{ projectRef.spent }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.techStack">Tech Stack</span></dt>
+          <dd>
+            <span>{{ projectRef.techStack }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.lead">Lead</span></dt>
+          <dd>
+            @if (project()!.lead) {
+              <div>
+                <a [routerLink]="['/team-member', project()!.lead?.id, 'view']">{{ projectRef.lead?.name }}</a>
+              </div>
+            }
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.project.client">Client</span></dt>
+          <dd>
+            @if (project()!.client) {
+              <div>
+                <a [routerLink]="['/client', project()!.client?.id, 'view']">{{ projectRef.client?.name }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/project', projectRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,216 @@
+<div>
+  <h2 id="page-heading" data-cy="ProjectHeading">
+    <span jhiTranslate="jojoaddisonApp.project.home.title">Projects</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading()">
+        <fa-icon icon="sync" [animation]="isLoading() ? 'spin' : undefined" />
+        <span jhiTranslate="jojoaddisonApp.project.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-project"
+        [routerLink]="['/project/new']"
+      >
+        <fa-icon icon="plus" />
+        <span jhiTranslate="jojoaddisonApp.project.home.createLabel">Create a new Project</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  <jhi-filter [filters]="filters" />
+
+  @if (projects().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="jojoaddisonApp.project.home.notFound">No Projects found</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="reference">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.reference">Reference</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.name">Name</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="pillar">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.pillar">Pillar</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="status">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.status">Status</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="progress">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.progress">Progress</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="dueDate">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.dueDate">Due Date</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="delivered">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.delivered">Delivered</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="budget">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.budget">Budget</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="spent">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.spent">Spent</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="techStack">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.techStack">Tech Stack</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="lead.name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.lead">Lead</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="client.name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.project.client">Client</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (project of projects(); track trackId(project)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/project', project.id, 'view']">{{ project.id }}</a>
+              </td>
+              <td>{{ project.reference }}</td>
+              <td>{{ project.name }}</td>
+              <td [jhiTranslate]="'jojoaddisonApp.ServicePillar.' + (project.pillar ?? 'null')">
+                {{
+                  {
+                    null: '',
+                    BESPOKE_SOLUTIONS: 'BESPOKE_SOLUTIONS',
+                    DIGITAL_TRANSFORMATION: 'DIGITAL_TRANSFORMATION',
+                    CAPACITY_BUILDING: 'CAPACITY_BUILDING',
+                    ENTERPRISE_INTEGRATION: 'ENTERPRISE_INTEGRATION',
+                    CONSULTANCY: 'CONSULTANCY',
+                  }[project.pillar ?? 'null']
+                }}
+              </td>
+              <td [jhiTranslate]="'jojoaddisonApp.Status.' + (project.status ?? 'null')">
+                {{ { null: '', GOOD: 'GOOD', WARN: 'WARN', SERIOUS: 'SERIOUS', CRIT: 'CRIT', DONE: 'DONE' }[project.status ?? 'null'] }}
+              </td>
+              <td>{{ project.progress }}</td>
+              <td>{{ project.dueDate | formatMediumDate }}</td>
+              <td>{{ project.delivered }}</td>
+              <td>{{ project.budget }}</td>
+              <td>{{ project.spent }}</td>
+              <td>{{ project.techStack }}</td>
+              <td>
+                @if (project.lead) {
+                  <div>
+                    <a [routerLink]="['/team-member', project.lead.id, 'view']">{{ project.lead.name }}</a>
+                  </div>
+                }
+              </td>
+              <td>
+                @if (project.client) {
+                  <div>
+                    <a [routerLink]="['/client', project.client.id, 'view']">{{ project.client.name }}</a>
+                  </div>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/project', project.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                  </a>
+
+                  <a [routerLink]="['/project', project.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(project)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (projects().length > 0) {
+    <div>
+      <div class="d-flex justify-content-center">
+        <jhi-item-count [params]="{ page: page(), totalItems: totalItems(), itemsPerPage: itemsPerPage() }" />
+      </div>
+
+      <div class="d-flex justify-content-center">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="page()"
+          [pageSize]="itemsPerPage()"
+          [maxSize]="5"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          (pageChange)="navigateToPage($event)"
+        />
+      </div>
+    </div>
+  }
+</div>

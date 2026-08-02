@@ -1,0 +1,11 @@
+{
+  "jojoaddisonApp": {
+    "CatalogueGroup": {
+      "null": "",
+      "CONSULTANCY": "CONSULTANCY",
+      "SOLUTIONS": "SOLUTIONS",
+      "SERVICES": "SERVICES",
+      "TRAINING": "TRAINING"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (teamMember(); as teamMemberRef) {
+      <div>
+        <h2 data-cy="teamMemberDetailsHeading"><span jhiTranslate="jojoaddisonApp.teamMember.detail.title">Team Member</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.teamMember.name">Name</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.teamMember.initials">Initials</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.initials }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.teamMember.role">Role</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.role }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.teamMember.qualification">Qualification</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.qualification }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.teamMember.bio">Bio</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.bio }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.teamMember.user">User</span></dt>
+          <dd>
+            <span>{{ teamMemberRef.user?.login }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/team-member', teamMemberRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

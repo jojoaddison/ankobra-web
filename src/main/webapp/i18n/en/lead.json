@@ -1,0 +1,29 @@
+{
+  "jojoaddisonApp": {
+    "lead": {
+      "home": {
+        "title": "Leads",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Lead",
+        "createOrEditLabel": "Create or edit a Lead",
+        "notFound": "No Leads found"
+      },
+      "created": "A new Lead is created with identifier {{ param }}",
+      "updated": "A Lead is updated with identifier {{ param }}",
+      "deleted": "A Lead is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Lead {{ id }}?"
+      },
+      "detail": {
+        "title": "Lead"
+      },
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "need": "Need",
+      "message": "Message",
+      "createdDate": "Created Date",
+      "status": "Status"
+    }
+  }
+}

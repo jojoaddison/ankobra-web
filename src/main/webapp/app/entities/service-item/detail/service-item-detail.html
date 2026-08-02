@@ -1,0 +1,71 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (serviceItem(); as serviceItemRef) {
+      <div>
+        <h2 data-cy="serviceItemDetailsHeading"><span jhiTranslate="jojoaddisonApp.serviceItem.detail.title">Service Item</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ serviceItemRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.serviceItem.code">Code</span></dt>
+          <dd>
+            <span>{{ serviceItemRef.code }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.serviceItem.name">Name</span></dt>
+          <dd>
+            <span>{{ serviceItemRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.serviceItem.description">Description</span></dt>
+          <dd>
+            <span>{{ serviceItemRef.description }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.serviceItem.rate">Rate</span></dt>
+          <dd>
+            <span>{{ serviceItemRef.rate }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.serviceItem.unit">Unit</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.RateUnit.' + (serviceItemRef.unit ?? 'null')">{{
+              {
+                null: '',
+                PER_PHASE: 'PER_PHASE',
+                PER_PROCESS: 'PER_PROCESS',
+                PER_SCOPE: 'PER_SCOPE',
+                PER_MODULE: 'PER_MODULE',
+                PER_INTEGRATION: 'PER_INTEGRATION',
+                PER_ENVIRONMENT: 'PER_ENVIRONMENT',
+                PER_MONTH: 'PER_MONTH',
+                PER_DATASET: 'PER_DATASET',
+                PER_COHORT: 'PER_COHORT',
+              }[serviceItemRef.unit ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.serviceItem.serviceGroup">Service Group</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.CatalogueGroup.' + (serviceItemRef.serviceGroup ?? 'null')">{{
+              { null: '', CONSULTANCY: 'CONSULTANCY', SOLUTIONS: 'SOLUTIONS', SERVICES: 'SERVICES', TRAINING: 'TRAINING' }[
+                serviceItemRef.serviceGroup ?? 'null'
+              ]
+            }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/service-item', serviceItemRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

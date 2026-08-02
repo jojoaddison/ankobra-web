@@ -1,0 +1,173 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-course-heading" data-cy="CourseCreateUpdateHeading" jhiTranslate="jojoaddisonApp.course.home.createOrEditLabel">
+        Create or edit a Course
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="global.field.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let nameRef = editForm.get('name')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_name" jhiTranslate="jojoaddisonApp.course.name">Name</label>
+          <input type="text" class="form-control" name="name" id="field_name" data-cy="name" formControlName="name" />
+          @if (nameRef.invalid && (nameRef.dirty || nameRef.touched)) {
+            <div>
+              @if (editForm.get('name')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('name')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '160' }"
+                  >This field cannot be longer than 160 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let descriptionRef = editForm.get('description')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_description" jhiTranslate="jojoaddisonApp.course.description">Description</label>
+          <input
+            type="text"
+            class="form-control"
+            name="description"
+            id="field_description"
+            data-cy="description"
+            formControlName="description"
+          />
+          @if (descriptionRef.invalid && (descriptionRef.dirty || descriptionRef.touched)) {
+            <div>
+              @if (editForm.get('description')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '300' }"
+                  >This field cannot be longer than 300 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let moduleCountRef = editForm.get('moduleCount')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_moduleCount" jhiTranslate="jojoaddisonApp.course.moduleCount">Module Count</label>
+          <input
+            type="number"
+            class="form-control"
+            name="moduleCount"
+            id="field_moduleCount"
+            data-cy="moduleCount"
+            formControlName="moduleCount"
+          />
+          @if (moduleCountRef.invalid && (moduleCountRef.dirty || moduleCountRef.touched)) {
+            <div>
+              @if (editForm.get('moduleCount')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '0' }"
+                  >This field should be at least 0.</small
+                >
+              }
+              <small
+                class="form-text text-danger"
+                [hidden]="!editForm.get('moduleCount')?.errors?.number"
+                jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_mode" jhiTranslate="jojoaddisonApp.course.mode">Mode</label>
+          <select class="form-control" name="mode" formControlName="mode" id="field_mode" data-cy="mode">
+            <option [ngValue]="null">{{ 'jojoaddisonApp.DeliveryMode.null' | translate }}</option>
+            @for (deliveryMode of deliveryModeValues; track $index) {
+              <option [value]="deliveryMode">{{ 'jojoaddisonApp.DeliveryMode.' + deliveryMode | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_labBased" jhiTranslate="jojoaddisonApp.course.labBased">Lab Based</label>
+          <input type="checkbox" class="form-check" name="labBased" id="field_labBased" data-cy="labBased" formControlName="labBased" />
+        </div>
+
+        @let enrolledCountRef = editForm.get('enrolledCount')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_enrolledCount" jhiTranslate="jojoaddisonApp.course.enrolledCount">Enrolled Count</label>
+          <input
+            type="number"
+            class="form-control"
+            name="enrolledCount"
+            id="field_enrolledCount"
+            data-cy="enrolledCount"
+            formControlName="enrolledCount"
+          />
+          @if (enrolledCountRef.invalid && (enrolledCountRef.dirty || enrolledCountRef.touched)) {
+            <div>
+              @if (editForm.get('enrolledCount')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '0' }"
+                  >This field should be at least 0.</small
+                >
+              }
+              <small
+                class="form-text text-danger"
+                [hidden]="!editForm.get('enrolledCount')?.errors?.number"
+                jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+
+        @let progressRef = editForm.get('progress')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_progress" jhiTranslate="jojoaddisonApp.course.progress">Progress</label>
+          <input type="number" class="form-control" name="progress" id="field_progress" data-cy="progress" formControlName="progress" />
+          @if (progressRef.invalid && (progressRef.dirty || progressRef.touched)) {
+            <div>
+              @if (editForm.get('progress')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '0' }"
+                  >This field should be at least 0.</small
+                >
+              }
+              @if (editForm.get('progress')?.errors?.max) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.max" [translateValues]="{ max: '100' }"
+                  >This field cannot be more than 100.</small
+                >
+              }
+              <small
+                class="form-text text-danger"
+                [hidden]="!editForm.get('progress')?.errors?.number"
+                jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban" />&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving()"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save" />&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (quote(); as quoteRef) {
+      <div>
+        <h2 data-cy="quoteDetailsHeading"><span jhiTranslate="jojoaddisonApp.quote.detail.title">Quote</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ quoteRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.quote.reference">Reference</span></dt>
+          <dd>
+            <span>{{ quoteRef.reference }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.quote.title">Title</span></dt>
+          <dd>
+            <span>{{ quoteRef.title }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.quote.createdDate">Created Date</span></dt>
+          <dd>
+            <span>{{ quoteRef.createdDate | formatMediumDatetime }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.quote.status">Status</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.QuoteStatus.' + (quoteRef.status ?? 'null')">{{
+              { null: '', DRAFT: 'DRAFT', SENT: 'SENT', ACCEPTED: 'ACCEPTED', DECLINED: 'DECLINED' }[quoteRef.status ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.quote.client">Client</span></dt>
+          <dd>
+            @if (quote()!.client) {
+              <div>
+                <a [routerLink]="['/client', quote()!.client?.id, 'view']">{{ quoteRef.client?.name }}</a>
+              </div>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/quote', quoteRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

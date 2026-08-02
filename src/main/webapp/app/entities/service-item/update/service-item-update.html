@@ -1,0 +1,155 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2
+        id="jhi-service-item-heading"
+        data-cy="ServiceItemCreateUpdateHeading"
+        jhiTranslate="jojoaddisonApp.serviceItem.home.createOrEditLabel"
+      >
+        Create or edit a Service Item
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="global.field.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let codeRef = editForm.get('code')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_code" jhiTranslate="jojoaddisonApp.serviceItem.code">Code</label>
+          <input type="text" class="form-control" name="code" id="field_code" data-cy="code" formControlName="code" />
+          @if (codeRef.invalid && (codeRef.dirty || codeRef.touched)) {
+            <div>
+              @if (editForm.get('code')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('code')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '20' }"
+                  >This field cannot be longer than 20 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let nameRef = editForm.get('name')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_name" jhiTranslate="jojoaddisonApp.serviceItem.name">Name</label>
+          <input type="text" class="form-control" name="name" id="field_name" data-cy="name" formControlName="name" />
+          @if (nameRef.invalid && (nameRef.dirty || nameRef.touched)) {
+            <div>
+              @if (editForm.get('name')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('name')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '160' }"
+                  >This field cannot be longer than 160 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let descriptionRef = editForm.get('description')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_description" jhiTranslate="jojoaddisonApp.serviceItem.description">Description</label>
+          <input
+            type="text"
+            class="form-control"
+            name="description"
+            id="field_description"
+            data-cy="description"
+            formControlName="description"
+          />
+          @if (descriptionRef.invalid && (descriptionRef.dirty || descriptionRef.touched)) {
+            <div>
+              @if (editForm.get('description')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '400' }"
+                  >This field cannot be longer than 400 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let rateRef = editForm.get('rate')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_rate" jhiTranslate="jojoaddisonApp.serviceItem.rate">Rate</label>
+          <input type="number" class="form-control" name="rate" id="field_rate" data-cy="rate" formControlName="rate" />
+          @if (rateRef.invalid && (rateRef.dirty || rateRef.touched)) {
+            <div>
+              @if (editForm.get('rate')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('rate')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '0' }"
+                  >This field should be at least 0.</small
+                >
+              }
+              <small class="form-text text-danger" [hidden]="!editForm.get('rate')?.errors?.number" jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+
+        @let unitRef = editForm.get('unit')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_unit" jhiTranslate="jojoaddisonApp.serviceItem.unit">Unit</label>
+          <select class="form-control" name="unit" formControlName="unit" id="field_unit" data-cy="unit">
+            <option [ngValue]="null">{{ 'jojoaddisonApp.RateUnit.null' | translate }}</option>
+            @for (rateUnit of rateUnitValues; track $index) {
+              <option [value]="rateUnit">{{ 'jojoaddisonApp.RateUnit.' + rateUnit | translate }}</option>
+            }
+          </select>
+          @if (unitRef.invalid && (unitRef.dirty || unitRef.touched)) {
+            <div>
+              @if (editForm.get('unit')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+
+        @let serviceGroupRef = editForm.get('serviceGroup')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_serviceGroup" jhiTranslate="jojoaddisonApp.serviceItem.serviceGroup">Service Group</label>
+          <select class="form-control" name="serviceGroup" formControlName="serviceGroup" id="field_serviceGroup" data-cy="serviceGroup">
+            <option [ngValue]="null">{{ 'jojoaddisonApp.CatalogueGroup.null' | translate }}</option>
+            @for (catalogueGroup of catalogueGroupValues; track $index) {
+              <option [value]="catalogueGroup">{{ 'jojoaddisonApp.CatalogueGroup.' + catalogueGroup | translate }}</option>
+            }
+          </select>
+          @if (serviceGroupRef.invalid && (serviceGroupRef.dirty || serviceGroupRef.touched)) {
+            <div>
+              @if (editForm.get('serviceGroup')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban" />&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving()"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save" />&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

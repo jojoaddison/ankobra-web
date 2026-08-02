@@ -1,0 +1,9 @@
+{
+  "jojoaddisonApp": {
+    "DeliveryMode": {
+      "null": "",
+      "VIRTUAL": "VIRTUAL",
+      "IN_HOUSE": "IN_HOUSE"
+    }
+  }
+}

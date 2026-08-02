@@ -1,0 +1,60 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (course(); as courseRef) {
+      <div>
+        <h2 data-cy="courseDetailsHeading"><span jhiTranslate="jojoaddisonApp.course.detail.title">Course</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ courseRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.name">Name</span></dt>
+          <dd>
+            <span>{{ courseRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.description">Description</span></dt>
+          <dd>
+            <span>{{ courseRef.description }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.moduleCount">Module Count</span></dt>
+          <dd>
+            <span>{{ courseRef.moduleCount }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.mode">Mode</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.DeliveryMode.' + (courseRef.mode ?? 'null')">{{
+              { null: '', VIRTUAL: 'VIRTUAL', IN_HOUSE: 'IN_HOUSE' }[courseRef.mode ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.labBased">Lab Based</span></dt>
+          <dd>
+            <span>{{ courseRef.labBased }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.enrolledCount">Enrolled Count</span></dt>
+          <dd>
+            <span>{{ courseRef.enrolledCount }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.course.progress">Progress</span></dt>
+          <dd>
+            <span>{{ courseRef.progress }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/course', courseRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

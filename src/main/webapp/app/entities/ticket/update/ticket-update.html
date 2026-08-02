@@ -1,0 +1,187 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-ticket-heading" data-cy="TicketCreateUpdateHeading" jhiTranslate="jojoaddisonApp.ticket.home.createOrEditLabel">
+        Create or edit a Ticket
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="global.field.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let referenceRef = editForm.get('reference')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_reference" jhiTranslate="jojoaddisonApp.ticket.reference">Reference</label>
+          <input type="text" class="form-control" name="reference" id="field_reference" data-cy="reference" formControlName="reference" />
+          @if (referenceRef.invalid && (referenceRef.dirty || referenceRef.touched)) {
+            <div>
+              @if (editForm.get('reference')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('reference')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '20' }"
+                  >This field cannot be longer than 20 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let subjectRef = editForm.get('subject')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_subject" jhiTranslate="jojoaddisonApp.ticket.subject">Subject</label>
+          <input type="text" class="form-control" name="subject" id="field_subject" data-cy="subject" formControlName="subject" />
+          @if (subjectRef.invalid && (subjectRef.dirty || subjectRef.touched)) {
+            <div>
+              @if (editForm.get('subject')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('subject')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '200' }"
+                  >This field cannot be longer than 200 characters.</small
+                >
+              }
+            </div>
+          }
+        </div>
+
+        @let priorityRef = editForm.get('priority')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_priority" jhiTranslate="jojoaddisonApp.ticket.priority">Priority</label>
+          <select class="form-control" name="priority" formControlName="priority" id="field_priority" data-cy="priority">
+            <option [ngValue]="null">{{ 'jojoaddisonApp.Status.null' | translate }}</option>
+            @for (status of statusValues; track $index) {
+              <option [value]="status">{{ 'jojoaddisonApp.Status.' + status | translate }}</option>
+            }
+          </select>
+          @if (priorityRef.invalid && (priorityRef.dirty || priorityRef.touched)) {
+            <div>
+              @if (editForm.get('priority')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_openedAt" jhiTranslate="jojoaddisonApp.ticket.openedAt">Opened At</label>
+          <div class="d-flex">
+            <input
+              id="field_openedAt"
+              data-cy="openedAt"
+              type="datetime-local"
+              class="form-control"
+              name="openedAt"
+              formControlName="openedAt"
+              placeholder="YYYY-MM-DD HH:mm"
+            />
+          </div>
+        </div>
+
+        @let slaHoursRef = editForm.get('slaHours')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_slaHours" jhiTranslate="jojoaddisonApp.ticket.slaHours">Sla Hours</label>
+          <input type="number" class="form-control" name="slaHours" id="field_slaHours" data-cy="slaHours" formControlName="slaHours" />
+          @if (slaHoursRef.invalid && (slaHoursRef.dirty || slaHoursRef.touched)) {
+            <div>
+              @if (editForm.get('slaHours')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '0' }"
+                  >This field should be at least 0.</small
+                >
+              }
+              <small
+                class="form-text text-danger"
+                [hidden]="!editForm.get('slaHours')?.errors?.number"
+                jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+
+        @let stateRef = editForm.get('state')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_state" jhiTranslate="jojoaddisonApp.ticket.state">State</label>
+          <select class="form-control" name="state" formControlName="state" id="field_state" data-cy="state">
+            <option [ngValue]="null">{{ 'jojoaddisonApp.TicketState.null' | translate }}</option>
+            @for (ticketState of ticketStateValues; track $index) {
+              <option [value]="ticketState">{{ 'jojoaddisonApp.TicketState.' + ticketState | translate }}</option>
+            }
+          </select>
+          @if (stateRef.invalid && (stateRef.dirty || stateRef.touched)) {
+            <div>
+              @if (editForm.get('state')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_owner" jhiTranslate="jojoaddisonApp.ticket.owner">Owner</label>
+          <select
+            class="form-control"
+            id="field_owner"
+            data-cy="owner"
+            name="owner"
+            formControlName="owner"
+            [compareWith]="compareTeamMember"
+          >
+            <option [ngValue]="null"></option>
+            @for (teamMemberOption of teamMembersSharedCollection(); track $index) {
+              <option [ngValue]="teamMemberOption">{{ teamMemberOption.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_client" jhiTranslate="jojoaddisonApp.ticket.client">Client</label>
+          <select
+            class="form-control"
+            id="field_client"
+            data-cy="client"
+            name="client"
+            formControlName="client"
+            [compareWith]="compareClient"
+          >
+            @if (editForm.get(['client'])!.value === null) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (clientOption of clientsSharedCollection(); track $index) {
+              <option [ngValue]="clientOption">{{ clientOption.name }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['client'])!.invalid && (editForm.get(['client'])!.dirty || editForm.get(['client'])!.touched)) {
+          <div>
+            @if (editForm.get(['client'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban" />&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving()"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save" />&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

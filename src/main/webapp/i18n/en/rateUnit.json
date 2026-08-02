@@ -1,0 +1,16 @@
+{
+  "jojoaddisonApp": {
+    "RateUnit": {
+      "null": "",
+      "PER_PHASE": "PER_PHASE",
+      "PER_PROCESS": "PER_PROCESS",
+      "PER_SCOPE": "PER_SCOPE",
+      "PER_MODULE": "PER_MODULE",
+      "PER_INTEGRATION": "PER_INTEGRATION",
+      "PER_ENVIRONMENT": "PER_ENVIRONMENT",
+      "PER_MONTH": "PER_MONTH",
+      "PER_DATASET": "PER_DATASET",
+      "PER_COHORT": "PER_COHORT"
+    }
+  }
+}

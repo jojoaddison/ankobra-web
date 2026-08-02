@@ -1,0 +1,73 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (client(); as clientRef) {
+      <div>
+        <h2 data-cy="clientDetailsHeading"><span jhiTranslate="jojoaddisonApp.client.detail.title">Client</span></h2>
+
+        <hr />
+
+        <jhi-alert-error />
+
+        <jhi-alert />
+
+        <dl class="row-md jh-entity-details">
+          <dt><span jhiTranslate="global.field.id">ID</span></dt>
+          <dd>
+            <span>{{ clientRef.id }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.client.name">Name</span></dt>
+          <dd>
+            <span>{{ clientRef.name }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.client.sector">Sector</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.Market.' + (clientRef.sector ?? 'null')">{{
+              {
+                null: '',
+                BANKING_FINANCE_INSURANCE: 'BANKING_FINANCE_INSURANCE',
+                REAL_ESTATE: 'REAL_ESTATE',
+                OIL_AND_GAS: 'OIL_AND_GAS',
+                HAULAGE_TRANSPORTATION: 'HAULAGE_TRANSPORTATION',
+                HEALTH_HOSPITALITY: 'HEALTH_HOSPITALITY',
+                DEFENCE_NATIONAL_SECURITY: 'DEFENCE_NATIONAL_SECURITY',
+                COMMUNICATION: 'COMMUNICATION',
+                TRANSPORTATION: 'TRANSPORTATION',
+                HEALTH_EDUCATION: 'HEALTH_EDUCATION',
+                AGRICULTURE: 'AGRICULTURE',
+                INSTITUTIONS_COMMISSIONS_AUTHORITIES: 'INSTITUTIONS_COMMISSIONS_AUTHORITIES',
+                PRIVATE_RESIDENCES_BUSINESSES: 'PRIVATE_RESIDENCES_BUSINESSES',
+                RETAIL_DISTRIBUTION: 'RETAIL_DISTRIBUTION',
+              }[clientRef.sector ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.client.clientSince">Client Since</span></dt>
+          <dd>
+            <span>{{ clientRef.clientSince }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.client.health">Health</span></dt>
+          <dd>
+            <span [jhiTranslate]="'jojoaddisonApp.Status.' + (clientRef.health ?? 'null')">{{
+              { null: '', GOOD: 'GOOD', WARN: 'WARN', SERIOUS: 'SERIOUS', CRIT: 'CRIT', DONE: 'DONE' }[clientRef.health ?? 'null']
+            }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.client.totalSpend">Total Spend</span></dt>
+          <dd>
+            <span>{{ clientRef.totalSpend }}</span>
+          </dd>
+          <dt><span jhiTranslate="jojoaddisonApp.client.user">User</span></dt>
+          <dd>
+            <span>{{ clientRef.user?.login }}</span>
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/client', clientRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

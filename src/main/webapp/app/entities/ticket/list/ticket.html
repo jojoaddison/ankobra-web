@@ -1,0 +1,175 @@
+<div>
+  <h2 id="page-heading" data-cy="TicketHeading">
+    <span jhiTranslate="jojoaddisonApp.ticket.home.title">Tickets</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="load()" [disabled]="isLoading()">
+        <fa-icon icon="sync" [animation]="isLoading() ? 'spin' : undefined" />
+        <span jhiTranslate="jojoaddisonApp.ticket.home.refreshListLabel">Refresh list</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-ticket"
+        [routerLink]="['/ticket/new']"
+      >
+        <fa-icon icon="plus" />
+        <span jhiTranslate="jojoaddisonApp.ticket.home.createLabel">Create a new Ticket</span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error />
+
+  <jhi-alert />
+
+  <jhi-filter [filters]="filters" />
+
+  @if (tickets().length === 0) {
+    <div class="alert alert-warning" id="no-result">
+      <span jhiTranslate="jojoaddisonApp.ticket.home.notFound">No Tickets found</span>
+    </div>
+  } @else {
+    <div class="table-responsive table-entities" id="entities">
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(sortState)]="sortState" (sortChange)="navigateToWithComponentValues($event)">
+            <th scope="col" jhiSortBy="id">
+              <div class="d-flex">
+                <span jhiTranslate="global.field.id">ID</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="reference">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.reference">Reference</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="subject">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.subject">Subject</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="priority">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.priority">Priority</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="openedAt">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.openedAt">Opened At</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="slaHours">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.slaHours">Sla Hours</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="state">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.state">State</span>
+
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="owner.name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.owner">Owner</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col" jhiSortBy="client.name">
+              <div class="d-flex">
+                <span jhiTranslate="jojoaddisonApp.ticket.client">Client</span>
+                <fa-icon class="p-1" icon="sort" />
+              </div>
+            </th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ticket of tickets(); track trackId(ticket)) {
+            <tr data-cy="entityTable">
+              <td>
+                <a [routerLink]="['/ticket', ticket.id, 'view']">{{ ticket.id }}</a>
+              </td>
+              <td>{{ ticket.reference }}</td>
+              <td>{{ ticket.subject }}</td>
+              <td [jhiTranslate]="'jojoaddisonApp.Status.' + (ticket.priority ?? 'null')">
+                {{ { null: '', GOOD: 'GOOD', WARN: 'WARN', SERIOUS: 'SERIOUS', CRIT: 'CRIT', DONE: 'DONE' }[ticket.priority ?? 'null'] }}
+              </td>
+              <td>{{ ticket.openedAt | formatMediumDatetime }}</td>
+              <td>{{ ticket.slaHours }}</td>
+              <td [jhiTranslate]="'jojoaddisonApp.TicketState.' + (ticket.state ?? 'null')">
+                {{ { null: '', OPEN: 'OPEN', CLOSED: 'CLOSED' }[ticket.state ?? 'null'] }}
+              </td>
+              <td>
+                @if (ticket.owner) {
+                  <div>
+                    <a [routerLink]="['/team-member', ticket.owner.id, 'view']">{{ ticket.owner.name }}</a>
+                  </div>
+                }
+              </td>
+              <td>
+                @if (ticket.client) {
+                  <div>
+                    <a [routerLink]="['/client', ticket.client.id, 'view']">{{ ticket.client.name }}</a>
+                  </div>
+                }
+              </td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <a [routerLink]="['/ticket', ticket.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                    <fa-icon icon="eye" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                  </a>
+
+                  <a [routerLink]="['/ticket', ticket.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                    <fa-icon icon="pencil-alt" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                  </a>
+
+                  <button type="submit" (click)="delete(ticket)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                    <fa-icon icon="times" />
+                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (tickets().length > 0) {
+    <div>
+      <div class="d-flex justify-content-center">
+        <jhi-item-count [params]="{ page: page(), totalItems: totalItems(), itemsPerPage: itemsPerPage() }" />
+      </div>
+
+      <div class="d-flex justify-content-center">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="page()"
+          [pageSize]="itemsPerPage()"
+          [maxSize]="5"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          (pageChange)="navigateToPage($event)"
+        />
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,11 @@
+{
+  "jojoaddisonApp": {
+    "LeadStatus": {
+      "null": "",
+      "NEW": "NEW",
+      "CONTACTED": "CONTACTED",
+      "QUALIFIED": "QUALIFIED",
+      "CLOSED": "CLOSED"
+    }
+  }
+}

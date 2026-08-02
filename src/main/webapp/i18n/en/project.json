@@ -1,0 +1,36 @@
+{
+  "jojoaddisonApp": {
+    "project": {
+      "home": {
+        "title": "Projects",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Project",
+        "createOrEditLabel": "Create or edit a Project",
+        "notFound": "No Projects found"
+      },
+      "created": "A new Project is created with identifier {{ param }}",
+      "updated": "A Project is updated with identifier {{ param }}",
+      "deleted": "A Project is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Project {{ id }}?"
+      },
+      "detail": {
+        "title": "Project"
+      },
+      "id": "ID",
+      "reference": "Reference",
+      "name": "Name",
+      "pillar": "Pillar",
+      "status": "Status",
+      "progress": "Progress",
+      "dueDate": "Due Date",
+      "delivered": "Delivered",
+      "budget": "Budget",
+      "spent": "Spent",
+      "techStack": "Tech Stack",
+      "milestone": "Milestone",
+      "lead": "Lead",
+      "client": "Client"
+    }
+  }
+}

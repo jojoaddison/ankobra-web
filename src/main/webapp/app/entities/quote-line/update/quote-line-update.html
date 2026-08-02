@@ -1,0 +1,119 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    <form name="editForm" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+      <h2 id="jhi-quote-line-heading" data-cy="QuoteLineCreateUpdateHeading" jhiTranslate="jojoaddisonApp.quoteLine.home.createOrEditLabel">
+        Create or edit a Quote Line
+      </h2>
+
+      <div>
+        <jhi-alert-error />
+
+        @if (editForm.controls.id.value !== null) {
+          <div class="mb-3">
+            <label class="form-label" for="field_id" jhiTranslate="global.field.id">ID</label>
+            <input type="number" class="form-control" name="id" id="field_id" data-cy="id" formControlName="id" [readonly]="true" />
+          </div>
+        }
+
+        @let quantityRef = editForm.get('quantity')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_quantity" jhiTranslate="jojoaddisonApp.quoteLine.quantity">Quantity</label>
+          <input type="number" class="form-control" name="quantity" id="field_quantity" data-cy="quantity" formControlName="quantity" />
+          @if (quantityRef.invalid && (quantityRef.dirty || quantityRef.touched)) {
+            <div>
+              @if (editForm.get('quantity')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('quantity')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '1' }"
+                  >This field should be at least 1.</small
+                >
+              }
+              <small
+                class="form-text text-danger"
+                [hidden]="!editForm.get('quantity')?.errors?.number"
+                jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+
+        @let rateRef = editForm.get('rate')!;
+        <div class="mb-3">
+          <label class="form-label" for="field_rate" jhiTranslate="jojoaddisonApp.quoteLine.rate">Rate</label>
+          <input type="number" class="form-control" name="rate" id="field_rate" data-cy="rate" formControlName="rate" />
+          @if (rateRef.invalid && (rateRef.dirty || rateRef.touched)) {
+            <div>
+              @if (editForm.get('rate')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('rate')?.errors?.min) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.min" [translateValues]="{ min: '0' }"
+                  >This field should be at least 0.</small
+                >
+              }
+              <small class="form-text text-danger" [hidden]="!editForm.get('rate')?.errors?.number" jhiTranslate="entity.validation.number"
+                >This field should be a number.</small
+              >
+            </div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="field_item" jhiTranslate="jojoaddisonApp.quoteLine.item">Item</label>
+          <select class="form-control" id="field_item" data-cy="item" name="item" formControlName="item" [compareWith]="compareServiceItem">
+            @if (!editForm.get('item')!.value) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (serviceItemOption of serviceItemsSharedCollection(); track $index) {
+              <option [ngValue]="serviceItemOption">{{ serviceItemOption.name }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['item'])!.invalid && (editForm.get(['item'])!.dirty || editForm.get(['item'])!.touched)) {
+          <div>
+            @if (editForm.get(['item'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+            }
+          </div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label" for="field_quote" jhiTranslate="jojoaddisonApp.quoteLine.quote">Quote</label>
+          <select class="form-control" id="field_quote" data-cy="quote" name="quote" formControlName="quote" [compareWith]="compareQuote">
+            @if (editForm.get(['quote'])!.value === null) {
+              <option [ngValue]="null" selected></option>
+            }
+            @for (quoteOption of quotesSharedCollection(); track $index) {
+              <option [ngValue]="quoteOption">{{ quoteOption.reference }}</option>
+            }
+          </select>
+        </div>
+        @if (editForm.get(['quote'])!.invalid && (editForm.get(['quote'])!.dirty || editForm.get(['quote'])!.touched)) {
+          <div>
+            @if (editForm.get(['quote'])?.errors?.required) {
+              <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+            }
+          </div>
+        }
+      </div>
+
+      <div>
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+          <fa-icon icon="ban" />&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+        </button>
+
+        <button
+          type="submit"
+          id="save-entity"
+          data-cy="entityCreateSaveButton"
+          [disabled]="editForm.invalid || isSaving()"
+          class="btn btn-primary"
+        >
+          <fa-icon icon="save" />&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

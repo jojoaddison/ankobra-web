@@ -1,0 +1,27 @@
+{
+  "generator-jhipster": {
+    "applicationType": "monolith",
+    "authenticationType": "jwt",
+    "baseName": "jojoaddison",
+    "buildTool": "maven",
+    "cacheProvider": "ehcache",
+    "clientFramework": "angular",
+    "clientThemeVariant": "primary",
+    "creationTimestamp": 1785676249582,
+    "databaseType": "sql",
+    "defaultCommand": "app",
+    "devDatabaseType": "h2Disk",
+    "enableHibernateCache": true,
+    "entities": ["Client", "Project", "Milestone", "Ticket", "ServiceItem", "Quote", "QuoteLine", "Course", "TeamMember", "Lead"],
+    "javaVersion": "25",
+    "jhipsterVersion": "9.1.0",
+    "jwtSecretKey": "NTdmMzUxZjdlYjg3NzI5ZWU1ODkyMDgwYmUxZDFjYmFkMTcwNGE3ZGJjYTM3ZDYzYjgyODg0M2JmOWVkYTc4NTNhYzM3Njk5NmU3MjhkZDM2M2VkMGEwYjlmMzcwNzdmZTgxN2FmYTBhNWMzNzY2ZmQ5NmI0NDI5NmYyMjY0ZmU=",
+    "languages": ["en"],
+    "lastLiquibaseTimestamp": 1785676259000,
+    "nativeLanguage": "en",
+    "packageName": "net.jojoaddison.consultancy",
+    "prodDatabaseType": "postgresql",
+    "reactive": false,
+    "testFrameworks": []
+  }
+}
