@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-The **JHipster 9.1.0 monolith has been generated** (commit `c47564d`) from `app.jdl` — Java 25, Spring Boot 4.0.6, Angular 21, PostgreSQL, JWT. Verified: `./mvnw clean compile` and `npm run webapp:build:dev` both pass. Remaining work is the bespoke UI: port the demo's design tokens + time-of-day theming, build the public marketing front, then the portal/CMS views, then seed data + role-scoping tests (see the phased TODO list). The originating reference files remain the spec:
+The **JHipster 9.1.0 monolith is built end-to-end** from `app.jdl` — Java 25, Spring Boot 4.0.6, Angular 21, PostgreSQL, JWT. All phases are complete and committed:
+
+- **Design system** (`content/scss/global.scss`, `app/core/theme/theme.service.ts`): demo tokens ported verbatim; `data-theme` on `<html>` defaults by time of day (06–18 light / 18–06 dark) with a manual toggle override.
+- **Public marketing front** (`app/home/`): full site (hero + animated terminal, about, services, portfolio, markets, team, contact). Contact form posts to `PublicEnquiryResource` `POST /api/public/enquiries` (permitAll) → saves a `Lead`. Renders full-bleed; the JHipster navbar is hidden on `/` and `/portal`.
+- **Portal / CMS** (`app/portal/`): shell (top bar + collapsible sidebar) at `/portal`, with bespoke views — Overview (KPIs + hand-rolled SVG charts), Projects (milestone timeline), Clients, Service catalogue, Quote builder (persists Quote+QuoteLines), Support desk, Training, Team. Views hit the generated entity services; shared helpers in `app/portal/shared/portal-format.ts`, shared `.pview` styles in `global.scss`.
+- **Data & security**: `config/DataSeeder.java` (dev profile) loads the real demo fixtures + logins `kojo`/`ama` (both `demo1234`); faker disabled in dev. **Role scoping** in `security/PortalSecurityService` restricts a client (`ROLE_USER`) to their own `Client`'s projects/tickets/quotes; staff (`ROLE_ADMIN`/`ROLE_CONSULTANT`) see all. `PortalScopingIT` proves it.
+- **Verified green**: `./mvnw verify` (488 tests) and `npm test` (746 tests, lint clean).
+
+When regenerating entities via JDL, re-apply: the four scoped resources (Project/Ticket/Client + `PublicEnquiryResource`), the `@WithMockUser(authorities = "ROLE_CONSULTANT")` on those three generated `ResourceIT`s, and the full-bleed `main.html`/hidden-navbar tweaks. The originating reference files remain the spec:
 
 | File                                | Role                                                                                                                                                                                                          |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
