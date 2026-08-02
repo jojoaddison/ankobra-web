@@ -45,13 +45,6 @@
               </a>
               <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="entity-menu">
                 <li>
-                  <a class="dropdown-item" routerLink="/cms" routerLinkActive="active" (click)="collapseNavbar()" data-cy="cms">
-                    <fa-icon icon="database" [fixedWidth]="true" />
-                    <span>Content management</span>
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
                   <a
                     class="dropdown-item"
                     routerLink="/client"
@@ -191,6 +184,19 @@
               </span>
             </a>
             <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="admin-menu">
+              <li>
+                <a class="dropdown-item" routerLink="/portal" routerLinkActive="active" (click)="collapseNavbar()" data-cy="portal">
+                  <fa-icon icon="tachometer-alt" [fixedWidth]="true" />
+                  <span>Client Portal</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/cms" routerLinkActive="active" (click)="collapseNavbar()" data-cy="cms">
+                  <fa-icon icon="database" [fixedWidth]="true" />
+                  <span>Content management</span>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
                 <a
                   class="dropdown-item"

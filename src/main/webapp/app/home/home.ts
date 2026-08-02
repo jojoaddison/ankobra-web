@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ThemeService } from 'app/core/theme/theme.service';
@@ -39,7 +38,7 @@ interface Member {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.html',
   styleUrl: './home.scss',
-  imports: [RouterLink, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
 })
 export default class Home implements OnInit, OnDestroy {
   protected readonly theme = inject(ThemeService);
@@ -265,7 +264,6 @@ export default class Home implements OnInit, OnDestroy {
     { value: 'OTHER', label: 'Something else' },
   ];
 
-  private readonly router = inject(Router);
   private readonly enquiryService = inject(EnquiryService);
   private termTimer?: ReturnType<typeof setTimeout>;
 
@@ -300,10 +298,6 @@ export default class Home implements OnInit, OnDestroy {
 
   protected activeItems(): string[] {
     return this.serviceTabs.find(t => t.key === this.activeTab())?.items ?? [];
-  }
-
-  protected launchPortal(): void {
-    this.router.navigate(['/login']);
   }
 
   protected submit(): void {

@@ -28,12 +28,12 @@
             </svg>
           }
         </button>
-        <button class="btn btn-primary" type="button" (click)="launchPortal()">
+        <a class="btn btn-primary" href="#contact" (click)="mobileNavOpen.set(false)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M5 3l14 9-14 9V3z" />
+            <path d="M4 4h16v12H5.2L4 17.2z" />
           </svg>
-          <span class="lbl">Client portal</span>
-        </button>
+          <span class="lbl">Get in touch</span>
+        </a>
       </div>
     </div>
   </header>
@@ -49,7 +49,7 @@
           efficiency and open new growth channels. Accra → Vienna → wherever your business runs.
         </p>
         <div class="hero-cta">
-          <button class="btn btn-primary lg" type="button" (click)="launchPortal()">Explore the client portal</button>
+          <a class="btn btn-primary lg" href="#contact">Start a conversation</a>
           <a class="btn btn-ghost lg" href="#services">See what we do</a>
         </div>
         <div class="hero-meta">
@@ -269,9 +269,7 @@
       <div>
         <div class="eyebrow">Get in touch</div>
         <h2 class="contact-title">Tell us about the problem.</h2>
-        <p class="muted">
-          We'll come back with a business case, not a brochure. Or skip ahead and build an estimate yourself inside the client portal.
-        </p>
+        <p class="muted">We'll come back with a business case, not a brochure.</p>
         <form class="contact-form" [formGroup]="contactForm" (ngSubmit)="submit()">
           <div class="field">
             <label for="cf-name">Name</label>
@@ -364,12 +362,6 @@
             </div>
           </div>
         </div>
-        <div class="panel portal-cta">
-          <div class="eyebrow light">Prefer to look around first?</div>
-          <h3>Open the client portal</h3>
-          <p>A working sample of the delivery dashboards, support desk, training tracker and quote builder we ship with engagements.</p>
-          <button class="btn btn-accent" type="button" (click)="launchPortal()">Launch portal →</button>
-        </div>
       </div>
     </div>
   </section>
@@ -395,10 +387,8 @@
           <a href="#about">About</a><a href="#work">Portfolio</a><a href="#team">Team</a><a href="#contact">Contact</a>
         </div>
         <div>
-          <h4>Portal</h4>
-          <a href="#" (click)="launchPortal(); $event.preventDefault()">Delivery dashboard</a>
-          <a href="#" (click)="launchPortal(); $event.preventDefault()">Support desk</a>
-          <a href="#" (click)="launchPortal(); $event.preventDefault()">Quote builder</a>
+          <h4>Markets</h4>
+          <a href="#markets">Sectors we serve</a><a href="#services">Our services</a><a href="#contact">Get in touch</a>
         </div>
       </div>
       <div class="foot-bot">
