@@ -1,7 +1,7 @@
 # Deployment
 
 Deploys the Jojo Addison site to a server behind host nginx, at
-`~/webroot/02-jojoaddison/ankobra-web/`, following the same conventions the health-connect apps on
+`~/webroot/01-jojoaddison/ankobra-web/`, following the same conventions the health-connect apps on
 that host use: one external Docker network per app, loopback-only published ports, host nginx owning
 TLS, container names prefixed per app.
 
@@ -27,7 +27,7 @@ deploy/
   prod-server/                    deployed verbatim to the server
     compose.yml                   app + postgres, loopback-only, hardened
     .env.example                  template; the real .env is generated on the server
-    ankobra-web.conf              host nginx site (pre-certbot, HTTP only)
+    ankobra-web.conf              host nginx site: apex jojoaddison.net + www, TLS (reuses the cert)
     infra.sh                      one-time: create the external network
     start                         pull the tagged image and recreate the stack
     backup.sh                     nightly pg_dump, 14-day retention
@@ -81,7 +81,17 @@ from `$REGISTRY`.
    Package settings → Change visibility) or give the server a credential:
    `ssh webserver 'docker login ghcr.io -u <user>'` with a PAT carrying `read:packages`.
 
-## First-time install
+> **Live** on `webserver` at `~/webroot/01-jojoaddison/ankobra-web/`, serving the apex
+> **https://jojoaddison.net** and **https://www.jojoaddison.net** (github channel, GHCR image).
+> The app runs on `127.0.0.1:8090`; host nginx (`ankobra-web.conf`) terminates TLS and proxies to it.
+>
+> The apex was taken over from the host's old multi-site `jojoaddison.conf` — its `web.`/`portainer.`/
+> `monitoring.` server blocks were split into their own `<subdomain>-jojoaddison.conf` files, and the
+> apex now lives in `ankobra-web.conf`. TLS **reuses the existing certificate** (lineage
+> `/etc/letsencrypt/live/www.jojoaddison.net`, covering both apex and www), so no `certbot` run was
+> needed and there is no rate-limit exposure; renewal continues via that lineage and reloads nginx.
+
+## First-time install (fresh host)
 
 DNS for the chosen host must already point at the server before the TLS step.
 
@@ -89,9 +99,15 @@ DNS for the chosen host must already point at the server before the TLS step.
 # 1. Everything except nginx and TLS. Generates all three secrets ON THE SERVER.
 ./deploy/deploy.sh --bootstrap
 
-# 2. Once you are happy the app is healthy, publish it.
-./deploy/deploy.sh --bootstrap --with-nginx --with-tls
+# 2. Once the app is healthy, install the host nginx site.
+./deploy/deploy.sh --with-nginx
 ```
+
+`ankobra-web.conf` ships a TLS server block that references the `www.jojoaddison.net` certificate
+lineage (reused from the apex takeover). On a genuinely fresh host with no such cert, obtain one first
+(`certbot certonly --nginx -d jojoaddison.net -d www.jojoaddison.net`) or point the conf at a lineage
+that exists — then `--with-nginx`. `--with-tls` (which runs `certbot --nginx`) is only needed if you
+want certbot to (re)issue and manage the cert rather than reuse the existing one.
 
 `--bootstrap` refuses to run if `compose.yml` already exists on the server, and refuses to overwrite
 an existing `.env`.
@@ -99,7 +115,7 @@ an existing `.env`.
 Read the generated admin password once, then store it in a password manager:
 
 ```bash
-ssh webserver "grep ANKOBRA_ADMIN_PASSWORD ~/webroot/02-jojoaddison/ankobra-web/.env"
+ssh webserver "grep ANKOBRA_ADMIN_PASSWORD ~/webroot/01-jojoaddison/ankobra-web/.env"
 ```
 
 ## Routine deploys
@@ -151,7 +167,7 @@ through a pipe.
 Add to root's crontab on the server, alongside the existing cert-renewal entry:
 
 ```cron
-15 3 * * * ~/webroot/02-jojoaddison/ankobra-web/backup.sh >> /var/log/ankobra-web-backup.log 2>&1
+15 3 * * * ~/webroot/01-jojoaddison/ankobra-web/backup.sh >> /var/log/ankobra-web-backup.log 2>&1
 ```
 
 A backup nobody has restored is a hypothesis. Do one restore drill into a scratch database before
@@ -185,14 +201,15 @@ this carries real data.
 - **`/management` returns 404 at the proxy.** Health and metrics belong to the monitoring network,
   which reaches the container directly.
 
-## Decisions to confirm before going live
+## Notes
 
-- **The domain.** This app is the top-level site: `PUBLIC_URL` defaults to `https://jojoaddison.net`
-  and the nginx block claims the apex `jojoaddison.net` and `www.jojoaddison.net` (`ALT_HOSTS`), both
-  covered by one certificate. Confirm no other enabled nginx site on the host already serves these
-  names before the first public deploy.
-- **`SSH_HOST` / `REMOTE_DIR`.** Default to `webserver` and `~/webroot/02-jojoaddison/ankobra-web`.
+- **The domain.** _Decided: the apex._ This app is the top-level site — `PUBLIC_URL` is
+  `https://jojoaddison.net` and `ankobra-web.conf` claims the apex `jojoaddison.net` and
+  `www.jojoaddison.net` (`ALT_HOSTS`), both covered by one certificate. The takeover displaced only
+  the two apex server blocks of the host's old `jojoaddison.conf`; its `web.`/`portainer.`/
+  `monitoring.` subdomains were split into their own `<subdomain>-jojoaddison.conf` files and keep
+  working.
+- **`SSH_HOST` / `REMOTE_DIR`.** Default to `webserver` and `~/webroot/01-jojoaddison/ankobra-web`.
   Override via env if the target host or path differs.
-- **Seed data in production** (see above) — decide whether a fresh install should be empty or carry
-  fixtures.
+- **Seed data in production** (see above) — a fresh install is empty; populate through the portal.
 - **Mail** is optional and unset by default; configure `SMTP_HOST` if account emails are needed.

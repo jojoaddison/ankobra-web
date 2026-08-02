@@ -1,5 +1,5 @@
 #!/bin/bash
-# Deploys this repo to production (host nginx -> https://ankobra.jojoaddison.net) and verifies it.
+# Deploys this repo to production (host nginx -> https://jojoaddison.net) and verifies it.
 # Run it by hand from a clean checkout of the commit you want live:
 #
 #   ./deploy/deploy.sh                 # build+push image, ship config, restart, verify
@@ -39,7 +39,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # --- Configuration -----------------------------------------------------------------------------
 
 SSH_HOST="${SSH_HOST:-webserver}"                                   # ~/.ssh/config alias
-REMOTE_DIR="${REMOTE_DIR:-~/webroot/02-jojoaddison/ankobra-web}"    # expanded remotely, not here
+REMOTE_DIR="${REMOTE_DIR:-~/webroot/01-jojoaddison/ankobra-web}"    # expanded remotely, not here
 PUBLIC_URL="${PUBLIC_URL:-https://jojoaddison.net}"
 # Extra hostnames served by the same nginx block and covered by the same certificate. Must match
 # `server_name` in prod-server/ankobra-web.conf. This app owns the apex and www.

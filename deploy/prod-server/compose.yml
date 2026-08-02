@@ -1,4 +1,4 @@
-# Deployed as ~/webroot/02-jojoaddison/ankobra-web/compose.yml on the server, following the per-app
+# Deployed as ~/webroot/01-jojoaddison/ankobra-web/compose.yml on the server, following the per-app
 # convention (see the health-connect siblings): a dedicated external network, loopback-only published
 # ports because host nginx owns TLS and public routing, and container names prefixed per app.
 #
