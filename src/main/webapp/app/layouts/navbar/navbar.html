@@ -334,18 +334,7 @@
                     <span jhiTranslate="global.menu.account.login">Sign in</span>
                   </a>
                 </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    routerLink="/account/register"
-                    routerLinkActive="active"
-                    (click)="collapseNavbar()"
-                    data-cy="register"
-                  >
-                    <fa-icon icon="user-plus" [fixedWidth]="true" />
-                    <span jhiTranslate="global.menu.account.register">Register</span>
-                  </a>
-                </li>
+                <!-- Registration is admin-only (see register.route.ts / SecurityConfiguration): no public sign-up link. -->
               }
             </ul>
           </li>

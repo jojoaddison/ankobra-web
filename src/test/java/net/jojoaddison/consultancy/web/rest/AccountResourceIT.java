@@ -123,6 +123,7 @@ class AccountResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void testRegisterValid() throws Exception {
         ManagedUserVM validUser = new ManagedUserVM();
         validUser.setLogin("test-register-valid");
@@ -146,6 +147,29 @@ class AccountResourceIT {
 
     @Test
     @Transactional
+    @WithUnauthenticatedMockUser
+    void testRegisterRequiresAdmin() throws Exception {
+        // Registration is admin-only: an anonymous caller must be rejected before any user is created.
+        ManagedUserVM validUser = new ManagedUserVM();
+        validUser.setLogin("test-register-anon");
+        validUser.setPassword("password");
+        validUser.setFirstName("Anon");
+        validUser.setLastName("Ymous");
+        validUser.setEmail("test-register-anon@example.com");
+        validUser.setActivated(true);
+        validUser.setLangKey(Constants.DEFAULT_LANGUAGE);
+        validUser.setAuthorities(Set.of(AuthoritiesConstants.USER));
+
+        restAccountMockMvc
+            .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(validUser)))
+            .andExpect(status().isUnauthorized());
+
+        assertThat(userRepository.findOneByLogin("test-register-anon")).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void testRegisterInvalidLogin() throws Exception {
         ManagedUserVM invalidUser = new ManagedUserVM();
         invalidUser.setLogin("funky-log(n"); // <-- invalid
@@ -177,6 +201,7 @@ class AccountResourceIT {
     @ParameterizedTest
     @MethodSource("invalidUsers")
     @Transactional
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void testRegisterInvalidUsers(ManagedUserVM invalidUser) throws Exception {
         restAccountMockMvc
             .perform(post("/api/register").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(invalidUser)))
@@ -209,6 +234,7 @@ class AccountResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void testRegisterDuplicateLogin() throws Exception {
         // First registration
         ManagedUserVM firstUser = new ManagedUserVM();
@@ -261,6 +287,7 @@ class AccountResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void testRegisterDuplicateEmail() throws Exception {
         // First user
         ManagedUserVM firstUser = new ManagedUserVM();
@@ -337,6 +364,7 @@ class AccountResourceIT {
 
     @Test
     @Transactional
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void testRegisterAdminIsIgnored() throws Exception {
         ManagedUserVM validUser = new ManagedUserVM();
         validUser.setLogin("badguy");

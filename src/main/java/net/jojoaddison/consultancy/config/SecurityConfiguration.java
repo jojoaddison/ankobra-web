@@ -70,7 +70,9 @@ public class SecurityConfiguration {
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/authenticate").permitAll()
-                    .requestMatchers("/api/register").permitAll()
+                    // Registration is not public: only an authenticated admin may create accounts.
+                    // (Activation stays public so an invited user can confirm their email.)
+                    .requestMatchers("/api/register").hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers("/api/activate").permitAll()
                     .requestMatchers("/api/account/reset-password/init").permitAll()
                     .requestMatchers("/api/account/reset-password/finish").permitAll()

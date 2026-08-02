@@ -99,13 +99,116 @@ body {
   font-family: var(--font);
 }
 
-/* Brand wordmark on the login screen. */
-.login-logo {
-  display: block;
-  height: 46px;
-  width: auto;
-  margin: 6px 0 22px;
-  border-radius: var(--r-sm);
+/* ==============================================================
+Themed auth pages (login, register) — a token-styled card that reads
+on both light and dark planes, replacing the plain Bootstrap forms.
+=============================================================== */
+.auth-page {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-2);
+    padding: 34px 32px;
+    &.auth-card-wide {
+      max-width: 520px;
+    }
+  }
+
+  .login-logo {
+    display: block;
+    height: 44px;
+    width: auto;
+    margin: 0 0 20px;
+    border-radius: var(--r-sm);
+  }
+
+  h1 {
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .auth-sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 22px;
+  }
+
+  label,
+  .form-label,
+  .form-check-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+
+  .form-control {
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    border-radius: var(--r-md);
+    padding: 10px 13px;
+    font-size: 14.5px;
+    &:focus {
+      background: var(--surface-2);
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+      color: var(--text-primary);
+    }
+    &::placeholder {
+      color: var(--text-muted);
+    }
+  }
+
+  .form-check-input:checked {
+    background-color: var(--brand);
+    border-color: var(--brand);
+  }
+
+  .btn-primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
+    font-weight: 650;
+    padding: 11px 16px;
+    border-radius: var(--r-md);
+    margin-top: 6px;
+    &:hover:not(:disabled) {
+      background: var(--brand-deep);
+      border-color: var(--brand-deep);
+    }
+    &:disabled {
+      opacity: 0.55;
+    }
+  }
+
+  .auth-links {
+    margin-top: 18px;
+    font-size: 13.5px;
+    a {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .alert {
+    border-radius: var(--r-md);
+    font-size: 14px;
+  }
 }
 
 /* ==============================================================
