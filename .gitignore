@@ -116,7 +116,9 @@ Desktop.ini
 # Directories
 ######################
 /bin/
-/deploy/
+# NOTE: JHipster ignores /deploy/ (output of its kubernetes/docker-compose subgenerators).
+# This repo uses deploy/ for its own hand-written jib/GHCR deployment, which must be tracked.
+# /deploy/
 
 ######################
 # Logs

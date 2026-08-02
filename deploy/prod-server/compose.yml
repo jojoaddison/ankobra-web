@@ -1,0 +1,125 @@
+# Deployed as ~/webroot/02-jojoaddison/ankobra-web/compose.yml on the server, following the per-app
+# convention (see the health-connect siblings): a dedicated external network, loopback-only published
+# ports because host nginx owns TLS and public routing, and container names prefixed per app.
+#
+# `name:` is pinned explicitly so `docker compose up -d --remove-orphans` (see ./start) can only ever
+# affect this project's containers — relying on the directory-derived default once cost a sibling app
+# an unrelated container that happened to share the name.
+#
+# One image, not two. This is a JHipster monolith: Spring Boot serves the compiled Angular bundle
+# from its own classpath, so there is no separate web container and nginx has exactly one upstream.
+name: ankobra-web
+
+services:
+  postgresql:
+    image: postgres:18.4
+    container_name: ankobra-web-postgres
+    restart: unless-stopped
+    networks:
+      - ankobrawebnet
+    environment:
+      POSTGRES_DB: jojoaddison
+      POSTGRES_USER: jojoaddison
+      # No POSTGRES_HOST_AUTH_METHOD=trust here, unlike the dev compose file. Trust auth is fine on a
+      # loopback-only dev container and is an unauthenticated database anywhere else.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (openssl rand -base64 24)}
+    volumes:
+      # /var/lib/postgresql, NOT /var/lib/postgresql/data. The 18+ images store data in a
+      # major-version-specific subdirectory and refuse to start when they find a volume on the old
+      # path — "there appears to be PostgreSQL data in: /var/lib/postgresql/data (unused mount/volume)".
+      - postgres-data:/var/lib/postgresql
+    # Deliberately publishes no port. Nothing outside this network has any business reaching the
+    # database, and backup.sh reaches it with `docker exec`.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  app:
+    image: ${REGISTRY:-docker.jojoaddison.net}/ankobra-web:${TAG:-latest}
+    container_name: ankobra-web-app
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - ankobrawebnet
+      # External, shared with the rest of this server's apps (~/webroot/00-admin/monitoring) — lets
+      # Prometheus scrape /management/prometheus. See infra.sh: this network is NOT created here.
+      - monitoring
+    environment:
+      # `prod` only. The dev-profile DataSeeder (real demo fixtures + the kojo/ama demo logins with a
+      # known password) is @Profile("dev") and never runs here, so production starts with just the
+      # admin account and no fixture data. Do NOT add `faker` or `dev`.
+      SPRING_PROFILES_ACTIVE: prod
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/jojoaddison
+      SPRING_DATASOURCE_USERNAME: jojoaddison
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      SPRING_LIQUIBASE_URL: jdbc:postgresql://postgresql:5432/jojoaddison
+
+      # HS512 needs >= 64 bytes of key material. Fail fast rather than booting unsigned: unlike dev
+      # there is no committed sample key to fall back on, which is the point.
+      #   openssl rand -base64 64 | tr -d '\n'
+      JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET: ${JWT_BASE64_SECRET:?Set JWT_BASE64_SECRET in .env (openssl rand -base64 64)}
+
+      # Applied to the seeded `admin` account at every boot by AdminPasswordInitializer. Unset, the
+      # account keeps generator-jhipster's committed `admin`/`admin` — which is why this is required
+      # here rather than defaulted.
+      ANKOBRA_ADMIN_PASSWORD: ${ANKOBRA_ADMIN_PASSWORD:?Set ANKOBRA_ADMIN_PASSWORD in .env (openssl rand -base64 24)}
+
+      # The browser must be allowed to call the API from the public origin. Empty means same-origin
+      # only, which is correct here because the monolith serves its own frontend.
+      JHIPSTER_CORS_ALLOWED_ORIGINS: ${PUBLIC_URL:?Set PUBLIC_URL in .env}
+
+      # Where account emails (password reset, etc.) point. The marketing contact form only writes a
+      # Lead row, so mail is not on the critical path; configure SMTP_HOST to enable outbound mail.
+      SPRING_MAIL_HOST: ${SMTP_HOST:-}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-true}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-true}
+      JHIPSTER_MAIL_FROM: ${MAIL_FROM:-noreply@jojoaddison.net}
+      JHIPSTER_MAIL_BASE_URL: ${PUBLIC_URL}
+
+      MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED: 'true'
+      JAVA_OPTS: '-XX:MaxRAMPercentage=75 -XX:+UseZGC'
+      # The generated entrypoint sleeps this many seconds before starting, a hook for waiting on
+      # dependencies. depends_on/condition already does that properly, so no sleep.
+      JHIPSTER_SLEEP: '0'
+    ports:
+      # Loopback only — host nginx (Certbot-managed TLS) is the sole thing on a public interface.
+      - '127.0.0.1:${APP_PORT:-8090}:8080'
+    read_only: true
+    tmpfs:
+      # Spring Boot and Liquibase both write here, and the image's own entrypoint expects it. With a
+      # read-only root and no tmpfs the container starts and then fails on the first temp file.
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      # bash's /dev/tcp rather than curl or wget: the temurin JRE base image ships neither, so the
+      # obvious healthcheck silently reports unhealthy forever on a container that is fine.
+      test:
+        - CMD-SHELL
+        - "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /management/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; grep -q \"\\\"status\\\":\\\"UP\\\"\" <&3'"
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # Wide on purpose. Liquibase runs the entity changelogs at startup on a small host; minutes,
+      # not seconds. This is expected, not a hang — deploy.sh waits it out.
+      start_period: 120s
+
+networks:
+  ankobrawebnet:
+    external: true
+  monitoring:
+    external: true
+
+volumes:
+  postgres-data:
