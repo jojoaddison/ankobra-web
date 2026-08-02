@@ -1,0 +1,89 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository state
+
+This is a **greenfield repo with no application code yet** — no `package.json`, `pom.xml`, `.jhipster/`, or JDL, and no commits on `main` (all three tracked files are staged, not committed). It currently holds only the brief and the design/content reference:
+
+| File | Role |
+| --- | --- |
+| `create-web-app-prompt.txt` | The brief. Build a **JHipster monolith** with a public marketing front and a CMS/portal; author a **JDL file for the models before implementation**; plan in phases + TODO lists; ask questions where unsure. |
+| `jojoaddison-consultancy-demo.html` | Single-file, dependency-free HTML/CSS/JS prototype of both halves of the app. **The authoritative source for design tokens, layout, copy and the domain model.** |
+| `jojoaddison-consultancy.pdf` | 2020 company profile — background content source. |
+
+Do not treat the demo HTML as code to port line-by-line; treat it as the spec. Extract tokens, IA, and entity shapes from it.
+
+## Toolchain on this machine
+
+Node and JHipster are managed by **nvm**, which `~/.bashrc` sources but non-interactive shells do not. A bare tool shell sees only the system `node` (`/usr/bin/node` v22.22.1, **no npm**), `java`, `mvn` 3.9.15 and `docker` — `npm`/`npx`/`jhipster` will all look missing. Source nvm first in every shell that needs them:
+
+```bash
+export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; nvm use v22.22.2
+```
+
+**Do not install node, npm, or generator-jhipster — they are already here.** `generator-jhipster` is installed under six nvm node versions, and the newest node is *not* the newest JHipster:
+
+| nvm node | generator-jhipster |
+| --- | --- |
+| **v22.22.2** | **9.1.0** ← use this one |
+| v24.13.0, v24.3.0 | 8.11.0 |
+| v20.18.0 | 8.7.1 |
+| v22.17.0 | 8.0.0 |
+| v16.20.2 | 7.9.3 |
+
+nvm's `default` alias is `stable` → v24.18.0, which has **no** jhipster at all. JHipster 9.1.0 requires node `^22.18.0 || >=24.11.0`, so v22.22.2 is the intended pairing.
+
+Once the app is generated the standard JHipster commands (`./mvnw`, `npm start`, `./mvnw verify`, `npm test`, `jhipster jdl <file>.jdl`) apply; there are no project-specific commands yet.
+
+## Target tech stack — Java 25 · Spring Boot 4 · Angular 21 · PostgreSQL
+
+The chosen stack is exactly what generator-jhipster 9.1.0 targets; verified against the installed generator, not assumed:
+
+- **PostgreSQL** — the fixed database (brief, line 8). Keep it non-reactive (see Spring Boot note) — a servlet/Spring MVC + JPA stack. Dev can use H2 in-memory with Postgres in prod (JHipster default) unless told otherwise.
+- **Auth: JWT** — self-contained token auth (JHipster default). The demo's client-vs-consultant split maps onto authorities: consultants are staff (a `ROLE_CONSULTANT`/admin-like authority seeing all data), clients (`ROLE_USER`) are scoped to their own `Client` and its projects/tickets. No external identity server.
+- **Angular 21** — pinned by the `angular` generator (`@angular/common` 21.2.14, `@angular/cli` 21.2.12). Select with `--client-framework angular`.
+- **Spring Boot 4.0.6** — shipped as `generators/spring-boot/resources/spring-boot-dependencies-4.json`. The generator flips to it via a computed `springBoot4` default = `!(databaseTypeSql && reactive) && !databaseTypeCouchbase`. **A non-reactive SQL monolith gets Spring Boot 4 automatically** — the 3.5.14 set (`spring-boot-dependencies.json`) is only the fallback for reactive-SQL / Couchbase. Do not pick a reactive stack, or you silently drop to Boot 3.5.
+- **Java 25** — supported but NOT the default. `JAVA_COMPATIBLE_VERSIONS = ['21', '25']` (generator default 21), so pass `--java-version 25` explicitly. The ambient `JAVA_HOME` is JDK **26**, which is outside the compatible list — `check-java` will reject it. Point the build and shell at `/usr/lib/jvm/java-25-openjdk-amd64` (or `jdk-25.0.2-oracle-x64`) for this project.
+
+## Design system contract
+
+The demo defines a complete token set in `:root` and `html[data-theme="dark"]` at the top of `jojoaddison-consultancy-demo.html`. **Port these tokens verbatim into the generated app's global stylesheet** — every component styles off `var(--…)`, never hardcoded colors.
+
+- Brand: `--brand:#0d6b2f` (deep green), `--brand-deep:#08511f`, accent `--accent:#f2d024` (yellow). Light plane `#f9f9f7`, dark plane `#0d0d0d`.
+- Categorical/sequential chart series (`--series-1..3`, `--seq-100..550`) and status colors (`--good/--warning/--serious/--critical`) are already defined — reuse them for any dashboard chart rather than inventing a palette.
+- Theming is `data-theme` on `<html>`, toggled by a button in both the marketing header and the app top bar. **Per the brief, the default is chosen by time of day, not `prefers-color-scheme`: 06:00–18:00 → light, 18:00–06:00 → dark.** Keep the manual toggle as an override on top of that time-based default (and re-evaluate the clock when the app is left open across the 6/18:00 boundary).
+- Type: system sans (`--font`) plus a mono stack (`--mono`) used for the `<jojoaddison/>` wordmark and the animated terminal. Radii `--r-sm..--r-xl`, shadows `--shadow-1..3`, page max width `--maxw:1200px`.
+- Charts in the demo are hand-rolled SVG (`drawGroupedBars`, `barTop`, `niceStep`, …). No charting library is assumed.
+
+## Application shape
+
+Two surfaces in one monolith, matching the demo:
+
+**Public marketing site** — sections `#about`, `#services`, `#work`, `#markets`, `#team`, `#contact`, plus footer. The four service pillars (Bespoke solutions, Digital transformation, Capacity building, Enterprise integration) and the Consultancy/Solutions/Training tabs are the spine of the services IA. The contact form is the lead-capture entry point.
+
+**Authenticated portal / CMS** — app shell with top bar (global search over projects, clients, tickets), collapsible sidebar, and a main view region. Sidebar groups and views (`NAV` in the demo):
+
+- Delivery: Overview (KPIs + charts), Projects, Clients
+- Commercial: Service catalogue, Quote builder
+- Operations: Support desk, Training, Team
+
+The demo logs in as either a **client** or a **consultant** — role-based scoping (a client sees only their own projects/tickets) is part of the design, and maps onto JHipster authorities.
+
+## Domain model source
+
+The JDL should be derived from the demo's in-memory fixtures, which already carry field-level detail:
+
+- `PROJECTS` — id, name, client, pillar, status, progress %, lead, due date, budget/spent, tech stack, ordered milestones with state (`done`/`now`/`next`).
+- `CLIENTS` — name, sector, since, project count, health, total spend. Sectors come from `MARKETS` (12 entries).
+- `TICKETS` — id, subject, priority, client, owner, age, SLA, open/closed state (support desk).
+- `CATALOGUE` — service line items with rate, unit (`per phase`, `per module`, `per month`, …) and pillar; the quote builder composes these into estimates.
+- `COURSES` — training courses with module counts, delivery mode, enrolment, progress.
+- `TEAM` — consultant name, initials, role, qualification, bio.
+- Aggregates for the overview: `HOURS` (delivery hours by month × pillar), `TREND` (tickets raised vs resolved, 12 weeks), `REVENUE` (by pillar).
+
+Status vocabulary is shared across projects, clients and tickets — `good | warn | serious | crit | done` rendered as *On track / At risk / Delayed / Blocked / Delivered*, and reused as ticket priority *Low / Medium / High / Critical*. Model it as one enum.
+
+## Working style for this project
+
+The brief asks explicitly for phased planning with TODO task lists, and for the JDL to land before implementation. Follow that order: JDL → generation → public front → portal views. Ask when the brief is ambiguous rather than guessing at business rules.

@@ -1,0 +1,202 @@
+/**
+ * Jojo Addison Consultancy — JHipster monolith
+ * Models derived from the fixtures in jojoaddison-consultancy-demo.html.
+ *
+ * Generate with (node v22.22.2 + JDK 25 on PATH, generator-jhipster 9.1.0):
+ *   jhipster jdl app.jdl --java-version 25
+ *
+ * Notes on the target stack (see CLAUDE.md):
+ *   - Java 25 is passed via --java-version (not a JDL config key; JAVA_COMPATIBLE_VERSIONS = 21|25).
+ *   - reactive=false + databaseType=sql => generator selects Spring Boot 4.0.6 automatically.
+ *   - Do NOT switch to a reactive stack, or it silently drops to Spring Boot 3.5.
+ */
+
+application {
+  config {
+    baseName jojoaddison
+    applicationType monolith
+    packageName net.jojoaddison.consultancy
+    authenticationType jwt
+    databaseType sql
+    prodDatabaseType postgresql
+    devDatabaseType h2Disk
+    cacheProvider ehcache
+    enableHibernateCache true
+    buildTool maven
+    clientFramework angular
+    reactive false
+    languages [en]
+    nativeLanguage en
+    clientThemeVariant primary
+    testFrameworks []
+  }
+  entities *
+}
+
+// ===================== ENUMS =====================
+
+/** Shared status vocabulary. Rendered On track / At risk / Delayed / Blocked / Delivered
+    for projects & clients, and reused as ticket priority Low / Medium / High / Critical. */
+enum Status { GOOD, WARN, SERIOUS, CRIT, DONE }
+
+/** Project service pillar (the four pillars + Consultancy from the demo portfolio). */
+enum ServicePillar { BESPOKE_SOLUTIONS, DIGITAL_TRANSFORMATION, CAPACITY_BUILDING, ENTERPRISE_INTEGRATION, CONSULTANCY }
+
+/** Service-catalogue grouping — matches the Consultancy / Solutions / Training tabs (+ Services). */
+enum CatalogueGroup { CONSULTANCY, SOLUTIONS, SERVICES, TRAINING }
+
+/** Ordered milestone state on a project timeline. */
+enum MilestoneState { DONE, NOW, NEXT }
+
+enum TicketState { OPEN, CLOSED }
+
+/** Catalogue rate unit (per phase / per module / per month / ...). */
+enum RateUnit { PER_PHASE, PER_PROCESS, PER_SCOPE, PER_MODULE, PER_INTEGRATION, PER_ENVIRONMENT, PER_MONTH, PER_DATASET, PER_COHORT }
+
+enum DeliveryMode { VIRTUAL, IN_HOUSE }
+
+enum QuoteStatus { DRAFT, SENT, ACCEPTED, DECLINED }
+
+enum LeadStatus { NEW, CONTACTED, QUALIFIED, CLOSED }
+
+/** Contact-form "What do you need?" options. */
+enum EnquiryType { BESPOKE_SOLUTION, DIGITAL_TRANSFORMATION, CAPACITY_BUILDING, ENTERPRISE_INTEGRATION, ISO_AUDIT, OTHER }
+
+/** Sectors served (the 12 markets from the demo, + Retail & Distribution used by a client). */
+enum Market {
+  BANKING_FINANCE_INSURANCE, REAL_ESTATE, OIL_AND_GAS, HAULAGE_TRANSPORTATION,
+  HEALTH_HOSPITALITY, DEFENCE_NATIONAL_SECURITY, COMMUNICATION, TRANSPORTATION,
+  HEALTH_EDUCATION, AGRICULTURE, INSTITUTIONS_COMMISSIONS_AUTHORITIES,
+  PRIVATE_RESIDENCES_BUSINESSES, RETAIL_DISTRIBUTION
+}
+
+// ===================== ENTITIES =====================
+
+/** A consultancy client. A client's portal user is scoped to only this client's data. */
+entity Client {
+  name String required maxlength(120)
+  sector Market
+  clientSince Integer
+  health Status
+  totalSpend BigDecimal min(0)
+}
+
+/** A delivery engagement. */
+entity Project {
+  reference String required unique maxlength(20)
+  name String required maxlength(160)
+  pillar ServicePillar required
+  status Status required
+  progress Integer min(0) max(100)
+  dueDate LocalDate
+  delivered Boolean
+  budget BigDecimal min(0)
+  spent BigDecimal min(0)
+  techStack String maxlength(255)
+}
+
+/** Ordered step on a project timeline (done / now / next). */
+entity Milestone {
+  title String required maxlength(160)
+  state MilestoneState required
+  position Integer required min(0)
+}
+
+/** Support-desk ticket. priority reuses the shared Status enum. */
+entity Ticket {
+  reference String required unique maxlength(20)
+  subject String required maxlength(200)
+  priority Status required
+  openedAt Instant
+  slaHours Integer min(0)
+  state TicketState required
+}
+
+/** A line in the service catalogue that the quote builder composes. */
+entity ServiceItem {
+  code String required unique maxlength(20)
+  name String required maxlength(160)
+  description String maxlength(400)
+  rate BigDecimal required min(0)
+  unit RateUnit required
+  serviceGroup CatalogueGroup required
+}
+
+/** An estimate assembled from catalogue items. */
+entity Quote {
+  reference String required unique maxlength(20)
+  title String maxlength(160)
+  createdDate Instant
+  status QuoteStatus
+}
+
+/** A quantity of a catalogue item on a quote (rate snapshotted at add time). */
+entity QuoteLine {
+  quantity Integer required min(1)
+  rate BigDecimal required min(0)
+}
+
+/** Training course offered as part of capacity building. */
+entity Course {
+  name String required maxlength(160)
+  description String maxlength(300)
+  moduleCount Integer min(0)
+  mode DeliveryMode
+  labBased Boolean
+  enrolledCount Integer min(0)
+  progress Integer min(0) max(100)
+}
+
+/** A consultant / team member. Referenced as project lead and ticket owner. */
+entity TeamMember {
+  name String required maxlength(120)
+  initials String maxlength(5)
+  role String maxlength(80)
+  qualification String maxlength(160)
+  bio TextBlob
+}
+
+/** Lead captured from the public contact form. */
+entity Lead {
+  name String required maxlength(120)
+  email String required maxlength(160)
+  need EnquiryType
+  message TextBlob
+  createdDate Instant
+  status LeadStatus
+}
+
+// ===================== RELATIONSHIPS =====================
+
+relationship OneToMany {
+  Client{project} to Project{client(name) required}
+  Client{ticket} to Ticket{client(name) required}
+  Client{quote} to Quote{client(name)}
+  Project{milestone} to Milestone{project(name) required}
+  Quote{line} to QuoteLine{quote(reference) required}
+}
+
+relationship ManyToOne {
+  Project{lead(name)} to TeamMember
+  Ticket{owner(name)} to TeamMember
+  QuoteLine{item(name) required} to ServiceItem
+}
+
+/** Role scoping: a client's login sees only their Client; a consultant's login maps to a TeamMember. */
+relationship OneToOne {
+  Client{user(login)} to User with builtInEntity
+  TeamMember{user(login)} to User with builtInEntity
+}
+
+// ===================== GENERATION OPTIONS =====================
+
+service all with serviceClass
+dto all with mapstruct
+
+// NOTE: `paginate` is the only accepted keyword in generator-jhipster 9.1.0; it emits a
+// spurious "deprecated, use pagination" warning (an upstream bug) but is correct. `pagination`
+// here is the strategy value, not a keyword.
+paginate Project, Ticket, Quote, Course, Lead, Client, ServiceItem, TeamMember with pagination
+
+/** JPA filtering — needed for role-scoped queries and portal search. */
+filter Client, Project, Ticket, Quote, ServiceItem, Course

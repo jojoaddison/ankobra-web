@@ -1,0 +1,8 @@
+Create a monolith web application comprising a public front and a cms using JHipster.
+Create a JDL file for models before implementation. 
+Plan the work in phases and TODO task lists. Ask questions where not sure.
+See jojoaddison-consultancy-demo.html for content, design guideline, colors and styling.
+Automatically switch defined light and dark themes for user based on the time of day.
+6AM - 6PM light theme.
+6PM - 6AM dark theme.
+Techstack: Java 25, SpringBoot 4x, Angular 21, PostgreSQL

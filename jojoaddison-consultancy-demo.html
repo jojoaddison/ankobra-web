@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>&lt;jojoaddison/&gt; — Information Systems Consulting</title>
+<meta name="description" content="Jojo Addison Consultancy — bespoke software, digital transformation, capacity building and enterprise integration. Accra, Ghana &amp; Vienna, Austria.">
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  color-scheme: light;
+  --plane:#f9f9f7;
+  --surface-1:#fcfcfb;
+  --surface-2:#ffffff;
+  --surface-sunk:#f1f2ec;
+  --text-primary:#0b0b0b;
+  --text-secondary:#52514e;
+  --text-muted:#898781;
+  --grid:#e1e0d9;
+  --axis:#c3c2b7;
+  --border:rgba(11,11,11,.10);
+  --border-strong:rgba(11,11,11,.18);
+
+  --brand:#0d6b2f;
+  --brand-deep:#08511f;
+  --brand-soft:#e8f3ea;
+  --brand-ink:#ffffff;
+  --accent:#f2d024;
+  --accent-soft:#fdf6d3;
+  --accent-ink:#3a3000;
+
+  --series-1:#2a78d6;
+  --series-2:#eb6834;
+  --series-3:#1baf7a;
+  --seq-100:#cde2fb; --seq-250:#86b6ef; --seq-400:#3987e5; --seq-550:#1c5cab;
+
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --success-text:#006300;
+
+  --shadow-1:0 1px 2px rgba(11,11,11,.05), 0 1px 3px rgba(11,11,11,.04);
+  --shadow-2:0 8px 24px rgba(11,11,11,.08), 0 2px 6px rgba(11,11,11,.04);
+  --shadow-3:0 24px 60px rgba(11,11,11,.16);
+  --r-sm:6px; --r-md:10px; --r-lg:16px; --r-xl:24px;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --maxw:1200px;
+}
+html[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#0d0d0d;
+  --surface-1:#1a1a19;
+  --surface-2:#212120;
+  --surface-sunk:#141413;
+  --text-primary:#ffffff;
+  --text-secondary:#c3c2b7;
+  --text-muted:#898781;
+  --grid:#2c2c2a;
+  --axis:#383835;
+  --border:rgba(255,255,255,.10);
+  --border-strong:rgba(255,255,255,.18);
+
+  --brand:#2fbf63;
+  --brand-deep:#8fe0ac;
+  --brand-soft:#122b1a;
+  --brand-ink:#06210f;
+  --accent:#ffe14d;
+  --accent-soft:#2c2708;
+  --accent-ink:#1a1600;
+
+  --series-1:#3987e5;
+  --series-2:#d95926;
+  --series-3:#199e70;
+  --seq-100:#184f95; --seq-250:#256abf; --seq-400:#3987e5; --seq-550:#86b6ef;
+
+  --success-text:#0ca30c;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5);
+  --shadow-2:0 8px 24px rgba(0,0,0,.55);
+  --shadow-3:0 24px 60px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font-family:var(--font); background:var(--plane); color:var(--text-primary);
+  -webkit-font-smoothing:antialiased; line-height:1.55;
+}
+h1,h2,h3,h4{line-height:1.15; margin:0; letter-spacing:-.02em; font-weight:700}
+p{margin:0}
+a{color:inherit}
+button{font:inherit; color:inherit}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+.eyebrow{font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--brand)}
+.muted{color:var(--text-secondary)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ===================== LOGO ===================== */
+.logo{display:inline-flex; align-items:center; gap:0; font-weight:800; letter-spacing:-.03em; text-decoration:none}
+.logo .br{color:var(--brand); font-family:var(--mono); font-weight:700}
+.logo .nm{color:var(--text-primary)}
+.logo .hl{background:linear-gradient(180deg,transparent 55%, var(--accent) 55%)}
+html[data-theme="dark"] .logo .hl{background:linear-gradient(180deg,transparent 55%, color-mix(in srgb,var(--accent) 34%, transparent) 55%)}
+html[data-theme="dark"] .hero h1 .mark{background:linear-gradient(180deg,transparent 58%, color-mix(in srgb,var(--accent) 32%, transparent) 58%)}
+
+/* ===================== NAV ===================== */
+header.nav{
+  position:sticky; top:0; z-index:60; backdrop-filter:saturate(180%) blur(12px);
+  background:color-mix(in srgb, var(--plane) 88%, transparent);
+  border-bottom:1px solid var(--border);
+}
+.nav-in{display:flex; align-items:center; gap:20px; height:64px}
+.nav-links{display:flex; gap:4px; margin-left:auto}
+.nav-links a{
+  text-decoration:none; font-size:14px; font-weight:500; color:var(--text-secondary);
+  padding:8px 12px; border-radius:var(--r-sm);
+}
+.nav-links a:hover{color:var(--text-primary); background:var(--surface-sunk)}
+.nav-actions{display:flex; align-items:center; gap:10px}
+.icon-btn{
+  width:38px; height:38px; display:grid; place-items:center; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface-1); cursor:pointer;
+}
+.icon-btn:hover{border-color:var(--border-strong)}
+.btn{
+  display:inline-flex; align-items:center; gap:8px; border-radius:var(--r-sm); cursor:pointer;
+  border:1px solid transparent; padding:10px 16px; font-size:14px; font-weight:600; text-decoration:none;
+  transition:transform .08s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--brand); color:var(--brand-ink); box-shadow:var(--shadow-1)}
+.btn-primary:hover{background:var(--brand-deep); color:var(--brand-ink)}
+html[data-theme="dark"] .btn-primary:hover{color:var(--brand-ink)}
+.btn-accent{background:var(--accent); color:var(--accent-ink)}
+.btn-ghost{background:var(--surface-1); border-color:var(--border); color:var(--text-primary)}
+.btn-ghost:hover{border-color:var(--border-strong)}
+.btn-sm{padding:7px 12px; font-size:13px}
+.btn[disabled]{opacity:.5; cursor:not-allowed}
+.menu-toggle{display:none}
+
+/* ===================== HERO ===================== */
+.hero{position:relative; overflow:hidden; padding:76px 0 64px}
+.hero::before{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(900px 420px at 78% -10%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 65%),
+    radial-gradient(760px 420px at 8% 8%, color-mix(in srgb, var(--brand) 16%, transparent), transparent 62%);
+  pointer-events:none;
+}
+.hero-in{position:relative; display:grid; grid-template-columns:1.05fr .95fr; gap:52px; align-items:center}
+.hero h1{font-size:clamp(34px,5vw,54px)}
+.hero h1 .mark{
+  background:linear-gradient(180deg,transparent 58%, color-mix(in srgb,var(--accent) 85%, transparent) 58%);
+  padding:0 4px;
+}
+.hero .lede{font-size:18px; color:var(--text-secondary); margin-top:18px; max-width:56ch}
+.hero-cta{display:flex; gap:12px; margin-top:28px; flex-wrap:wrap}
+.hero-meta{display:flex; gap:22px; margin-top:30px; flex-wrap:wrap; font-size:13px; color:var(--text-muted)}
+.hero-meta span{display:inline-flex; align-items:center; gap:7px}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--good)}
+
+/* terminal card */
+.term{
+  background:#0f1512; border:1px solid rgba(255,255,255,.09); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-3); overflow:hidden; font-family:var(--mono); font-size:13px;
+}
+.term-bar{display:flex; align-items:center; gap:7px; padding:11px 14px; background:#0a0f0c; border-bottom:1px solid rgba(255,255,255,.07)}
+.term-bar i{width:11px; height:11px; border-radius:50%; display:block}
+.term-title{margin-left:8px; color:#7e8b83; font-size:11.5px; letter-spacing:.04em}
+.term-body{padding:16px 18px; color:#cfe8d8; min-height:268px; line-height:1.75}
+.term-body .c{color:#5c7a68}
+.term-body .k{color:var(--accent)}
+.term-body .g{color:#57d98a}
+.term-body .s{color:#8ecdf5}
+.cursor{display:inline-block; width:8px; height:15px; background:var(--accent); vertical-align:-2px; animation:blink 1.05s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+
+/* ===================== BANDS / SECTIONS ===================== */
+section{padding:72px 0}
+.band{background:var(--surface-1); border-top:1px solid var(--border); border-bottom:1px solid var(--border)}
+.sec-head{max-width:62ch; margin-bottom:38px}
+.sec-head h2{font-size:clamp(25px,3.2vw,34px); margin-top:10px}
+.sec-head p{color:var(--text-secondary); margin-top:12px; font-size:16px}
+
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden}
+.stat{background:var(--surface-1); padding:24px}
+.stat .v{font-size:32px; font-weight:800; letter-spacing:-.03em}
+.stat .l{font-size:13px; color:var(--text-secondary); margin-top:4px}
+
+.cards{display:grid; grid-template-columns:repeat(2,1fr); gap:20px}
+.card{
+  background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-lg);
+  padding:26px; box-shadow:var(--shadow-1); position:relative; overflow:hidden;
+  transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.card:hover{transform:translateY(-3px); box-shadow:var(--shadow-2); border-color:var(--border-strong)}
+.card .ico{
+  width:42px; height:42px; border-radius:11px; display:grid; place-items:center;
+  background:var(--brand-soft); color:var(--brand); margin-bottom:16px;
+}
+.card h3{font-size:19px}
+.card p{color:var(--text-secondary); font-size:14.5px; margin-top:9px}
+.card .rule{position:absolute; left:0; top:0; height:3px; width:0; background:var(--accent); transition:width .3s ease}
+.card:hover .rule{width:100%}
+
+/* tabs */
+.tabs{display:flex; gap:6px; flex-wrap:wrap; border-bottom:1px solid var(--border); margin-bottom:26px}
+.tab{
+  background:none; border:none; border-bottom:2px solid transparent; padding:11px 15px;
+  font-size:14.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; margin-bottom:-1px;
+}
+.tab[aria-selected="true"]{color:var(--brand); border-bottom-color:var(--brand)}
+.tab:hover{color:var(--text-primary)}
+.tabpanel[hidden]{display:none}
+.svc-list{display:grid; grid-template-columns:repeat(2,1fr); gap:10px 26px}
+.svc-item{display:flex; gap:12px; align-items:flex-start; padding:11px 0; border-bottom:1px dashed var(--border); font-size:15px}
+.svc-item svg{flex:none; margin-top:3px; color:var(--brand)}
+.svc-item .note{color:var(--text-muted); font-size:12.5px; font-style:italic}
+
+.chips{display:flex; flex-wrap:wrap; gap:9px}
+.chip{
+  font-size:13.5px; padding:8px 14px; border-radius:999px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text-secondary);
+}
+.chip.on{background:var(--brand-soft); border-color:color-mix(in srgb,var(--brand) 32%,transparent); color:var(--brand); font-weight:600}
+
+/* portfolio */
+.pf{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+.pf-card{
+  background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-lg);
+  overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--shadow-1);
+  transition:transform .16s ease, box-shadow .16s ease;
+}
+.pf-card:hover{transform:translateY(-3px); box-shadow:var(--shadow-2)}
+.pf-thumb{height:132px; position:relative; overflow:hidden; border-bottom:1px solid var(--border)}
+.pf-body{padding:20px; display:flex; flex-direction:column; gap:10px; flex:1}
+.pf-body h3{font-size:17px}
+.pf-body p{font-size:14px; color:var(--text-secondary)}
+.tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:12px}
+.tag{font-size:11.5px; font-family:var(--mono); padding:4px 8px; border-radius:5px; background:var(--surface-sunk); color:var(--text-secondary); border:1px solid var(--border)}
+
+/* markets */
+.markets{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.market{
+  display:flex; align-items:center; gap:12px; padding:16px; border-radius:var(--r-md);
+  background:var(--surface-1); border:1px solid var(--border); font-size:14.5px; font-weight:500;
+}
+.market .m-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--brand);flex:none}
+
+/* team */
+.team{display:grid; grid-template-columns:repeat(4,1fr); gap:20px}
+.member{background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-lg); padding:24px; text-align:center}
+.avatar{
+  width:74px; height:74px; border-radius:50%; margin:0 auto 14px; display:grid; place-items:center;
+  font-size:23px; font-weight:800; color:var(--brand-ink); background:var(--brand); letter-spacing:-.02em;
+  border:3px solid var(--accent);
+}
+.member h3{font-size:16px}
+.member .role{font-size:12.5px; color:var(--brand); font-weight:700; margin-top:3px}
+.member .bio{font-size:13.5px; color:var(--text-secondary); margin-top:10px}
+
+/* process */
+.process{display:grid; grid-template-columns:repeat(6,1fr); gap:0; position:relative; margin-top:12px}
+.step{padding:0 12px; position:relative}
+.step .n{
+  width:34px; height:34px; border-radius:50%; background:var(--surface-1); border:2px solid var(--brand);
+  color:var(--brand); display:grid; place-items:center; font-weight:800; font-size:14px; margin-bottom:14px; position:relative; z-index:2;
+}
+.step::after{content:""; position:absolute; left:34px; top:16px; right:0; height:2px; background:var(--grid)}
+.step:last-child::after{display:none}
+.step h4{font-size:14.5px}
+.step p{font-size:13px; color:var(--text-secondary); margin-top:5px}
+
+/* contact */
+.contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:start}
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+.field label{font-size:13px; font-weight:600}
+.input, select.input, textarea.input{
+  width:100%; padding:11px 13px; border-radius:var(--r-sm); border:1px solid var(--border-strong);
+  background:var(--surface-2); color:var(--text-primary); font:inherit; font-size:14px;
+}
+.input:focus{outline:2px solid color-mix(in srgb,var(--brand) 55%,transparent); outline-offset:1px; border-color:var(--brand)}
+textarea.input{min-height:104px; resize:vertical}
+.contact-line{display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--border)}
+.contact-line .ci{width:36px;height:36px;border-radius:9px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none}
+.contact-line a{color:var(--brand); text-decoration:none; font-weight:600}
+.contact-line a:hover{text-decoration:underline}
+
+footer{background:var(--surface-1); border-top:1px solid var(--border); padding:44px 0 30px; font-size:14px}
+.foot-grid{display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:32px}
+.foot-grid h4{font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted); margin-bottom:12px}
+.foot-grid a{display:block; color:var(--text-secondary); text-decoration:none; padding:4px 0}
+.foot-grid a:hover{color:var(--brand)}
+.foot-bot{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:32px; padding-top:20px; border-top:1px solid var(--border); color:var(--text-muted); font-size:12.5px}
+
+/* ===================== DEMO APP ===================== */
+#app{position:fixed; inset:0; z-index:200; background:var(--plane); display:none; flex-direction:column}
+#app.open{display:flex}
+body.locked{overflow:hidden}
+
+.app-top{
+  height:58px; display:flex; align-items:center; gap:14px; padding:0 18px;
+  background:var(--surface-1); border-bottom:1px solid var(--border); flex:none;
+}
+.badge-demo{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; background:var(--accent); color:var(--accent-ink); padding:4px 8px; border-radius:5px}
+.app-search{position:relative; margin-left:14px; width:280px; max-width:34vw}
+.app-search input{width:100%; padding:8px 12px 8px 34px; font-size:13.5px; border-radius:999px; border:1px solid var(--border); background:var(--surface-sunk); color:var(--text-primary)}
+.app-search svg{position:absolute; left:11px; top:9px; color:var(--text-muted)}
+.app-top .spacer{margin-left:auto}
+.who{display:flex; align-items:center; gap:9px; font-size:13px}
+.who .av{width:30px;height:30px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:700;font-size:12px}
+
+.app-body{flex:1; display:flex; min-height:0}
+.side{
+  width:224px; flex:none; background:var(--surface-1); border-right:1px solid var(--border);
+  padding:14px 10px; overflow-y:auto; display:flex; flex-direction:column; gap:2px;
+}
+.side .grp{font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); padding:14px 10px 6px}
+.nv{
+  display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:var(--r-sm); cursor:pointer;
+  font-size:14px; color:var(--text-secondary); border:none; background:none; width:100%; text-align:left;
+}
+.nv:hover{background:var(--surface-sunk); color:var(--text-primary)}
+.nv.on{background:var(--brand-soft); color:var(--brand); font-weight:650}
+.nv .cnt{margin-left:auto; font-size:11px; font-weight:700; background:var(--surface-sunk); color:var(--text-secondary); padding:1px 7px; border-radius:999px}
+.nv.on .cnt{background:color-mix(in srgb,var(--brand) 20%,transparent); color:var(--brand)}
+
+.main{flex:1; overflow-y:auto; padding:26px 30px 60px; min-width:0}
+.page-head{display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:22px}
+.page-head h2{font-size:24px}
+.page-head p{font-size:14px; color:var(--text-secondary); margin-top:5px}
+.page-head .ph-actions{margin-left:auto; display:flex; gap:9px}
+
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px}
+.kpi{background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-md); padding:17px}
+.kpi .kl{font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; gap:7px}
+.kpi .kv{font-size:29px; font-weight:800; letter-spacing:-.03em; margin-top:7px}
+.kpi .kd{font-size:12px; margin-top:3px; display:flex; align-items:center; gap:5px}
+.up{color:var(--success-text); font-weight:700}
+.down{color:var(--critical); font-weight:700}
+
+.grid2{display:grid; grid-template-columns:1.4fr 1fr; gap:16px}
+.grid2b{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.panel{background:var(--surface-1); border:1px solid var(--border); border-radius:var(--r-md); padding:18px; margin-bottom:16px}
+.panel-head{display:flex; align-items:center; gap:12px; margin-bottom:4px}
+.panel-head h3{font-size:15.5px}
+.panel-head .sub{font-size:12.5px; color:var(--text-secondary)}
+.panel-head .right{margin-left:auto; display:flex; gap:6px; align-items:center}
+.seg{display:flex; background:var(--surface-sunk); border-radius:var(--r-sm); padding:2px; border:1px solid var(--border)}
+.seg button{border:none; background:none; font-size:12px; padding:5px 10px; border-radius:4px; cursor:pointer; color:var(--text-secondary); font-weight:600}
+.seg button.on{background:var(--surface-2); color:var(--text-primary); box-shadow:var(--shadow-1)}
+
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--text-secondary); margin:10px 0 2px}
+.legend i{width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:-1px}
+
+.chart-wrap{position:relative}
+svg.chart{display:block; width:100%; overflow:visible}
+svg.chart text{font-family:var(--font)}
+.tip{
+  position:absolute; pointer-events:none; z-index:5; background:var(--surface-2); border:1px solid var(--border-strong);
+  border-radius:var(--r-sm); box-shadow:var(--shadow-2); padding:9px 11px; font-size:12.5px; min-width:130px;
+  opacity:0; transition:opacity .1s ease; transform:translate(-50%,-108%);
+}
+.tip.on{opacity:1}
+.tip .tt{font-weight:700; margin-bottom:5px; font-size:12.5px}
+.tip .tr{display:flex; align-items:center; gap:7px; justify-content:space-between; color:var(--text-secondary)}
+.tip .tr b{color:var(--text-primary); font-variant-numeric:tabular-nums}
+.tip .sw{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}
+
+table.tbl{width:100%; border-collapse:collapse; font-size:13.5px}
+table.tbl th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);
+  padding:9px 12px; border-bottom:1px solid var(--border); font-weight:700; white-space:nowrap; cursor:pointer; user-select:none;
+}
+table.tbl th:hover{color:var(--text-primary)}
+table.tbl td{padding:11px 12px; border-bottom:1px solid var(--border); vertical-align:middle}
+table.tbl td.ref{font-family:var(--mono); font-size:12.5px; color:var(--text-secondary); white-space:nowrap}
+table.tbl tbody tr{cursor:pointer}
+table.tbl tbody tr:hover{background:var(--surface-sunk)}
+.st{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:650; padding:3px 9px; border-radius:999px; border:1px solid var(--border); white-space:nowrap}
+.st svg{flex:none}
+.st-good{color:var(--success-text); background:color-mix(in srgb,var(--good) 12%,transparent)}
+.st-warn{color:#8a6100; background:color-mix(in srgb,var(--warning) 20%,transparent)}
+html[data-theme="dark"] .st-warn{color:var(--warning)}
+.st-serious{color:#a3502a; background:color-mix(in srgb,var(--serious) 18%,transparent)}
+html[data-theme="dark"] .st-serious{color:var(--serious)}
+.st-crit{color:var(--critical); background:color-mix(in srgb,var(--critical) 13%,transparent)}
+.st-neutral{color:var(--text-secondary); background:var(--surface-sunk)}
+
+.bar-mini{height:6px; border-radius:999px; background:var(--surface-sunk); overflow:hidden; min-width:70px}
+.bar-mini i{display:block; height:100%; border-radius:999px; background:var(--brand)}
+
+.toolbar{display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:14px}
+.toolbar .input{width:auto; padding:8px 11px; font-size:13px}
+.fchip{
+  font-size:12.5px; padding:6px 12px; border-radius:999px; border:1px solid var(--border);
+  background:var(--surface-1); color:var(--text-secondary); cursor:pointer; font-weight:600;
+}
+.fchip.on{background:var(--brand); border-color:var(--brand); color:var(--brand-ink)}
+
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:440px; max-width:92vw; background:var(--surface-1);
+  border-left:1px solid var(--border); box-shadow:var(--shadow-3); z-index:220; transform:translateX(102%);
+  transition:transform .24s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column;
+}
+.drawer.on{transform:none}
+.drawer-head{padding:18px 20px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:flex-start}
+.drawer-body{padding:20px; overflow-y:auto; flex:1}
+.kv{display:grid; grid-template-columns:130px 1fr; gap:8px 14px; font-size:13.5px; margin-bottom:18px}
+.kv dt{color:var(--text-secondary)}
+.kv dd{margin:0; font-weight:600}
+.mstone{display:flex; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); font-size:13.5px; align-items:center}
+.mstone .mi{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:11px;font-weight:800}
+.mi-done{background:color-mix(in srgb,var(--good) 18%,transparent); color:var(--success-text)}
+.mi-now{background:color-mix(in srgb,var(--warning) 26%,transparent); color:#8a6100}
+html[data-theme="dark"] .mi-now{color:var(--warning)}
+.mi-next{background:var(--surface-sunk); color:var(--text-muted)}
+
+.toast-host{position:fixed; right:22px; bottom:22px; z-index:400; display:flex; flex-direction:column; gap:10px}
+.toast{
+  background:var(--surface-2); border:1px solid var(--border-strong); border-left:3px solid var(--good);
+  border-radius:var(--r-sm); box-shadow:var(--shadow-2); padding:12px 16px; font-size:13.5px; min-width:250px;
+  animation:slidein .22s ease;
+}
+@keyframes slidein{from{transform:translateX(20px); opacity:0}}
+
+/* login */
+.login{position:absolute; inset:0; z-index:10; display:grid; place-items:center; background:var(--plane)}
+.login-card{
+  width:400px; max-width:92vw; background:var(--surface-1); border:1px solid var(--border);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-2); padding:32px; position:relative; overflow:hidden;
+}
+.login-card::before{content:""; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--brand),var(--accent))}
+.login h3{font-size:20px; margin-bottom:6px}
+.login .sub{font-size:13.5px; color:var(--text-secondary); margin-bottom:22px}
+.hint{font-size:12px; color:var(--text-muted); text-align:center; margin-top:16px}
+
+/* catalogue / quote */
+.cat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.cat{border:1px solid var(--border); border-radius:var(--r-md); padding:16px; background:var(--surface-1); cursor:pointer; transition:border-color .14s, background .14s}
+.cat:hover{border-color:var(--border-strong)}
+.cat.on{border-color:var(--brand); background:var(--brand-soft)}
+.cat h4{font-size:14.5px; display:flex; gap:8px; align-items:center}
+.cat p{font-size:12.5px; color:var(--text-secondary); margin-top:6px}
+.cat .price{font-size:12.5px; font-weight:700; margin-top:10px; color:var(--brand)}
+.cat .ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border-strong);display:grid;place-items:center;margin-left:auto;flex:none}
+.cat.on .ck{background:var(--brand); border-color:var(--brand); color:var(--brand-ink)}
+.quote-out{background:var(--surface-sunk); border-radius:var(--r-md); padding:18px; font-size:13.5px}
+.qline{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed var(--border)}
+.qtotal{display:flex; justify-content:space-between; padding-top:12px; font-size:19px; font-weight:800}
+
+.course{display:flex; gap:14px; align-items:center; padding:14px 0; border-bottom:1px solid var(--border)}
+.course .cico{width:42px;height:42px;border-radius:10px;background:var(--accent-soft);color:var(--brand);display:grid;place-items:center;flex:none}
+.course h4{font-size:14.5px}
+.course p{font-size:12.5px; color:var(--text-secondary); margin-top:2px}
+.course .cact{margin-left:auto; display:flex; align-items:center; gap:12px}
+
+.empty{text-align:center; padding:44px 20px; color:var(--text-muted); font-size:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media (max-width:1000px){
+  .hero-in,.contact-grid{grid-template-columns:1fr}
+  .cards,.grid2,.grid2b{grid-template-columns:1fr}
+  .pf,.team,.cat-grid{grid-template-columns:repeat(2,1fr)}
+  .markets,.stats{grid-template-columns:repeat(2,1fr)}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .process{grid-template-columns:repeat(2,1fr); gap:22px}
+  .step::after{display:none}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .nav-links.show{display:flex; position:absolute; top:64px; left:0; right:0; flex-direction:column; background:var(--surface-1); border-bottom:1px solid var(--border); padding:10px}
+  .menu-toggle{display:grid}
+  .side{position:absolute; z-index:9; height:calc(100% - 58px); transform:translateX(-102%); transition:transform .2s}
+  .side.show{transform:none; box-shadow:var(--shadow-3)}
+  .app-search{display:none}
+}
+@media (max-width:640px){
+  .nav .btn-primary .lbl{display:none}
+  .nav .btn-primary{padding:10px 12px}
+  .nav-in{gap:10px}
+  .hero{padding:52px 0 44px}
+  .pf,.team,.cat-grid,.markets,.stats,.svc-list,.kpis{grid-template-columns:1fr}
+  section{padding:52px 0}
+  .main{padding:18px 16px 50px}
+}
+@media print{ header.nav,#app{display:none !important} }
+</style>
+</head>
+<body>
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top" style="font-size:19px">
+      <span class="br">&lt;</span><span class="nm hl">jojoaddison</span><span class="br">/&gt;</span>
+    </a>
+    <nav class="nav-links" id="navlinks">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#work">Portfolio</a>
+      <a href="#markets">Markets</a>
+      <a href="#team">Team</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg id="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M5 5l1.5 1.5M17.5 17.5L19 19M2 12h2M20 12h2M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+        <svg id="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+      <button class="btn btn-primary" onclick="openApp()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 3l14 9-14 9V3z"/></svg>
+        <span class="lbl">Launch demo</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<div id="top" class="hero">
+  <div class="wrap hero-in">
+    <div>
+      <div class="eyebrow">Information Systems Consulting &middot; Est. 2019</div>
+      <h1 style="margin-top:14px">We turn <span class="mark">ideas into reality</span> — and complex systems into working software.</h1>
+      <p class="lede">Jojo Addison Consultancy solves peculiar, bespoke software problems with state-of-the-art cloud technology, so our clients gain efficiency and open new growth channels. Accra &rarr; Vienna &rarr; wherever your business runs.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" onclick="openApp()" style="padding:13px 22px">Explore the live demo portal</button>
+        <a class="btn btn-ghost" href="#services" style="padding:13px 22px">See what we do</a>
+      </div>
+      <div class="hero-meta">
+        <span><i class="dot"></i> Reg. BN308012019 &middot; Republic of Ghana</span>
+        <span>20+ years combined engineering experience</span>
+      </div>
+    </div>
+    <div class="term" aria-hidden="true">
+      <div class="term-bar">
+        <i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+        <span class="term-title">jojoaddison — engagement.sh</span>
+      </div>
+      <div class="term-body" id="term"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STATS ============ -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="v">2019</div><div class="l">Registered in Ghana &middot; BN308012019</div></div>
+      <div class="stat"><div class="v">20<span style="color:var(--brand)">+</span></div><div class="l">Years of combined engineering practice</div></div>
+      <div class="stat"><div class="v">4</div><div class="l">Service pillars, one delivery method</div></div>
+      <div class="stat"><div class="v">2</div><div class="l">Continents — Accra &amp; Vienna</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="about" class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Who we are</div>
+      <h2>Technology is a great enabler — but only with preparation, agility and focus.</h2>
+      <p>As economies around the world digitise their processes, it is imperative that businesses of all sizes adequately prepare for the fourth industrial revolution. We are a privately held enterprise, launched in 2019 and registered under the Ghana company registration laws, with a team of experienced engineers and sharp, energetic youth.</p>
+    </div>
+    <div class="cards" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 .9-4.5 4.3 1.1 6.2L12 16.5 6.4 19.4l1.1-6.2L3 8.9 9 8z"/></svg></div>
+        <h3>Mission</h3>
+        <p>We build the capacity of businesses and individuals to remain competitive and grow — regardless of size, sector or scale — offering solutions that boost confidence, efficiency and competitiveness using modern web-based internet technology.</p>
+      </div>
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1a5.5 5.5 0 10-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 000-7.9z"/></svg></div>
+        <h3>Philosophy</h3>
+        <p>We go beyond client expectations and tailor the relationship beyond the immediate business. We look into the consummate needs of the customer to offer custom-made bespoke solutions — because one size does not fit all.</p>
+      </div>
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.1V12a10 10 0 11-5.9-9.1"/><path d="M22 4L12 14l-3-3"/></svg></div>
+        <h3>Commitment</h3>
+        <p>Excellent customer support at the client's convenience. We go the extra mile, because our growth is tied to the individual growth of our clients — every deliverable ships with documentation, presentation and training.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:52px">
+      <div class="eyebrow" style="margin-bottom:16px">How we deliver — every engagement</div>
+      <div class="process">
+        <div class="step"><div class="n">1</div><h4>Business case</h4><p>Thorough analysis of the problem and its commercial shape.</p></div>
+        <div class="step"><div class="n">2</div><h4>Mockup &amp; review</h4><p>Planning sessions and prototypes you can react to.</p></div>
+        <div class="step"><div class="n">3</div><h4>Implementation</h4><p>Iterative build on trusted tools and processes.</p></div>
+        <div class="step"><div class="n">4</div><h4>Testing</h4><p>Feedback and evaluation loops until it holds up.</p></div>
+        <div class="step"><div class="n">5</div><h4>Documentation</h4><p>Everything written down and handed over.</p></div>
+        <div class="step"><div class="n">6</div><h4>Training &amp; support</h4><p>Your team owns it — we stay reachable.</p></div>
+      </div>
+    </div>
+
+    <div style="margin-top:52px">
+      <div class="eyebrow" style="margin-bottom:14px">Our software &amp; IT-engineering competence covers</div>
+      <div class="chips">
+        <span class="chip on">Software Engineering</span>
+        <span class="chip on">System Engineering</span>
+        <span class="chip on">Cyber Security Engineering</span>
+        <span class="chip">Electrical &amp; Electronics Engineering</span>
+        <span class="chip">Social Engineering</span>
+        <span class="chip">Visual Media Engineering</span>
+        <span class="chip">Project Engineering</span>
+        <span class="chip">Financial Engineering</span>
+        <span class="chip">Business Engineering</span>
+      </div>
+      <div class="chips" style="margin-top:26px">
+        <span class="chip">Advanced internet technology expertise</span>
+        <span class="chip">Cost reduction in business process</span>
+        <span class="chip">Time efficiency through customer self-service</span>
+        <span class="chip">Flexibility and scalability</span>
+        <span class="chip">High online service availability</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section id="services">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">What we do</div>
+      <h2>Four pillars, delivered as one practice.</h2>
+      <p>Consultancy, solutions, services and training — engaged separately or as a single programme of work.</p>
+    </div>
+
+    <div class="cards" style="margin-bottom:52px">
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+        <h3>Bespoke solutions</h3>
+        <p>Many businesses faced with friction in the market may not find easy answers in an off-the-shelf approach. We come in to fix broken integrations with custom solutions that fit your business needs — and your budget.</p>
+      </div>
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.2-8.6"/><path d="M21 3v6h-6"/></svg></div>
+        <h3>Digital transformation</h3>
+        <p>Businesses that are hi-tech ready stand a better chance at overcoming challenges with digital agility. We provide simple, cost-effective tools that guide your digital journey, enhance productivity and secure your business.</p>
+      </div>
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.9"/></svg></div>
+        <h3>Capacity building</h3>
+        <p>Customers are increasingly sophisticated and demanding. We provide in-house and virtual training to boost your personnel capacity, and act as an extension of your team so you flex with demand. You're as good as your team.</p>
+      </div>
+      <div class="card"><div class="rule"></div>
+        <div class="ico"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="8" rx="2"/><rect x="13" y="13" width="9" height="8" rx="2"/><path d="M11 7h5a2 2 0 012 2v4"/></svg></div>
+        <h3>Enterprise integration</h3>
+        <p>As consulting contractors we provide solution integrations using trusted tools, processes and technologies drawn from vast experience — removing friction and enabling your product, service or team to function efficiently and within budget.</p>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="consultancy">Consultancy</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="solutions">Solutions</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="training">Training</button>
+    </div>
+
+    <div class="tabpanel" id="tab-consultancy">
+      <div class="svc-list">
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Business analysis and conceptions</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Data collection and collation concepts</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Business exposure and organic growth</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Customer relations management</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Data processing and visualization</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Business process digitization</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg><span>Information systems audit preparation <span class="note">(ISO compliance)</span></span></div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Qualitative analysis</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Geographic information systems</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Digital asset management systems</div>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-solutions" hidden>
+      <div class="svc-list">
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Internet web-based software engineering</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Digital transformation and paperless transition</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Project consulting and management</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Operations monitoring and ongoing support</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Infrastructure and asset management</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Information security compliance consulting</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Cyber security protection</div>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-training" hidden>
+      <div class="svc-list">
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Web and mobile application engineering</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software design &amp; architecture</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software development</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software engineering</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software maintenance &amp; analysis</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software testing</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software support &amp; monitoring</div>
+        <div class="svc-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Software training (in-house &amp; virtual)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PORTFOLIO ============ -->
+<section id="work" class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Portfolio</div>
+      <h2>Systems we have researched, built and deployed.</h2>
+      <p>From microservice insurance platforms to cyber threat intelligence correlation engines — plus a long tail of deployed web properties across media, agriculture, finance and the arts.</p>
+    </div>
+    <div class="pf" id="pfGrid"></div>
+  </div>
+</section>
+
+<!-- ============ MARKETS ============ -->
+<section id="markets">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Target market</div>
+      <h2>Sectors we serve.</h2>
+    </div>
+    <div class="markets" id="marketGrid"></div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section id="team" class="band">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The team</div>
+      <h2>Experienced engineers, sharp energetic youth.</h2>
+    </div>
+    <div class="team" id="teamGrid"></div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact">
+  <div class="wrap contact-grid">
+    <div>
+      <div class="eyebrow">Get in touch</div>
+      <h2 style="font-size:clamp(25px,3.2vw,34px); margin-top:10px">Tell us about the problem.</h2>
+      <p class="muted" style="margin-top:12px">We'll come back with a business case, not a brochure. Or skip ahead and build an estimate yourself inside the demo portal.</p>
+      <form id="contactForm" style="margin-top:24px">
+        <div class="field"><label for="cf-name">Name</label><input class="input" id="cf-name" required placeholder="Your name"></div>
+        <div class="field"><label for="cf-email">Email</label><input class="input" id="cf-email" type="email" required placeholder="you@company.com"></div>
+        <div class="field"><label for="cf-need">What do you need?</label>
+          <select class="input" id="cf-need">
+            <option>Bespoke solution</option><option>Digital transformation</option>
+            <option>Capacity building / training</option><option>Enterprise integration</option>
+            <option>Information systems audit (ISO)</option><option>Something else</option>
+          </select>
+        </div>
+        <div class="field"><label for="cf-msg">Message</label><textarea class="input" id="cf-msg" placeholder="A sentence or two on the friction you're facing."></textarea></div>
+        <button class="btn btn-primary" type="submit" style="padding:12px 22px">Send enquiry</button>
+        <span id="cfNote" class="muted" style="font-size:13px; margin-left:12px"></span>
+      </form>
+    </div>
+    <div>
+      <div class="panel" style="padding:24px">
+        <div class="contact-line">
+          <div class="ci"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3 19.5 19.5 0 01-6-6A19.8 19.8 0 011.2 4.2 2 2 0 013.2 2h3a2 2 0 012 1.7c.1 1 .3 1.9.7 2.8a2 2 0 01-.5 2.1L7.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.4 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg></div>
+          <div><div style="font-weight:700">Telephone</div>
+            <div class="muted tnum" style="font-size:14px">+233 302 717 577 &middot; office line<br>+233 244 188 977 &middot; +233 242 286 304<br>+43 676 922 1796 &middot; Vienna</div>
+          </div>
+        </div>
+        <div class="contact-line">
+          <div class="ci"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg></div>
+          <div><div style="font-weight:700">Email</div>
+            <a href="mailto:office@jojoaddison.net">office@jojoaddison.net</a><br>
+            <a href="mailto:info@jojoaddison.net">info@jojoaddison.net</a>
+          </div>
+        </div>
+        <div class="contact-line">
+          <div class="ci"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><div style="font-weight:700">Office</div>
+            <div class="muted" style="font-size:14px">Ankobra River Street #5<br>Teshie Nungua Estates, Accra, Ghana</div>
+          </div>
+        </div>
+        <div class="contact-line" style="border-bottom:none">
+          <div class="ci"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg></div>
+          <div><div style="font-weight:700">Web</div>
+            <a href="https://www.jojoaddison.net" target="_blank" rel="noopener">www.jojoaddison.net</a>
+            <div class="muted" style="font-size:13px; margin-top:4px">Reg. No. BN308012019 &middot; TIN P0021484082</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="background:var(--brand); color:var(--brand-ink); border-color:transparent; padding:24px">
+        <div style="font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; opacity:.85">Prefer to look around first?</div>
+        <h3 style="font-size:19px; margin-top:8px">Open the client portal demo</h3>
+        <p style="font-size:14px; opacity:.9; margin-top:8px">A working sample of the delivery dashboards, support desk, training tracker and quote builder we ship with engagements.</p>
+        <button class="btn btn-accent" style="margin-top:16px" onclick="openApp()">Launch demo &rarr;</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="logo" href="#top" style="font-size:18px"><span class="br">&lt;</span><span class="nm hl">jojoaddison</span><span class="br">/&gt;</span></a>
+        <p class="muted" style="margin-top:12px; max-width:40ch; font-size:13.5px">Information Systems Consulting. <em>...ideas to reality.</em> Creative and adaptive solutions for tomorrow's problems.</p>
+      </div>
+      <div><h4>Services</h4>
+        <a href="#services">Bespoke solutions</a><a href="#services">Digital transformation</a><a href="#services">Capacity building</a><a href="#services">Enterprise integration</a>
+      </div>
+      <div><h4>Company</h4>
+        <a href="#about">About</a><a href="#work">Portfolio</a><a href="#team">Team</a><a href="#contact">Contact</a>
+      </div>
+      <div><h4>Demo</h4>
+        <a href="#" onclick="openApp('overview');return false">Delivery dashboard</a>
+        <a href="#" onclick="openApp('projects');return false">Projects</a>
+        <a href="#" onclick="openApp('catalogue');return false">Quote builder</a>
+        <a href="#" onclick="openApp('support');return false">Support desk</a>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>&copy; 2019&ndash;<span id="yr"></span> Jojo Addison Consultancy &middot; All rights reserved</span>
+      <span>Accra, Ghana &middot; Vienna, Austria &middot; Reg. BN308012019</span>
+    </div>
+  </div>
+</footer>
+<!-- ============ DEMO APPLICATION ============ -->
+<div id="app" role="dialog" aria-label="Jojo Addison client portal demo">
+  <div class="app-top">
+    <a class="logo" href="#" onclick="return false" style="font-size:16px"><span class="br">&lt;</span><span class="nm hl">jojoaddison</span><span class="br">/&gt;</span></a>
+    <span class="badge-demo">Demo portal</span>
+    <button class="icon-btn menu-toggle" id="sideToggle" aria-label="Menu" style="margin-left:6px">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="app-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="gsearch" placeholder="Search projects, clients, tickets…" aria-label="Search">
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="themeBtn2" aria-label="Toggle dark mode">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M5 5l1.5 1.5M17.5 17.5L19 19M2 12h2M20 12h2M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+    </button>
+    <div class="who"><div class="av" id="userAv">AK</div><div><div style="font-weight:650" id="userName">Ama Kusi</div><div style="font-size:11px;color:var(--text-muted)" id="userRole">Client — Bedrock Insurance</div></div></div>
+    <button class="btn btn-ghost btn-sm" onclick="closeApp()">Exit demo</button>
+  </div>
+
+  <div class="app-body">
+    <aside class="side" id="side"></aside>
+    <main class="main" id="mainView"></main>
+  </div>
+
+  <!-- login overlay -->
+  <div class="login" id="login">
+    <div class="login-card">
+      <a class="logo" href="#" onclick="return false" style="font-size:17px"><span class="br">&lt;</span><span class="nm hl">jojoaddison</span><span class="br">/&gt;</span></a>
+      <h3 style="margin-top:18px">Sign in to your portal</h3>
+      <p class="sub">Track delivery, raise tickets, build estimates and manage training in one place.</p>
+      <form id="loginForm">
+        <div class="field"><label for="lg-email">Email</label><input class="input" id="lg-email" value="ama.kusi@bedrockinsurancegh.com"></div>
+        <div class="field"><label for="lg-pass">Password</label><input class="input" id="lg-pass" type="password" value="demo1234"></div>
+        <div class="field"><label for="lg-role">Sign in as</label>
+          <select class="input" id="lg-role">
+            <option value="client">Client — Bedrock Insurance</option>
+            <option value="consultant">Consultant — Jojo Addison team</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center; padding:12px">Sign in</button>
+      </form>
+      <div class="hint">Demo environment — any credentials work. No data leaves this page.</div>
+    </div>
+  </div>
+</div>
+
+<div class="drawer" id="drawer" aria-hidden="true"></div>
+<div class="toast-host" id="toasts"></div>
+
+<script>
+(function(){
+"use strict";
+/* ==================== THEME ==================== */
+var root = document.documentElement;
+function setTheme(t){
+  root.setAttribute('data-theme', t);
+  document.getElementById('ico-sun').style.display = t === 'dark' ? 'none' : 'block';
+  document.getElementById('ico-moon').style.display = t === 'dark' ? 'block' : 'none';
+}
+try{ if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark'); }catch(e){}
+function toggleTheme(){ setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+document.getElementById('themeBtn2').addEventListener('click', toggleTheme);
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ==================== MARKETING PAGE ==================== */
+document.getElementById('menuToggle').addEventListener('click', function(){
+  document.getElementById('navlinks').classList.toggle('show');
+});
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-selected','false'); });
+    t.setAttribute('aria-selected','true');
+    document.querySelectorAll('.tabpanel').forEach(function(p){ p.hidden = true; });
+    document.getElementById('tab-' + t.dataset.tab).hidden = false;
+  });
+});
+
+/* terminal typing */
+var lines = [
+  '<span class="c">// engagement lifecycle</span>',
+  '<span class="k">$</span> jojo <span class="g">analyse</span> --client "bedrock" --scope business-case',
+  '  <span class="s">&#10003;</span> friction mapped &middot; 6 broken integrations found',
+  '<span class="k">$</span> jojo <span class="g">mockup</span> --review-cycles 3',
+  '  <span class="s">&#10003;</span> signed off by stakeholders',
+  '<span class="k">$</span> jojo <span class="g">build</span> --stack spring-boot,angular,kafka,mongo',
+  '  <span class="s">&#10003;</span> 9 microservices &middot; docker-compose up',
+  '<span class="k">$</span> jojo <span class="g">test</span> &amp;&amp; jojo <span class="g">document</span> &amp;&amp; jojo <span class="g">train</span>',
+  '  <span class="s">&#10003;</span> handover complete &middot; support window open',
+  '<span class="k">$</span> <span class="g">CODE IT!</span> <span class="cursor"></span>'
+];
+var term = document.getElementById('term'), li = 0, ci = 0, buf = '';
+function type(){
+  if(li >= lines.length) return;
+  var raw = lines[li];
+  if(ci === 0){ buf += '<div>'; }
+  if(raw.indexOf('<') === 0 || ci > 0){ /* render whole line at once for tagged content */ }
+  buf += raw; ci = 0; li++;
+  buf += '</div>';
+  term.innerHTML = buf;
+  setTimeout(type, li === 1 ? 320 : 520);
+}
+setTimeout(type, 380);
+
+/* portfolio + markets + team data */
+var PORTFOLIO = [
+  { t:'Bedrock Insurance Platform', k:'Insurance application', s:'Quote, policy and claims management with a customer self-service front end and full CMS — built on a microservice architecture.',
+    tags:['Spring Boot 2+','Angular 10','Java 11','MongoDB','Kafka','Elasticsearch','Docker Compose','Prometheus','Grafana'], grad:'linear-gradient(135deg,#0d6b2f,#1baf7a)', ic:'shield' },
+  { t:'Supermarket Inventory System', k:'Inventory &amp; retail administration', s:'Admin dashboard covering leads, customers, orders, invoices, catalogue, suppliers, brands, manufacturers, reviews and media.',
+    tags:['Spring Boot 2+','Angular 11','MongoDB','Kafka','Elasticsearch','Docker Compose'], grad:'linear-gradient(135deg,#1c5cab,#3987e5)', ic:'box' },
+  { t:'Cyber Threat Intelligence', k:'Research &amp; development', s:'Aggregates disparate sources into a correlation engine, enriches with parsed metadata, analyses against prescribed rules and visualises the result.',
+    tags:['Elasticsearch','Kafka','Logstash','D3','Kibana','PhysicsJS','AngularX','Bootstrap HTML5'], grad:'linear-gradient(135deg,#0f3f47,#177f8f)', ic:'radar' },
+  { t:'IBEX — Internet Based Exercises', k:'Training platform', s:'A platform for conducting practical training of professionals in situational awareness, distributed across remote locations.',
+    tags:['AngularX','Spring Framework','WebSockets'], grad:'linear-gradient(135deg,#146470,#2fbf9f)', ic:'target' },
+  { t:'Situation Room Dashboard', k:'Security operations', s:'Demonstrates the situation room of a security defence operations centre — live correlation views and incident drill-down.',
+    tags:['D3','Kibana','Elasticsearch','HTML5'], grad:'linear-gradient(135deg,#123c5a,#2a78d6)', ic:'monitor' },
+  { t:'Data Intelligence Platform', k:'Big data', s:'Crawlers, parsers, correlation engines and storage nodes feeding on-demand search, automated visualisation, profiling, analysis and near real-time alerts.',
+    tags:['ETLAP','Crawlers','Correlation engine','HMI desktop/tablet/mobile'], grad:'linear-gradient(135deg,#3f2f6b,#6d5bc0)', ic:'layers' }
+];
+var ICONS = {
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  box:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/>',
+  radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 12l6-4"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  monitor:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  layers:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>'
+};
+document.getElementById('pfGrid').innerHTML = PORTFOLIO.map(function(p){
+  return '<article class="pf-card">' +
+    '<div class="pf-thumb" style="background:' + p.grad + '">' +
+      '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="1.4" style="position:absolute;left:20px;top:42px">' + ICONS[p.ic] + '</svg>' +
+      '<svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1" style="position:absolute;right:-24px;top:-16px">' + ICONS[p.ic] + '</svg>' +
+    '</div>' +
+    '<div class="pf-body"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)">' + p.k + '</div>' +
+    '<h3>' + p.t + '</h3><p>' + p.s + '</p>' +
+    '<div class="tags">' + p.tags.map(function(x){ return '<span class="tag">' + x + '</span>'; }).join('') + '</div></div></article>';
+}).join('');
+
+var MARKETS = ['Banking, Finance &amp; Insurance','Real Estate','Oil &amp; Gas','Haulage &amp; Transportation','Health &amp; Hospitality','Defence &amp; National Security','Communication','Transportation','Health &amp; Education','Agriculture','Institutions, Commissions &amp; Authorities','Private residences &amp; businesses'];
+document.getElementById('marketGrid').innerHTML = MARKETS.map(function(m){
+  return '<div class="market"><div class="m-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg></div>' + m + '</div>';
+}).join('');
+
+var TEAM = [
+  { n:'Kojo Ampia-Addison', i:'KA', r:'Managing Consultant', d:'Software &amp; Systems Engineer (Bsc.)', b:'Over 10 years strategizing innovative digital experiences for clients from small startups to some of the world’s biggest brands. Vienna University of Technology; lives in Vienna. Avid scrabble and chess player.' },
+  { n:'Kwesi Arku-Addison', i:'KwA', r:'Partner Consultant', d:'Electrical &amp; Electronic Technician', b:'A meticulous master technician with over 25 years of experience. Studied electricals and electronics at Kumasi and Accra Polytechnic, with a specialised study trip to Wiesbaden on medical diagnostic equipment.' },
+  { n:'Kwabena Addai Frimpong', i:'KF', r:'Associate Consultant', d:'Software Engineer (Bsc.)', b:'Computer Engineering, University of Ghana, Legon. Served national duty with the Kofi Annan Center of Excellence in ICT, where his capacity to train and engage teams emerged. Devoted hockey player.' },
+  { n:'Nii Adjei Osae', i:'NO', r:'Associate Consultant', d:'Software Engineer (Bsc.)', b:'Computer Engineering with a focus on system analysis and software development. Loves to program in Java, and is not afraid to step into any work field to feel the experience and optimise the working system.' }
+];
+document.getElementById('teamGrid').innerHTML = TEAM.map(function(m){
+  return '<article class="member"><div class="avatar">' + m.i + '</div><h3>' + m.n + '</h3>' +
+    '<div class="role">' + m.r + '</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">' + m.d + '</div>' +
+    '<p class="bio">' + m.b + '</p></article>';
+}).join('');
+
+document.getElementById('contactForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  document.getElementById('cfNote').textContent = 'Thanks — this is a demo, so nothing was sent.';
+  toast('Enquiry captured (demo only)');
+});
+
+/* ==================== DEMO APP DATA ==================== */
+var STATUS = {
+  good:    { cls:'st-good',    label:'On track',  ico:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><path d="M20 6L9 17l-5-5"/></svg>' },
+  warn:    { cls:'st-warn',    label:'At risk',   ico:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 9v5M12 17.5v.2"/><path d="M10.3 3.6L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.6a2 2 0 00-3.4 0z"/></svg>' },
+  serious: { cls:'st-serious', label:'Delayed',   ico:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' },
+  crit:    { cls:'st-crit',    label:'Blocked',   ico:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>' },
+  done:    { cls:'st-neutral', label:'Delivered', ico:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M20 6L9 17l-5-5"/></svg>' }
+};
+function stBadge(k){ var s = STATUS[k]; return '<span class="st ' + s.cls + '">' + s.ico + s.label + '</span>'; }
+var PRIORITY = { good:'Low', warn:'Medium', serious:'High', crit:'Critical' };
+function prBadge(k){ var s = STATUS[k]; return '<span class="st ' + s.cls + '">' + s.ico + PRIORITY[k] + '</span>'; }
+
+var PROJECTS = [
+  { id:'JA-2401', name:'Insurance platform — claims module', client:'Bedrock Insurance Ghana', pillar:'Bespoke solutions', status:'good', progress:78, lead:'Kojo Ampia-Addison', due:'12 Sep 2026', budget:184000, spent:141000,
+    stack:['Spring Boot','Angular 10','Kafka','MongoDB'],
+    ms:[['Business case & friction map','done'],['Mockup & review cycles','done'],['Claims service implementation','done'],['Integration testing','now'],['Documentation & handover','next'],['Training window','next']] },
+  { id:'JA-2402', name:'Paperless transition — records digitisation', client:'Ghana Ports Authority', pillar:'Digital transformation', status:'warn', progress:46, lead:'Kwabena Addai Frimpong', due:'30 Oct 2026', budget:96000, spent:52000,
+    stack:['Elasticsearch','OCR pipeline','Angular'],
+    ms:[['Business case & friction map','done'],['Records inventory','done'],['Ingestion pipeline','now'],['Search & retrieval UI','next'],['Audit trail & ISO prep','next'],['Training window','next']] },
+  { id:'JA-2403', name:'ISO 27001 audit preparation', client:'Izzi Technologies', pillar:'Consultancy', status:'good', progress:61, lead:'Kojo Ampia-Addison', due:'05 Nov 2026', budget:48000, spent:27500,
+    stack:['Policy framework','Risk register','GAP analysis'],
+    ms:[['Scope & asset register','done'],['Gap analysis','done'],['Control implementation','now'],['Internal audit','next'],['Management review','next'],['Certification support','next']] },
+  { id:'JA-2404', name:'Inventory system rollout — 14 branches', client:'Melcom Retail Group', pillar:'Enterprise integration', status:'serious', progress:34, lead:'Nii Adjei Osae', due:'21 Dec 2026', budget:212000, spent:88000,
+    stack:['Spring Boot','Angular 11','Kafka','Docker'],
+    ms:[['Branch survey','done'],['Core catalogue migration','done'],['Supplier integration','now'],['Branch pilot (2 sites)','next'],['Full rollout','next'],['Support handover','next']] },
+  { id:'JA-2405', name:'Cyber threat intelligence pilot', client:'National Security Directorate', pillar:'Bespoke solutions', status:'crit', progress:22, lead:'Kojo Ampia-Addison', due:'28 Feb 2027', budget:340000, spent:71000,
+    stack:['Elasticsearch','Logstash','Kafka','D3','Kibana'],
+    ms:[['Source inventory','done'],['Correlation rules v1','now'],['Enrichment & parsers','next'],['Visualisation layer','next'],['Situation room UI','next'],['Operator training','next']] },
+  { id:'JA-2406', name:'Corporate web presence & CMS', client:'AFRI-EUROTEXT e.V.', pillar:'Digital transformation', status:'done', progress:100, lead:'Kwabena Addai Frimpong', due:'Delivered 14 Mar 2026', budget:26000, spent:24800,
+    stack:['CMS','HTML5','Responsive'],
+    ms:[['Business case','done'],['Design & mockups','done'],['Build','done'],['Testing','done'],['Documentation','done'],['Training delivered','done']] },
+  { id:'JA-2407', name:'Field data collection — afforestation', client:'AAA African Afforestation', pillar:'Capacity building', status:'good', progress:88, lead:'Nii Adjei Osae', due:'19 Aug 2026', budget:34000, spent:29900,
+    stack:['GIS','Mobile capture','MongoDB'],
+    ms:[['Field workflow analysis','done'],['GIS schema','done'],['Mobile capture app','done'],['Volunteer training','now'],['Reporting dashboards','next'],['Handover','next']] },
+  { id:'JA-2408', name:'Payments integration & reconciliation', client:'Gahana Mobile Money', pillar:'Enterprise integration', status:'warn', progress:55, lead:'Kwesi Arku-Addison', due:'07 Oct 2026', budget:128000, spent:79000,
+    stack:['Spring Boot','Kafka','Prometheus','Grafana'],
+    ms:[['Integration audit','done'],['Sandbox connectivity','done'],['Reconciliation engine','now'],['Failure replay','next'],['Load testing','next'],['Go-live support','next']] }
+];
+
+var CLIENTS = [
+  { n:'Bedrock Insurance Ghana', s:'Banking, Finance & Insurance', since:'2020', projects:3, health:'good', spend:412000 },
+  { n:'Ghana Ports Authority', s:'Haulage & Transportation', since:'2023', projects:1, health:'warn', spend:96000 },
+  { n:'Izzi Technologies', s:'Banking, Finance & Insurance', since:'2022', projects:2, health:'good', spend:118000 },
+  { n:'Melcom Retail Group', s:'Retail & Distribution', since:'2024', projects:1, health:'serious', spend:212000 },
+  { n:'National Security Directorate', s:'Defence & National Security', since:'2025', projects:1, health:'crit', spend:340000 },
+  { n:'AFRI-EUROTEXT e.V.', s:'Institutions & Authorities', since:'2021', projects:4, health:'good', spend:74000 },
+  { n:'AAA African Afforestation', s:'Agriculture', since:'2023', projects:2, health:'good', spend:61000 },
+  { n:'Gahana Mobile Money', s:'Communication', since:'2024', projects:1, health:'warn', spend:128000 }
+];
+
+var TICKETS = [
+  { id:'SD-1188', s:'Claims PDF export renders blank on Safari', p:'crit',    c:'Bedrock Insurance Ghana', o:'Kojo A.',   age:'2h',  sla:'4h', state:'open' },
+  { id:'SD-1187', s:'Kafka consumer lag on reconciliation topic', p:'serious', c:'Gahana Mobile Money',   o:'Kwesi A.',  age:'6h',  sla:'8h', state:'open' },
+  { id:'SD-1186', s:'Add supplier bulk-import template', p:'warn',           c:'Melcom Retail Group',    o:'Nii A.',    age:'1d',  sla:'3d', state:'open' },
+  { id:'SD-1185', s:'Request: extra admin seat for finance team', p:'good',  c:'Izzi Technologies',      o:'Kwabena F.',age:'1d',  sla:'5d', state:'open' },
+  { id:'SD-1184', s:'GIS layer not refreshing after sync', p:'warn',         c:'AAA African Afforestation', o:'Nii A.', age:'2d', sla:'3d', state:'open' },
+  { id:'SD-1183', s:'Grafana alert threshold tuning', p:'good',              c:'Bedrock Insurance Ghana',o:'Kwesi A.',  age:'3d',  sla:'5d', state:'closed' },
+  { id:'SD-1182', s:'Password policy update after ISO gap analysis', p:'warn', c:'Izzi Technologies',    o:'Kojo A.',   age:'4d',  sla:'3d', state:'closed' }
+];
+
+var CATALOGUE = [
+  { id:'c1', n:'Business analysis & conception', d:'Friction mapping, business case, target operating model.', rate:4800, unit:'per phase', pillar:'Consultancy' },
+  { id:'c2', n:'Business process digitization', d:'Paperless transition of a defined process family.', rate:9600, unit:'per process', pillar:'Consultancy' },
+  { id:'c3', n:'Information systems audit prep', d:'ISO compliance gap analysis and control implementation.', rate:12000, unit:'per scope', pillar:'Consultancy' },
+  { id:'c4', n:'Web-based software engineering', d:'Bespoke build on Spring Boot, Angular, Kafka, MongoDB.', rate:15500, unit:'per module', pillar:'Solutions' },
+  { id:'c5', n:'Enterprise integration', d:'Connect systems, remove friction, replay failures safely.', rate:11200, unit:'per integration', pillar:'Solutions' },
+  { id:'c6', n:'Cyber security protection', d:'Hardening, monitoring and threat intelligence tooling.', rate:13400, unit:'per environment', pillar:'Solutions' },
+  { id:'c7', n:'Operations monitoring & support', d:'Prometheus/Grafana observability plus a support window.', rate:3200, unit:'per month', pillar:'Services' },
+  { id:'c8', n:'Data processing & visualization', d:'ETL, correlation and dashboards over your data.', rate:8700, unit:'per dataset', pillar:'Services' },
+  { id:'c9', n:'In-house / virtual training', d:'Capacity building for your engineering and ops teams.', rate:2600, unit:'per cohort', pillar:'Training' }
+];
+
+var COURSES = [
+  { n:'Software architecture fundamentals', d:'12 modules · virtual · certificate', enrolled:14, progress:72 },
+  { n:'Angular for enterprise front ends', d:'9 modules · in-house · lab based', enrolled:11, progress:45 },
+  { n:'Spring Boot microservices', d:'14 modules · virtual · lab based', enrolled:9, progress:61 },
+  { n:'Software testing & quality gates', d:'8 modules · virtual', enrolled:17, progress:88 },
+  { n:'Cyber security awareness (all staff)', d:'5 modules · virtual · annual', enrolled:126, progress:93 },
+  { n:'Data visualization & reporting', d:'7 modules · in-house', enrolled:6, progress:20 }
+];
+
+/* delivery hours by month, two service pillars */
+var HOURS = [
+  { m:'Jan', v:[420, 260] }, { m:'Feb', v:[468, 305] }, { m:'Mar', v:[512, 288] },
+  { m:'Apr', v:[496, 350] }, { m:'May', v:[604, 402] }, { m:'Jun', v:[588, 455] },
+  { m:'Jul', v:[651, 470] }, { m:'Aug', v:[612, 521] }
+];
+/* tickets raised vs resolved, last 12 weeks */
+var TREND = [];
+(function(){
+  var raised = [14,17,12,19,23,18,21,26,22,19,24,20];
+  var resolved = [12,16,14,17,20,19,18,24,25,21,22,23];
+  for(var i=0;i<12;i++) TREND.push({ x:'W' + (i+1), a:raised[i], b:resolved[i] });
+})();
+var REVENUE = [
+  { n:'Bespoke solutions', v:524000 },
+  { n:'Enterprise integration', v:340000 },
+  { n:'Digital transformation', v:196000 },
+  { n:'Consultancy', v:118000 },
+  { n:'Training', v:64000 }
+];
+
+/* ==================== HELPERS ==================== */
+function money(n){ return '$' + n.toLocaleString('en-US'); }
+function kmoney(n){ return n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + Math.round(n/1000) + 'k'; }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+function toast(msg){
+  var host = document.getElementById('toasts');
+  var d = document.createElement('div'); d.className = 'toast'; d.textContent = msg;
+  host.appendChild(d);
+  setTimeout(function(){ d.style.opacity = '0'; d.style.transition = 'opacity .25s'; }, 2600);
+  setTimeout(function(){ d.remove(); }, 3000);
+}
+function barTop(x,y,w,h,r){
+  r = Math.min(r, w/2, Math.max(h,0));
+  if(h <= 0.5) return '';
+  return 'M' + x + ',' + (y+h) + ' L' + x + ',' + (y+r) + ' Q' + x + ',' + y + ' ' + (x+r) + ',' + y +
+         ' L' + (x+w-r) + ',' + y + ' Q' + (x+w) + ',' + y + ' ' + (x+w) + ',' + (y+r) +
+         ' L' + (x+w) + ',' + (y+h) + ' Z';
+}
+function barRight(x,y,w,h,r){
+  r = Math.min(r, Math.max(w,0), h/2);
+  if(w <= 0.5) return '';
+  return 'M' + x + ',' + y + ' L' + (x+w-r) + ',' + y + ' Q' + (x+w) + ',' + y + ' ' + (x+w) + ',' + (y+r) +
+         ' L' + (x+w) + ',' + (y+h-r) + ' Q' + (x+w) + ',' + (y+h) + ' ' + (x+w-r) + ',' + (y+h) + ' L' + x + ',' + (y+h) + ' Z';
+}
+function niceStep(raw){
+  var p = Math.pow(10, Math.floor(Math.log(raw)/Math.LN10));
+  var c = [1,1.25,1.5,1.75,2,2.5,3,4,5,6,8,10], step = p*10;
+  for(var i=0;i<c.length;i++){ if(raw <= p*c[i]){ step = p*c[i]; break; } }
+  return step < 10 ? Math.ceil(step) : step;
+}
+function niceMax(v, n){ n = n || 4; return niceStep(v/n) * n; }
+function ticks(max, n){ var out = [], step = max/n; for(var i=0;i<=n;i++) out.push(Math.round(step*i)); return out; }
+
+/* ==================== CHARTS ==================== */
+function chartHost(id, h){ return '<div class="chart-wrap" id="' + id + '" style="height:' + h + 'px"><div class="tip" id="' + id + '-tip"></div></div>'; }
+
+function drawGroupedBars(hostId, data, names, colors, unit){
+  var host = document.getElementById(hostId); if(!host) return;
+  var w = host.clientWidth || 640, h = host.clientHeight || 260;
+  var pad = { l:46, r:10, t:12, b:30 };
+  var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  var max = niceMax(Math.max.apply(null, data.map(function(d){ return Math.max.apply(null, d.v); })));
+  var band = iw / data.length, gw = Math.min(band * 0.62, 74), bw = (gw - 2) / 2;
+  var s = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" height="' + h + '" role="img" aria-label="Delivery hours by month">';
+  ticks(max, 4).forEach(function(t){
+    var y = pad.t + ih - (t/max)*ih;
+    s += '<line x1="' + pad.l + '" y1="' + y + '" x2="' + (w-pad.r) + '" y2="' + y + '" stroke="var(--grid)" stroke-width="1"/>';
+    s += '<text x="' + (pad.l-9) + '" y="' + (y+4) + '" text-anchor="end" font-size="11" fill="var(--text-muted)" style="font-variant-numeric:tabular-nums">' + t + '</text>';
+  });
+  data.forEach(function(d,i){
+    var cx = pad.l + band*i + band/2;
+    d.v.forEach(function(val,j){
+      var bh = (val/max)*ih, x = cx - gw/2 + j*(bw+2), y = pad.t + ih - bh;
+      s += '<path d="' + barTop(x,y,bw,bh,4) + '" fill="' + colors[j] + '"/>';
+    });
+    s += '<text x="' + cx + '" y="' + (h-9) + '" text-anchor="middle" font-size="11.5" fill="var(--text-muted)">' + d.m + '</text>';
+  });
+  data.forEach(function(d,i){
+    s += '<rect class="hit" data-i="' + i + '" x="' + (pad.l+band*i) + '" y="' + pad.t + '" width="' + band + '" height="' + ih + '" fill="transparent"/>';
+  });
+  s += '</svg>';
+  host.insertAdjacentHTML('afterbegin', s);
+  var tip = document.getElementById(hostId + '-tip');
+  host.querySelectorAll('.hit').forEach(function(r){
+    r.addEventListener('mouseenter', function(){
+      var d = data[+r.dataset.i];
+      tip.innerHTML = '<div class="tt">' + d.m + ' 2026</div>' +
+        names.map(function(n,j){ return '<div class="tr"><span><i class="sw" style="background:' + colors[j] + '"></i>' + n + '</span><b>' + d.v[j] + ' ' + unit + '</b></div>'; }).join('');
+      tip.style.left = (pad.l + band*(+r.dataset.i) + band/2) + 'px';
+      tip.style.top = (pad.t + ih*0.42) + 'px';
+      tip.classList.add('on');
+    });
+    r.addEventListener('mouseleave', function(){ tip.classList.remove('on'); });
+  });
+}
+
+function drawHBars(hostId, data){
+  var host = document.getElementById(hostId); if(!host) return;
+  var w = host.clientWidth || 480, rowH = 40, h = data.length * rowH + 8;
+  host.style.height = h + 'px';
+  var labelW = Math.min(168, w * 0.42), pad = { l:labelW, r:64, t:4 };
+  var iw = w - pad.l - pad.r;
+  var max = Math.max.apply(null, data.map(function(d){ return d.v; }));
+  var s = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" height="' + h + '" role="img" aria-label="Revenue by service line">';
+  data.forEach(function(d,i){
+    var y = pad.t + i*rowH, bh = 20, bw = (d.v/max)*iw;
+    s += '<text x="' + (pad.l-12) + '" y="' + (y+bh/2+4) + '" text-anchor="end" font-size="12.5" fill="var(--text-secondary)">' + d.n + '</text>';
+    s += '<path d="' + barRight(pad.l, y, bw, bh, 4) + '" fill="var(--seq-400)"/>';
+    s += '<text x="' + (pad.l+bw+9) + '" y="' + (y+bh/2+4) + '" font-size="12.5" font-weight="700" fill="var(--text-primary)" style="font-variant-numeric:tabular-nums">' + kmoney(d.v) + '</text>';
+  });
+  s += '</svg>';
+  host.insertAdjacentHTML('afterbegin', s);
+}
+
+function drawLines(hostId, data, names, colors){
+  var host = document.getElementById(hostId); if(!host) return;
+  var w = host.clientWidth || 640, h = host.clientHeight || 250;
+  var pad = { l:38, r:14, t:14, b:28 };
+  var iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  var max = niceMax(Math.max.apply(null, data.map(function(d){ return Math.max(d.a,d.b); })));
+  var X = function(i){ return pad.l + (iw/(data.length-1))*i; };
+  var Y = function(v){ return pad.t + ih - (v/max)*ih; };
+  var s = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" height="' + h + '" role="img" aria-label="Support tickets raised versus resolved">';
+  ticks(max,4).forEach(function(t){
+    var y = Y(t);
+    s += '<line x1="' + pad.l + '" y1="' + y + '" x2="' + (w-pad.r) + '" y2="' + y + '" stroke="var(--grid)" stroke-width="1"/>';
+    s += '<text x="' + (pad.l-8) + '" y="' + (y+4) + '" text-anchor="end" font-size="11" fill="var(--text-muted)" style="font-variant-numeric:tabular-nums">' + t + '</text>';
+  });
+  ['a','b'].forEach(function(key,j){
+    var pts = data.map(function(d,i){ return X(i) + ',' + Y(d[key]); }).join(' ');
+    s += '<polyline points="' + pts + '" fill="none" stroke="' + colors[j] + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    var last = data[data.length-1];
+    s += '<circle cx="' + X(data.length-1) + '" cy="' + Y(last[key]) + '" r="4" fill="' + colors[j] + '" stroke="var(--surface-1)" stroke-width="2"/>';
+  });
+  data.forEach(function(d,i){
+    if(i % 2 === 0) s += '<text x="' + X(i) + '" y="' + (h-8) + '" text-anchor="middle" font-size="11" fill="var(--text-muted)">' + d.x + '</text>';
+  });
+  s += '<line id="' + hostId + '-cross" x1="0" y1="' + pad.t + '" x2="0" y2="' + (pad.t+ih) + '" stroke="var(--axis)" stroke-width="1" opacity="0"/>';
+  s += '<g id="' + hostId + '-dots" opacity="0"><circle r="5" fill="' + colors[0] + '" stroke="var(--surface-1)" stroke-width="2" id="' + hostId + '-d0"/><circle r="5" fill="' + colors[1] + '" stroke="var(--surface-1)" stroke-width="2" id="' + hostId + '-d1"/></g>';
+  s += '<rect id="' + hostId + '-plate" x="' + pad.l + '" y="' + pad.t + '" width="' + iw + '" height="' + ih + '" fill="transparent"/>';
+  s += '</svg>';
+  host.insertAdjacentHTML('afterbegin', s);
+  var tip = document.getElementById(hostId + '-tip');
+  var cross = document.getElementById(hostId + '-cross');
+  var dots = document.getElementById(hostId + '-dots');
+  var d0 = document.getElementById(hostId + '-d0'), d1 = document.getElementById(hostId + '-d1');
+  var plate = document.getElementById(hostId + '-plate');
+  plate.addEventListener('mousemove', function(ev){
+    var box = host.getBoundingClientRect();
+    var rel = (ev.clientX - box.left - pad.l) / iw;
+    var i = Math.max(0, Math.min(data.length-1, Math.round(rel*(data.length-1))));
+    var d = data[i];
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.setAttribute('opacity','1');
+    d0.setAttribute('cx', X(i)); d0.setAttribute('cy', Y(d.a));
+    d1.setAttribute('cx', X(i)); d1.setAttribute('cy', Y(d.b));
+    dots.setAttribute('opacity','1');
+    tip.innerHTML = '<div class="tt">Week ' + (i+1) + '</div>' +
+      '<div class="tr"><span><i class="sw" style="background:' + colors[0] + '"></i>' + names[0] + '</span><b>' + d.a + '</b></div>' +
+      '<div class="tr"><span><i class="sw" style="background:' + colors[1] + '"></i>' + names[1] + '</span><b>' + d.b + '</b></div>';
+    tip.style.left = X(i) + 'px'; tip.style.top = Math.min(Y(d.a), Y(d.b)) + 'px';
+    tip.classList.add('on');
+  });
+  plate.addEventListener('mouseleave', function(){
+    tip.classList.remove('on'); cross.setAttribute('opacity','0'); dots.setAttribute('opacity','0');
+  });
+}
+
+function spark(vals, color){
+  var w = 84, h = 26, max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+  var pts = vals.map(function(v,i){
+    return (i/(vals.length-1))*w + ',' + (h - ((v-min)/((max-min)||1))*(h-4) - 2);
+  }).join(' ');
+  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+/* ==================== APP SHELL ==================== */
+var NAV = [
+  { g:'Delivery' },
+  { id:'overview',  n:'Overview',        i:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>' },
+  { id:'projects',  n:'Projects',        i:'<path d="M3 7h6l2 2h10v10H3z"/>', cnt:function(){ return PROJECTS.filter(function(p){ return p.status !== 'done'; }).length; } },
+  { id:'clients',   n:'Clients',         i:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0114 0"/><path d="M17 11a3 3 0 100-6"/><path d="M18.5 20a6 6 0 00-2-4.5"/>' },
+  { g:'Commercial' },
+  { id:'catalogue', n:'Service catalogue',i:'<path d="M4 4h16v5H4zM4 13h7v7H4zM13 13h7v7h-7z"/>' },
+  { id:'quotes',    n:'Quote builder',   i:'<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h7M9 17h5"/>' },
+  { g:'Operations' },
+  { id:'support',   n:'Support desk',    i:'<path d="M4 12a8 8 0 0116 0v5a3 3 0 01-3 3h-2"/><rect x="2" y="12" width="4" height="6" rx="1.5"/><rect x="18" y="12" width="4" height="6" rx="1.5"/>', cnt:function(){ return TICKETS.filter(function(t){ return t.state === 'open'; }).length; } },
+  { id:'training',  n:'Training',        i:'<path d="M22 9L12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>' },
+  { id:'team',      n:'Team',            i:'<circle cx="12" cy="7" r="3.5"/><path d="M4 21a8 8 0 0116 0"/>' }
+];
+function renderNav(active){
+  document.getElementById('side').innerHTML = NAV.map(function(n){
+    if(n.g) return '<div class="grp">' + n.g + '</div>';
+    var c = n.cnt ? '<span class="cnt tnum">' + n.cnt() + '</span>' : '';
+    return '<button class="nv' + (n.id === active ? ' on' : '') + '" data-view="' + n.id + '">' +
+      '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">' + n.i + '</svg>' + n.n + c + '</button>';
+  }).join('');
+  document.getElementById('side').querySelectorAll('.nv').forEach(function(b){
+    b.addEventListener('click', function(){ go(b.dataset.view); document.getElementById('side').classList.remove('show'); });
+  });
+}
+
+var state = { view:'overview', role:'client', q:'', filter:'all', sel:new Set(['c4','c7']), months:6, cohort:2, sort:{ k:'id', dir:1 } };
+
+function go(view){
+  state.view = view;
+  renderNav(view);
+  var m = document.getElementById('mainView');
+  m.scrollTop = 0;
+  ({ overview:vOverview, projects:vProjects, clients:vClients, catalogue:vCatalogue,
+     quotes:vQuotes, support:vSupport, training:vTraining, team:vTeam }[view] || vOverview)(m);
+}
+
+/* ---------- OVERVIEW ---------- */
+function vOverview(m){
+  var active = PROJECTS.filter(function(p){ return p.status !== 'done'; });
+  var openT = TICKETS.filter(function(t){ return t.state === 'open'; });
+  var budget = PROJECTS.reduce(function(a,p){ return a + p.budget; }, 0);
+  var spent = PROJECTS.reduce(function(a,p){ return a + p.spent; }, 0);
+  m.innerHTML =
+    '<div class="page-head"><div><h2>Delivery overview</h2><p>Portfolio health across ' + PROJECTS.length + ' engagements &middot; financial year 2026</p></div>' +
+      '<div class="ph-actions"><div class="seg" id="rangeSeg"><button class="on" data-r="8">8 mo</button><button data-r="6">6 mo</button><button data-r="3">3 mo</button></div>' +
+      '<button class="btn btn-ghost btn-sm" onclick="jaToast(\'Report exported (demo)\')">Export report</button></div></div>' +
+
+    '<div class="kpis">' +
+      kpi('Active engagements', active.length, '<span class="up">&uarr; 2</span> vs last quarter', spark([4,5,5,6,6,7,7], 'var(--series-1)')) +
+      kpi('Contracted value', kmoney(budget), '<span class="muted">' + Math.round(spent/budget*100) + '% recognised</span>', spark([620,700,760,830,910,1010,1068], 'var(--series-3)')) +
+      kpi('Open tickets', openT.length, '<span class="up">&darr; 3</span> week on week', spark([9,8,10,7,6,6,5], 'var(--series-2)')) +
+      kpi('Platform uptime', '99.94%', '<span class="muted">30-day rolling</span>', spark([99.9,99.8,100,99.95,99.99,99.9,99.94], 'var(--series-3)')) +
+    '</div>' +
+
+    '<div class="grid2">' +
+      '<div class="panel"><div class="panel-head"><div><h3>Delivery hours by month</h3><div class="sub">Billable engineering hours, split by service pillar</div></div></div>' +
+        '<div class="legend"><span><i style="background:var(--series-1)"></i>Consultancy &amp; transformation</span><span><i style="background:var(--series-2)"></i>Solutions &amp; integration</span></div>' +
+        chartHost('cHours', 250) + '</div>' +
+      '<div class="panel"><div class="panel-head"><div><h3>Revenue by service line</h3><div class="sub">Contracted value, FY2026</div></div></div>' +
+        chartHost('cRev', 220) +
+        '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px">' +
+          '<span class="muted">Total contracted, FY2026</span><b class="tnum">' + money(REVENUE.reduce(function(a,r){ return a+r.v; },0)) + '</b></div>' +
+        '<div class="muted" style="font-size:12.5px;margin-top:8px">Bespoke solutions and enterprise integration carry 74% of contracted value.</div></div>' +
+    '</div>' +
+
+    '<div class="grid2">' +
+      '<div class="panel"><div class="panel-head"><div><h3>Support load</h3><div class="sub">Tickets raised vs resolved, last 12 weeks</div></div></div>' +
+        '<div class="legend"><span><i style="background:var(--series-1)"></i>Raised</span><span><i style="background:var(--series-2)"></i>Resolved</span></div>' +
+        chartHost('cTrend', 230) + '</div>' +
+      '<div class="panel"><div class="panel-head"><div><h3>Attention required</h3><div class="sub">Engagements off the happy path</div></div></div>' +
+        '<div style="margin-top:10px">' +
+        PROJECTS.filter(function(p){ return p.status === 'warn' || p.status === 'serious' || p.status === 'crit'; }).map(function(p){
+          return '<div class="mstone" style="cursor:pointer" data-open="' + p.id + '">' +
+            '<div style="flex:1"><div style="font-weight:650">' + p.name + '</div><div style="font-size:12px;color:var(--text-secondary)">' + p.client + ' &middot; due ' + p.due + '</div></div>' +
+            stBadge(p.status) + '</div>';
+        }).join('') + '</div></div>' +
+    '</div>' +
+
+    '<div class="panel"><div class="panel-head"><div><h3>Recent activity</h3><div class="sub">Across all engagements</div></div></div>' +
+      '<div style="margin-top:8px">' + [
+        ['Claims module passed integration test suite (412/412)','Bedrock Insurance Ghana','2 hours ago','good'],
+        ['Ticket SD-1188 escalated — SLA breach in 2h','Bedrock Insurance Ghana','3 hours ago','crit'],
+        ['Supplier integration milestone slipped one sprint','Melcom Retail Group','yesterday','serious'],
+        ['ISO gap analysis signed off by management','Izzi Technologies','2 days ago','good'],
+        ['Volunteer training cohort 3 completed','AAA African Afforestation','3 days ago','good']
+      ].map(function(a){
+        return '<div class="mstone"><div class="mi ' + (a[3] === 'good' ? 'mi-done' : a[3] === 'crit' ? 'mi-now' : 'mi-now') + '">&bull;</div>' +
+          '<div style="flex:1"><div>' + a[0] + '</div><div style="font-size:12px;color:var(--text-muted)">' + a[1] + '</div></div>' +
+          '<div style="font-size:12px;color:var(--text-muted);white-space:nowrap">' + a[2] + '</div></div>';
+      }).join('') + '</div></div>';
+
+  drawGroupedBars('cHours', HOURS, ['Consultancy & transformation','Solutions & integration'], ['var(--series-1)','var(--series-2)'], 'hrs');
+  drawHBars('cRev', REVENUE);
+  drawLines('cTrend', TREND, ['Raised','Resolved'], ['var(--series-1)','var(--series-2)']);
+  m.querySelectorAll('[data-open]').forEach(function(el){
+    el.addEventListener('click', function(){ openProject(el.dataset.open); });
+  });
+  m.querySelectorAll('#rangeSeg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      m.querySelectorAll('#rangeSeg button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      var n = +b.dataset.r;
+      document.getElementById('cHours').innerHTML = '<div class="tip" id="cHours-tip"></div>';
+      drawGroupedBars('cHours', HOURS.slice(HOURS.length-n), ['Consultancy & transformation','Solutions & integration'], ['var(--series-1)','var(--series-2)'], 'hrs');
+    });
+  });
+}
+function kpi(label, val, delta, sp){
+  return '<div class="kpi"><div class="kl">' + label + '</div>' +
+    '<div style="display:flex;align-items:flex-end;gap:10px"><div><div class="kv tnum">' + val + '</div><div class="kd">' + delta + '</div></div>' +
+    '<div style="margin-left:auto;opacity:.9">' + sp + '</div></div></div>';
+}
+
+/* ---------- PROJECTS ---------- */
+function vProjects(m){
+  m.innerHTML =
+    '<div class="page-head"><div><h2>Projects</h2><p>Every engagement, its milestones and its burn</p></div>' +
+      '<div class="ph-actions"><button class="btn btn-primary btn-sm" onclick="jaToast(\'New engagement form opened (demo)\')">+ New engagement</button></div></div>' +
+    '<div class="toolbar">' +
+      '<input class="input" id="pq" placeholder="Filter by name, client or lead…" style="min-width:250px" value="' + esc(state.q) + '">' +
+      ['all','good','warn','serious','crit','done'].map(function(f){
+        return '<button class="fchip' + (state.filter === f ? ' on' : '') + '" data-f="' + f + '">' + (f === 'all' ? 'All' : STATUS[f].label) + '</button>';
+      }).join('') +
+    '</div>' +
+    '<div class="panel" style="padding:4px 0 0"><div style="overflow-x:auto"><table class="tbl"><thead><tr>' +
+      ['id:Ref','name:Engagement','client:Client','pillar:Pillar','progress:Progress','due:Due','budget:Burn','status:Status'].map(function(c){
+        var k = c.split(':')[0];
+        return '<th data-k="' + k + '">' + c.split(':')[1] + (state.sort.k === k ? (state.sort.dir > 0 ? ' &uarr;' : ' &darr;') : '') + '</th>';
+      }).join('') +
+    '</tr></thead><tbody id="pbody"></tbody></table></div></div>';
+  renderRows();
+  document.getElementById('pq').addEventListener('input', function(e){ state.q = e.target.value; renderRows(); });
+  m.querySelectorAll('.fchip').forEach(function(b){
+    b.addEventListener('click', function(){ state.filter = b.dataset.f; vProjects(m); });
+  });
+  m.querySelectorAll('th').forEach(function(th){
+    th.addEventListener('click', function(){
+      var k = th.dataset.k;
+      state.sort = { k:k, dir: state.sort.k === k ? -state.sort.dir : 1 };
+      vProjects(m);
+    });
+  });
+}
+function filteredProjects(){
+  var q = state.q.toLowerCase();
+  return PROJECTS.filter(function(p){
+    var okF = state.filter === 'all' || p.status === state.filter;
+    var okQ = !q || (p.name + p.client + p.lead + p.id + p.pillar).toLowerCase().indexOf(q) >= 0;
+    return okF && okQ;
+  }).sort(function(a,b){
+    var k = state.sort.k, av = a[k], bv = b[k];
+    if(typeof av === 'string') return av.localeCompare(bv) * state.sort.dir;
+    return (av - bv) * state.sort.dir;
+  });
+}
+function renderRows(){
+  var rows = filteredProjects();
+  var tb = document.getElementById('pbody');
+  if(!rows.length){ tb.innerHTML = '<tr><td colspan="8"><div class="empty">No engagements match that filter.</div></td></tr>'; return; }
+  tb.innerHTML = rows.map(function(p){
+    return '<tr data-id="' + p.id + '">' +
+      '<td class="ref">' + p.id + '</td>' +
+      '<td style="font-weight:600;min-width:220px">' + p.name + '</td>' +
+      '<td class="muted">' + p.client + '</td>' +
+      '<td class="muted" style="font-size:12.5px">' + p.pillar + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:9px"><div class="bar-mini"><i style="width:' + p.progress + '%"></i></div><span class="tnum" style="font-size:12.5px;font-weight:600">' + p.progress + '%</span></div></td>' +
+      '<td class="muted tnum" style="font-size:12.5px;white-space:nowrap">' + p.due + '</td>' +
+      '<td class="tnum" style="font-size:12.5px">' + kmoney(p.spent) + ' <span class="muted">/ ' + kmoney(p.budget) + '</span></td>' +
+      '<td>' + stBadge(p.status) + '</td></tr>';
+  }).join('');
+  tb.querySelectorAll('tr').forEach(function(tr){
+    tr.addEventListener('click', function(){ openProject(tr.dataset.id); });
+  });
+}
+function openProject(id){
+  var p = PROJECTS.filter(function(x){ return x.id === id; })[0]; if(!p) return;
+  var d = document.getElementById('drawer');
+  d.innerHTML =
+    '<div class="drawer-head"><div style="flex:1"><div style="font-family:var(--mono);font-size:12px;color:var(--text-muted)">' + p.id + '</div>' +
+      '<h3 style="font-size:18px;margin-top:4px">' + p.name + '</h3>' +
+      '<div class="muted" style="font-size:13px;margin-top:4px">' + p.client + '</div></div>' +
+      '<button class="icon-btn" id="dClose" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>' +
+    '<div class="drawer-body">' +
+      '<div style="margin-bottom:16px">' + stBadge(p.status) + '</div>' +
+      '<dl class="kv"><dt>Service pillar</dt><dd>' + p.pillar + '</dd>' +
+        '<dt>Engagement lead</dt><dd>' + p.lead + '</dd>' +
+        '<dt>Due</dt><dd class="tnum">' + p.due + '</dd>' +
+        '<dt>Contract value</dt><dd class="tnum">' + money(p.budget) + '</dd>' +
+        '<dt>Recognised</dt><dd class="tnum">' + money(p.spent) + ' (' + Math.round(p.spent/p.budget*100) + '%)</dd></dl>' +
+      '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Progress</div>' +
+      '<div class="bar-mini" style="height:9px;margin-bottom:6px"><i style="width:' + p.progress + '%"></i></div>' +
+      '<div class="tnum" style="font-size:13px;margin-bottom:22px">' + p.progress + '% complete</div>' +
+      '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Delivery method</div>' +
+      p.ms.map(function(s){
+        var cls = s[1] === 'done' ? 'mi-done' : s[1] === 'now' ? 'mi-now' : 'mi-next';
+        var gl = s[1] === 'done' ? '&#10003;' : s[1] === 'now' ? '&#9679;' : '';
+        return '<div class="mstone"><div class="mi ' + cls + '">' + gl + '</div><div style="flex:1">' + s[0] + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em">' + (s[1] === 'now' ? 'in progress' : s[1]) + '</div></div>';
+      }).join('') +
+      '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin:22px 0 10px">Stack</div>' +
+      '<div class="tags">' + p.stack.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
+      '<div style="display:flex;gap:9px;margin-top:26px">' +
+        '<button class="btn btn-primary btn-sm" onclick="jaToast(\'Status report requested\')">Request status report</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="jaGo(\'support\')">Raise a ticket</button></div>' +
+    '</div>';
+  d.classList.add('on'); d.setAttribute('aria-hidden','false');
+  document.getElementById('dClose').addEventListener('click', closeDrawer);
+}
+function closeDrawer(){
+  var d = document.getElementById('drawer');
+  d.classList.remove('on'); d.setAttribute('aria-hidden','true');
+}
+
+/* ---------- CLIENTS ---------- */
+function vClients(m){
+  m.innerHTML = '<div class="page-head"><div><h2>Clients</h2><p>Relationships, sectors and lifetime engagement value</p></div></div>' +
+    '<div class="panel" style="padding:4px 0 0"><div style="overflow-x:auto"><table class="tbl"><thead><tr>' +
+      '<th>Client</th><th>Sector</th><th>Client since</th><th>Engagements</th><th>Lifetime value</th><th>Account health</th>' +
+    '</tr></thead><tbody>' +
+    CLIENTS.map(function(c){
+      return '<tr><td style="font-weight:600">' + c.n + '</td><td class="muted">' + c.s + '</td>' +
+        '<td class="tnum muted">' + c.since + '</td><td class="tnum">' + c.projects + '</td>' +
+        '<td class="tnum">' + money(c.spend) + '</td><td>' + stBadge(c.health) + '</td></tr>';
+    }).join('') + '</tbody></table></div></div>' +
+    '<div class="grid2b">' +
+      '<div class="panel"><div class="panel-head"><div><h3>Sectors served</h3><div class="sub">From the target market list</div></div></div>' +
+        '<div class="chips" style="margin-top:12px">' + MARKETS.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join('') + '</div></div>' +
+      '<div class="panel"><div class="panel-head"><div><h3>Engagement mix</h3><div class="sub">Contracted value by pillar</div></div></div>' +
+        chartHost('cMix', 200) + '</div>' +
+    '</div>';
+  drawHBars('cMix', REVENUE);
+}
+
+/* ---------- CATALOGUE ---------- */
+function vCatalogue(m){
+  m.innerHTML = '<div class="page-head"><div><h2>Service catalogue</h2><p>Select the services you need — the quote builder totals them for you</p></div>' +
+    '<div class="ph-actions"><button class="btn btn-primary btn-sm" onclick="jaGo(\'quotes\')">Go to quote builder &rarr;</button></div></div>' +
+    ['Consultancy','Solutions','Services','Training'].map(function(pillar){
+      var items = CATALOGUE.filter(function(c){ return c.pillar === pillar; });
+      if(!items.length) return '';
+      return '<div style="margin-bottom:26px"><div class="eyebrow" style="margin-bottom:12px">' + pillar + '</div><div class="cat-grid">' +
+        items.map(function(c){
+          return '<div class="cat' + (state.sel.has(c.id) ? ' on' : '') + '" data-id="' + c.id + '">' +
+            '<h4>' + c.n + '<span class="ck">' + (state.sel.has(c.id) ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"><path d="M20 6L9 17l-5-5"/></svg>' : '') + '</span></h4>' +
+            '<p>' + c.d + '</p><div class="price tnum">' + money(c.rate) + ' <span style="color:var(--text-muted);font-weight:500">' + c.unit + '</span></div></div>';
+        }).join('') + '</div></div>';
+    }).join('');
+  m.querySelectorAll('.cat').forEach(function(el){
+    el.addEventListener('click', function(){
+      var id = el.dataset.id;
+      if(state.sel.has(id)) state.sel.delete(id); else state.sel.add(id);
+      vCatalogue(m);
+    });
+  });
+}
+
+/* ---------- QUOTES ---------- */
+function vQuotes(m){
+  var picked = CATALOGUE.filter(function(c){ return state.sel.has(c.id); });
+  var base = picked.filter(function(c){ return c.id !== 'c7'; }).reduce(function(a,c){ return a + c.rate; }, 0);
+  var teamFactor = [1, 1, 1.6, 2.1, 2.5][state.cohort] || 1.6;
+  var durFactor = 1 + (state.months - 3) * 0.06;
+  var support = picked.some(function(c){ return c.id === 'c7'; }) ? 3200 * state.months : 0;
+  var subtotal = Math.round(base * teamFactor * durFactor);
+  var disc = state.months >= 9 ? Math.round(subtotal * 0.08) : 0;
+  var total = subtotal + support - disc;
+  m.innerHTML = '<div class="page-head"><div><h2>Quote builder</h2><p>Indicative pricing — a real proposal follows a business case session</p></div></div>' +
+    '<div class="grid2">' +
+      '<div class="panel"><div class="panel-head"><div><h3>Scope</h3><div class="sub">' + picked.length + ' service' + (picked.length === 1 ? '' : 's') + ' selected</div></div>' +
+        '<div class="right"><button class="btn btn-ghost btn-sm" onclick="jaGo(\'catalogue\')">Edit selection</button></div></div>' +
+        (picked.length ? picked.map(function(c){
+          return '<div class="mstone"><div class="mi mi-done">&#10003;</div><div style="flex:1"><div style="font-weight:600">' + c.n + '</div>' +
+            '<div style="font-size:12px;color:var(--text-muted)">' + c.pillar + ' &middot; ' + c.unit + '</div></div>' +
+            '<div class="tnum" style="font-weight:650">' + money(c.rate) + '</div></div>';
+        }).join('') : '<div class="empty">Nothing selected yet — open the service catalogue.</div>') +
+
+        '<div style="margin-top:24px">' +
+          '<label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px">Engagement duration — <span class="tnum" id="mLbl">' + state.months + ' months</span></label>' +
+          '<input type="range" id="mRange" min="3" max="18" value="' + state.months + '" style="width:100%;accent-color:var(--brand)">' +
+        '</div>' +
+        '<div style="margin-top:18px">' +
+          '<label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px">Team shape</label>' +
+          '<div class="seg" id="cohortSeg" style="display:inline-flex">' +
+            ['Advisory (1)','Squad (2–3)','Squad+ (4–5)','Programme (6+)'].map(function(t,i){
+              return '<button data-c="' + (i+1) + '"' + (state.cohort === i+1 ? ' class="on"' : '') + '>' + t + '</button>';
+            }).join('') + '</div></div>' +
+      '</div>' +
+
+      '<div class="panel"><div class="panel-head"><div><h3>Indicative estimate</h3><div class="sub">Excludes third-party licences &amp; travel</div></div></div>' +
+        '<div class="quote-out" style="margin-top:12px">' +
+          '<div class="qline"><span>Service base</span><b class="tnum">' + money(base) + '</b></div>' +
+          '<div class="qline"><span>Team shape factor</span><b class="tnum">&times; ' + teamFactor.toFixed(2) + '</b></div>' +
+          '<div class="qline"><span>Duration factor (' + state.months + ' mo)</span><b class="tnum">&times; ' + durFactor.toFixed(2) + '</b></div>' +
+          (support ? '<div class="qline"><span>Support window (' + state.months + ' mo)</span><b class="tnum">' + money(support) + '</b></div>' : '') +
+          (disc ? '<div class="qline" style="color:var(--success-text)"><span>Long engagement discount (8%)</span><b class="tnum">&minus;' + money(disc) + '</b></div>' : '') +
+          '<div class="qtotal"><span>Estimate</span><span class="tnum">' + money(total) + '</span></div>' +
+        '</div>' +
+        '<div style="margin-top:18px;font-size:13px;color:var(--text-secondary)">Every engagement includes business case analysis, mockup planning and review sessions, implementation, testing and feedback loops, documentation, presentation and training on all deliverables.</div>' +
+        '<div style="display:flex;gap:9px;margin-top:20px"><button class="btn btn-primary" id="reqProp">Request proposal</button>' +
+        '<button class="btn btn-ghost" onclick="jaToast(\'Estimate saved to your portal (demo)\')">Save estimate</button></div>' +
+      '</div>' +
+    '</div>';
+  var r = document.getElementById('mRange');
+  r.addEventListener('input', function(){ document.getElementById('mLbl').textContent = r.value + ' months'; });
+  r.addEventListener('change', function(){ state.months = +r.value; vQuotes(m); });
+  m.querySelectorAll('#cohortSeg button').forEach(function(b){
+    b.addEventListener('click', function(){ state.cohort = +b.dataset.c; vQuotes(m); });
+  });
+  document.getElementById('reqProp').addEventListener('click', function(){
+    toast('Proposal requested — the team will respond within 2 working days (demo)');
+  });
+}
+
+/* ---------- SUPPORT ---------- */
+function vSupport(m){
+  var open = TICKETS.filter(function(t){ return t.state === 'open'; });
+  m.innerHTML = '<div class="page-head"><div><h2>Support desk</h2><p>Excellent customer support at the client’s convenience</p></div></div>' +
+    '<div class="kpis" style="grid-template-columns:repeat(4,1fr)">' +
+      kpi('Open tickets', open.length, '<span class="muted">' + TICKETS.length + ' total</span>', spark([9,8,10,7,6,6,open.length], 'var(--series-2)')) +
+      kpi('Breaching SLA', open.filter(function(t){ return t.p === 'crit'; }).length, '<span class="down">needs attention</span>', spark([0,1,0,2,1,1,1], 'var(--series-2)')) +
+      kpi('Median first response', '38m', '<span class="up">&darr; 11m</span> vs target', spark([62,58,49,52,44,41,38], 'var(--series-3)')) +
+      kpi('Resolved this week', 23, '<span class="up">&uarr; 4</span>', spark([18,24,25,21,22,20,23], 'var(--series-1)')) +
+    '</div>' +
+    '<div class="grid2">' +
+      '<div class="panel" style="padding:4px 0 0"><div style="padding:16px 18px 6px"><h3 style="font-size:15.5px">Ticket queue</h3></div>' +
+        '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Ref</th><th>Summary</th><th>Client</th><th>Owner</th><th>Age / SLA</th><th>Priority</th></tr></thead>' +
+        '<tbody id="tbody"></tbody></table></div></div>' +
+      '<div class="panel"><div class="panel-head"><div><h3>Raise a ticket</h3><div class="sub">Goes straight to the engagement lead</div></div></div>' +
+        '<form id="tForm" style="margin-top:14px">' +
+          '<div class="field"><label for="t-sum">Summary</label><input class="input" id="t-sum" required placeholder="What is happening?"></div>' +
+          '<div class="field"><label for="t-cl">Client / system</label><select class="input" id="t-cl">' +
+            CLIENTS.map(function(c){ return '<option>' + c.n + '</option>'; }).join('') + '</select></div>' +
+          '<div class="field"><label for="t-pr">Priority</label><select class="input" id="t-pr">' +
+            '<option value="good">Low — request</option><option value="warn" selected>Medium — degraded</option>' +
+            '<option value="serious">High — impaired</option><option value="crit">Critical — outage</option></select></div>' +
+          '<div class="field"><label for="t-dt">Detail</label><textarea class="input" id="t-dt" placeholder="Steps, environment, when it started."></textarea></div>' +
+          '<button class="btn btn-primary" type="submit">Submit ticket</button>' +
+        '</form></div>' +
+    '</div>';
+  renderTickets();
+  document.getElementById('tForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var n = 1189 + (TICKETS.length - 7);
+    TICKETS.unshift({ id:'SD-' + n, s:document.getElementById('t-sum').value || 'New request',
+      p:document.getElementById('t-pr').value, c:document.getElementById('t-cl').value,
+      o:'Triage', age:'just now', sla:'4h', state:'open' });
+    toast('Ticket SD-' + n + ' raised');
+    vSupport(m); renderNav('support');
+  });
+}
+function renderTickets(){
+  var tb = document.getElementById('tbody'); if(!tb) return;
+  tb.innerHTML = TICKETS.map(function(t){
+    return '<tr style="cursor:default;opacity:' + (t.state === 'closed' ? '.55' : '1') + '">' +
+      '<td class="ref">' + t.id + '</td>' +
+      '<td style="font-weight:600;min-width:210px">' + esc(t.s) + '</td>' +
+      '<td class="muted" style="font-size:12.5px">' + t.c + '</td>' +
+      '<td class="muted" style="font-size:12.5px">' + t.o + '</td>' +
+      '<td class="tnum" style="font-size:12.5px">' + t.age + ' <span class="muted">/ ' + t.sla + '</span></td>' +
+      '<td>' + prBadge(t.p) + '</td></tr>';
+  }).join('');
+}
+
+/* ---------- TRAINING ---------- */
+function vTraining(m){
+  m.innerHTML = '<div class="page-head"><div><h2>Training</h2><p>Capacity building — in-house and virtual, because you’re as good as your team</p></div>' +
+    '<div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="jaToast(\'Cohort request sent (demo)\')">Request a cohort</button></div></div>' +
+    '<div class="panel">' + COURSES.map(function(c,i){
+      return '<div class="course"><div class="cico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M22 9L12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></div>' +
+        '<div style="flex:1;min-width:150px"><h4>' + c.n + '</h4><p>' + c.d + '</p></div>' +
+        '<div class="cact"><div style="text-align:right"><div class="tnum" style="font-size:13px;font-weight:650">' + c.enrolled + ' enrolled</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-top:5px"><div class="bar-mini" style="width:96px"><i style="width:' + c.progress + '%"></i></div>' +
+        '<span class="tnum" style="font-size:12px;color:var(--text-secondary)">' + c.progress + '%</span></div></div>' +
+        '<button class="btn btn-ghost btn-sm" data-en="' + i + '">Enrol</button></div></div>';
+    }).join('') + '</div>' +
+    '<div class="grid2b"><div class="panel"><div class="panel-head"><div><h3>Delivery formats</h3></div></div>' +
+      '<div class="chips" style="margin-top:12px"><span class="chip on">In-house workshops</span><span class="chip on">Virtual classrooms</span><span class="chip on">Lab-based exercises</span><span class="chip">Situational awareness (IBEX)</span><span class="chip">Certification support</span></div></div>' +
+      '<div class="panel"><div class="panel-head"><div><h3>Training syllabus</h3><div class="sub">From the service portfolio</div></div></div>' +
+      '<div class="chips" style="margin-top:12px">' + ['Web &amp; mobile application engineering','Software design','Software architecture','Software development','Software engineering','Software maintenance','Software analysis','Software testing','Software support','Software monitoring','Software training'].map(function(x){ return '<span class="chip">' + x + '</span>'; }).join('') + '</div></div></div>';
+  m.querySelectorAll('[data-en]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var c = COURSES[+b.dataset.en];
+      c.enrolled += 1;
+      toast('Enrolled in ' + c.n);
+      vTraining(m);
+    });
+  });
+}
+
+/* ---------- TEAM ---------- */
+function vTeam(m){
+  m.innerHTML = '<div class="page-head"><div><h2>Team</h2><p>Your engagement bench</p></div></div>' +
+    '<div class="cards" style="grid-template-columns:repeat(2,1fr)">' +
+    TEAM.map(function(t){
+      var load = PROJECTS.filter(function(p){ return p.lead === t.n && p.status !== 'done'; });
+      return '<div class="card"><div style="display:flex;gap:16px;align-items:flex-start">' +
+        '<div class="avatar" style="margin:0;width:56px;height:56px;font-size:17px;flex:none">' + t.i + '</div>' +
+        '<div><h3 style="font-size:17px">' + t.n + '</h3><div style="color:var(--brand);font-weight:700;font-size:12.5px;margin-top:2px">' + t.r + '</div>' +
+        '<div style="font-size:12px;color:var(--text-muted)">' + t.d + '</div></div></div>' +
+        '<p style="margin-top:14px">' + t.b + '</p>' +
+        '<div style="margin-top:14px;font-size:12.5px;color:var(--text-secondary)"><b>' + load.length + '</b> active engagement' + (load.length === 1 ? '' : 's') +
+        (load.length ? ' &middot; ' + load.map(function(p){ return p.id; }).join(', ') : '') + '</div></div>';
+    }).join('') + '</div>';
+}
+
+/* ==================== APP CONTROL ==================== */
+function openApp(view){
+  document.getElementById('app').classList.add('open');
+  document.body.classList.add('locked');
+  document.getElementById('login').style.display = 'grid';
+  if(view) state.view = view;
+  renderNav(state.view);
+}
+function closeApp(){
+  document.getElementById('app').classList.remove('open');
+  document.body.classList.remove('locked');
+  closeDrawer();
+}
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var role = document.getElementById('lg-role').value;
+  state.role = role;
+  if(role === 'consultant'){
+    document.getElementById('userName').textContent = 'Kojo Ampia-Addison';
+    document.getElementById('userRole').textContent = 'Managing Consultant';
+    document.getElementById('userAv').textContent = 'KA';
+  } else {
+    document.getElementById('userName').textContent = 'Ama Kusi';
+    document.getElementById('userRole').textContent = 'Client — Bedrock Insurance';
+    document.getElementById('userAv').textContent = 'AK';
+  }
+  document.getElementById('login').style.display = 'none';
+  go(state.view);
+  toast('Signed in to the demo portal');
+});
+document.getElementById('sideToggle').addEventListener('click', function(){
+  document.getElementById('side').classList.toggle('show');
+});
+document.getElementById('gsearch').addEventListener('input', function(e){
+  state.q = e.target.value;
+  if(state.view !== 'projects') go('projects'); else renderRows();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    if(document.getElementById('drawer').classList.contains('on')) closeDrawer();
+    else if(document.getElementById('app').classList.contains('open')) closeApp();
+  }
+});
+var rt;
+window.addEventListener('resize', function(){
+  clearTimeout(rt);
+  rt = setTimeout(function(){
+    if(document.getElementById('app').classList.contains('open') &&
+       document.getElementById('login').style.display === 'none') go(state.view);
+  }, 220);
+});
+
+/* expose the few handlers used by inline attributes */
+window.openApp = openApp;
+window.closeApp = closeApp;
+window.jaToast = toast;
+window.jaGo = go;
+})();
+</script>
+</body>
+</html>
