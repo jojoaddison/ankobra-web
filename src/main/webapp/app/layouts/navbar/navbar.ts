@@ -58,9 +58,9 @@ export default class Navbar {
     } else {
       this.version = '';
     }
-    // The marketing home and the portal both render their own chrome, so the JHipster navbar is hidden there.
+    // The marketing home, the portal and the CMS all render their own chrome, so the JHipster navbar is hidden there.
     const ownsChrome = (url: string): boolean =>
-      url === '/' || url === '' || url.startsWith('/?') || url.startsWith('/#') || url.startsWith('/portal');
+      url === '/' || url === '' || url.startsWith('/?') || url.startsWith('/#') || url.startsWith('/portal') || url.startsWith('/cms');
     this.hidden.set(ownsChrome(this.router.url));
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe(e => {
       this.hidden.set(ownsChrome(e.urlAfterRedirects));

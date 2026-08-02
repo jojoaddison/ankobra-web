@@ -1,0 +1,76 @@
+<div class="pview cms">
+  <div class="pview-head">
+    <div>
+      <h1>Content management</h1>
+      <p class="sub">Create, edit and remove the records behind the marketing site and portal. Admin only.</p>
+    </div>
+  </div>
+
+  @for (grp of groups; track grp.group) {
+    <div class="cms-group">
+      <div class="cms-group-label">{{ grp.group }}</div>
+      <div class="pgrid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))">
+        @for (item of grp.items; track item.key) {
+          <a class="pcard cms-card" [routerLink]="item.link">
+            <div class="cms-card-top">
+              <span class="cms-ico">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  @switch (item.icon) {
+                    @case ('users') {
+                      <circle cx="9" cy="8" r="3.5" />
+                      <path d="M2 20a7 7 0 0114 0" />
+                      <path d="M17 11a3 3 0 100-6" />
+                      <path d="M18.5 20a6 6 0 00-2-4.5" />
+                    }
+                    @case ('folder') {
+                      <path d="M3 7h6l2 2h10v10H3z" />
+                    }
+                    @case ('flag') {
+                      <path d="M4 21V4h13l-2 4 2 4H4" />
+                    }
+                    @case ('headset') {
+                      <path d="M4 12a8 8 0 0116 0v5a3 3 0 01-3 3h-2" />
+                      <rect x="2" y="12" width="4" height="6" rx="1.5" />
+                      <rect x="18" y="12" width="4" height="6" rx="1.5" />
+                    }
+                    @case ('grid') {
+                      <path d="M4 4h16v5H4zM4 13h7v7H4zM13 13h7v7h-7z" />
+                    }
+                    @case ('file') {
+                      <path d="M6 2h9l5 5v15H6z" />
+                      <path d="M15 2v5h5" />
+                      <path d="M9 13h7M9 17h5" />
+                    }
+                    @case ('list') {
+                      <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                    }
+                    @case ('cap') {
+                      <path d="M22 9L12 4 2 9l10 5 10-5z" />
+                      <path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5" />
+                    }
+                    @case ('user') {
+                      <circle cx="12" cy="7" r="3.5" />
+                      <path d="M4 21a8 8 0 0116 0" />
+                    }
+                    @case ('inbox') {
+                      <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+                      <path d="M5.5 5h13l3.5 7v6a1 1 0 01-1 1H3a1 1 0 01-1-1v-6z" />
+                    }
+                  }
+                </svg>
+              </span>
+              @if (countOf(item.key) !== undefined) {
+                <span class="cms-count">{{ countOf(item.key) === null ? '—' : countOf(item.key) }}</span>
+              } @else {
+                <span class="cms-count muted">…</span>
+              }
+            </div>
+            <h3>{{ item.label }}</h3>
+            <p>{{ item.description }}</p>
+            <span class="cms-manage">Manage →</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>

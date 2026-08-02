@@ -1,176 +1,102 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { HttpResponse } from '@angular/common/http';
-import { Observable, forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { ClientService } from 'app/entities/client/service/client.service';
-import { ProjectService } from 'app/entities/project/service/project.service';
-import { MilestoneService } from 'app/entities/milestone/service/milestone.service';
-import { TicketService } from 'app/entities/ticket/service/ticket.service';
-import { ServiceItemService } from 'app/entities/service-item/service/service-item.service';
-import { QuoteService } from 'app/entities/quote/service/quote.service';
-import { QuoteLineService } from 'app/entities/quote-line/service/quote-line.service';
-import { CourseService } from 'app/entities/course/service/course.service';
-import { TeamMemberService } from 'app/entities/team-member/service/team-member.service';
-import { LeadService } from 'app/entities/lead/service/lead.service';
+import { AccountService } from 'app/core/auth/account.service';
+import { LoginService } from 'app/login/login.service';
+import { ThemeService } from 'app/core/theme/theme.service';
 
-interface EntityCard {
-  key: string;
+interface CmsNavItem {
+  id: string;
   label: string;
-  description: string;
   link: string;
   icon: string;
-  count: (() => Observable<HttpResponse<unknown[]>>) | null;
+  exact?: boolean;
 }
-interface EntityGroup {
+interface CmsNavGroup {
   group: string;
-  items: EntityCard[];
+  items: CmsNavItem[];
 }
 
+/**
+ * Content-management shell — the same top-bar + collapsible-sidebar chrome as the portal,
+ * but scoped to the entity CRUD surface. The sidebar links to each entity manager; the
+ * dashboard (entity cards) is the index child. The return button goes back to /admin.
+ */
 @Component({
   selector: 'jhi-cms',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './cms.html',
   styleUrl: './cms.scss',
-  imports: [RouterLink],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
 })
-export default class Cms implements OnInit {
-  protected readonly counts = signal<Record<string, number | null>>({});
+export default class Cms {
+  protected readonly theme = inject(ThemeService);
+  protected readonly account = inject(AccountService).account;
+  protected readonly sidebarCollapsed = signal(false);
 
-  protected readonly groups: EntityGroup[] = [
+  protected readonly displayName = computed(() => {
+    const a = this.account();
+    if (!a) {
+      return 'Guest';
+    }
+    return [a.firstName, a.lastName].filter(Boolean).join(' ') || a.login;
+  });
+
+  protected readonly initials = computed(() =>
+    this.displayName()
+      .split(/\s+/)
+      .map(p => p.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase(),
+  );
+
+  protected readonly nav: CmsNavGroup[] = [
+    {
+      group: 'Manage',
+      items: [{ id: 'dashboard', label: 'Dashboard', link: '/cms', icon: 'grid', exact: true }],
+    },
     {
       group: 'Delivery',
       items: [
-        {
-          key: 'client',
-          label: 'Clients',
-          description: 'Accounts we deliver for',
-          link: '/client',
-          icon: 'users',
-          count: () => this.clientService.query({ size: 1 }),
-        },
-        {
-          key: 'project',
-          label: 'Projects',
-          description: 'Delivery engagements',
-          link: '/project',
-          icon: 'folder',
-          count: () => this.projectService.query({ size: 1 }),
-        },
-        {
-          key: 'milestone',
-          label: 'Milestones',
-          description: 'Project timeline steps',
-          link: '/milestone',
-          icon: 'flag',
-          count: () => this.milestoneService.query({ size: 1 }),
-        },
-        {
-          key: 'ticket',
-          label: 'Tickets',
-          description: 'Support desk requests',
-          link: '/ticket',
-          icon: 'headset',
-          count: () => this.ticketService.query({ size: 1 }),
-        },
+        { id: 'client', label: 'Clients', link: '/client', icon: 'users' },
+        { id: 'project', label: 'Projects', link: '/project', icon: 'folder' },
+        { id: 'milestone', label: 'Milestones', link: '/milestone', icon: 'flag' },
+        { id: 'ticket', label: 'Tickets', link: '/ticket', icon: 'headset' },
       ],
     },
     {
       group: 'Commercial',
       items: [
-        {
-          key: 'serviceItem',
-          label: 'Service catalogue',
-          description: 'Rate-card line items',
-          link: '/service-item',
-          icon: 'grid',
-          count: () => this.serviceItemService.query({ size: 1 }),
-        },
-        {
-          key: 'quote',
-          label: 'Quotes',
-          description: 'Estimates for clients',
-          link: '/quote',
-          icon: 'file',
-          count: () => this.quoteService.query({ size: 1 }),
-        },
-        {
-          key: 'quoteLine',
-          label: 'Quote lines',
-          description: 'Line items on quotes',
-          link: '/quote-line',
-          icon: 'list',
-          count: () => this.quoteLineService.query({ size: 1 }),
-        },
+        { id: 'service-item', label: 'Service catalogue', link: '/service-item', icon: 'grid2' },
+        { id: 'quote', label: 'Quotes', link: '/quote', icon: 'file' },
+        { id: 'quote-line', label: 'Quote lines', link: '/quote-line', icon: 'list' },
       ],
     },
     {
       group: 'Operations',
       items: [
-        {
-          key: 'course',
-          label: 'Courses',
-          description: 'Training curriculum',
-          link: '/course',
-          icon: 'cap',
-          count: () => this.courseService.query({ size: 1 }),
-        },
-        {
-          key: 'teamMember',
-          label: 'Team',
-          description: 'Consultants and staff',
-          link: '/team-member',
-          icon: 'user',
-          count: () => this.teamMemberService.query({ size: 1 }),
-        },
+        { id: 'course', label: 'Courses', link: '/course', icon: 'cap' },
+        { id: 'team-member', label: 'Team', link: '/team-member', icon: 'user' },
       ],
     },
     {
       group: 'Leads',
-      items: [
-        {
-          key: 'lead',
-          label: 'Leads',
-          description: 'Enquiries from the contact form',
-          link: '/lead',
-          icon: 'inbox',
-          count: () => this.leadService.query({ size: 1 }),
-        },
-      ],
+      items: [{ id: 'lead', label: 'Leads', link: '/lead', icon: 'inbox' }],
     },
   ];
 
-  private readonly clientService = inject(ClientService);
-  private readonly projectService = inject(ProjectService);
-  private readonly milestoneService = inject(MilestoneService);
-  private readonly ticketService = inject(TicketService);
-  private readonly serviceItemService = inject(ServiceItemService);
-  private readonly quoteService = inject(QuoteService);
-  private readonly quoteLineService = inject(QuoteLineService);
-  private readonly courseService = inject(CourseService);
-  private readonly teamMemberService = inject(TeamMemberService);
-  private readonly leadService = inject(LeadService);
+  private readonly loginService = inject(LoginService);
 
-  ngOnInit(): void {
-    const cards = this.groups.flatMap(g => g.items).filter(c => c.count);
-    forkJoin(
-      cards.map(card =>
-        card.count!().pipe(
-          map(res => ({ key: card.key, count: Number(res.headers.get('X-Total-Count') ?? 0) })),
-          catchError(() => of({ key: card.key, count: null as number | null })),
-        ),
-      ),
-    ).subscribe(results => {
-      const next: Record<string, number | null> = {};
-      for (const r of results) {
-        next[r.key] = r.count;
-      }
-      this.counts.set(next);
-    });
+  protected toggleSidebar(): void {
+    this.sidebarCollapsed.update(v => !v);
   }
 
-  protected countOf(key: string): number | null | undefined {
-    return this.counts()[key];
+  protected toggleTheme(): void {
+    this.theme.toggle();
+  }
+
+  protected logout(): void {
+    this.loginService.logout();
   }
 }

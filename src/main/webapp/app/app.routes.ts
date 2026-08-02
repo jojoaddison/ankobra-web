@@ -44,8 +44,7 @@ const routes: Routes = [
       authorities: [Authority.ADMIN],
     },
     canActivate: [UserRouteAccessService],
-    loadComponent: () => import('./cms/cms'),
-    title: 'Content management',
+    loadChildren: () => import('./cms/cms.routes'),
   },
   {
     // The entity CRUD pages are the content-management surface: admin only.
