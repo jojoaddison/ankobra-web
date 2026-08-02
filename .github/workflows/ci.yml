@@ -55,3 +55,9 @@ jobs:
       # `npm test` runs pretest -> lint, then vitest.
       - name: Lint + unit tests
         run: npm test
+
+      # The production Angular build enforces bundle/style budgets that the dev build does not
+      # (publish.yml's -Pprod is where a budget overrun would otherwise first surface). Run it here
+      # so a budget or AOT error fails the PR, not the release.
+      - name: Production webapp build
+        run: npm run webapp:build:prod
