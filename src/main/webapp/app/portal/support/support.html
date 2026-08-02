@@ -1,0 +1,45 @@
+<div class="pview">
+  <div class="pview-head">
+    <div>
+      <h1>Support desk</h1>
+      <p class="sub">{{ openCount() }} open ticket{{ openCount() === 1 ? '' : 's' }} across your engagements.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="panel empty">Loading tickets…</div>
+  } @else if (tickets().length === 0) {
+    <div class="panel empty">No tickets on the desk.</div>
+  } @else {
+    <table class="ptable">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Subject</th>
+          <th>Priority</th>
+          <th>Client</th>
+          <th>Owner</th>
+          <th>SLA</th>
+          <th>State</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of tickets(); track t.id) {
+          <tr>
+            <td class="mono">{{ t.reference }}</td>
+            <td class="strong">{{ t.subject }}</td>
+            <td>
+              <span class="st" [class]="fmt.statusClass(t.priority)">{{ fmt.priorityLabel(t.priority) }}</span>
+            </td>
+            <td>{{ t.client?.name ?? '—' }}</td>
+            <td>{{ t.owner?.name ?? '—' }}</td>
+            <td>{{ t.slaHours !== null && t.slaHours !== undefined ? t.slaHours + 'h' : '—' }}</td>
+            <td>
+              <span class="st" [class]="t.state === 'OPEN' ? 'st-warn' : 'st-neutral'">{{ t.state === 'OPEN' ? 'Open' : 'Closed' }}</span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

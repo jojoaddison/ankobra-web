@@ -1,0 +1,39 @@
+<div class="pview">
+  <div class="pview-head">
+    <div>
+      <h1>Clients</h1>
+      <p class="sub">Accounts we deliver for, with health and lifetime spend.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="panel empty">Loading clients…</div>
+  } @else if (clients().length === 0) {
+    <div class="panel empty">No clients to show.</div>
+  } @else {
+    <table class="ptable">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Sector</th>
+          <th>Since</th>
+          <th>Health</th>
+          <th style="text-align: right">Total spend</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of clients(); track c.id) {
+          <tr>
+            <td class="strong">{{ c.name }}</td>
+            <td>{{ fmt.humanize(c.sector) }}</td>
+            <td>{{ c.clientSince ?? '—' }}</td>
+            <td>
+              <span class="st" [class]="fmt.statusClass(c.health)">{{ fmt.statusLabel(c.health) }}</span>
+            </td>
+            <td class="strong" style="text-align: right">{{ fmt.money(c.totalSpend) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

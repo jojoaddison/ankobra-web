@@ -61,23 +61,23 @@ export default class Portal {
       group: 'Delivery',
       items: [
         { id: 'overview', label: 'Overview', link: '/portal/overview', icon: 'grid' },
-        { id: 'projects', label: 'Projects', link: '/project', icon: 'folder' },
-        { id: 'clients', label: 'Clients', link: '/client', icon: 'users' },
+        { id: 'projects', label: 'Projects', link: '/portal/projects', icon: 'folder' },
+        { id: 'clients', label: 'Clients', link: '/portal/clients', icon: 'users' },
       ],
     },
     {
       group: 'Commercial',
       items: [
-        { id: 'catalogue', label: 'Service catalogue', link: '/service-item', icon: 'grid2' },
-        { id: 'quotes', label: 'Quote builder', link: '/quote', icon: 'file' },
+        { id: 'catalogue', label: 'Service catalogue', link: '/portal/catalogue', icon: 'grid2' },
+        { id: 'quotes', label: 'Quote builder', link: '/portal/quotes', icon: 'file' },
       ],
     },
     {
       group: 'Operations',
       items: [
-        { id: 'support', label: 'Support desk', link: '/ticket', icon: 'headset' },
-        { id: 'training', label: 'Training', link: '/course', icon: 'cap' },
-        { id: 'team', label: 'Team', link: '/team-member', icon: 'user' },
+        { id: 'support', label: 'Support desk', link: '/portal/support', icon: 'headset' },
+        { id: 'training', label: 'Training', link: '/portal/training', icon: 'cap' },
+        { id: 'team', label: 'Team', link: '/portal/team', icon: 'user' },
       ],
     },
   ];

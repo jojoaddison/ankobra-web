@@ -1,0 +1,73 @@
+<div class="pview">
+  <div class="pview-head">
+    <div>
+      <h1>Projects</h1>
+      <p class="sub">Delivery engagements, milestones and budget burn.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="panel empty">Loading projects…</div>
+  } @else if (projects().length === 0) {
+    <div class="panel empty">No projects to show.</div>
+  } @else {
+    <div class="pgrid" style="grid-template-columns: repeat(auto-fill, minmax(420px, 1fr))">
+      @for (p of projects(); track p.id) {
+        <div class="pcard proj">
+          <div class="proj-top">
+            <div>
+              <span class="mono">{{ p.reference }}</span>
+              <h3>{{ p.name }}</h3>
+            </div>
+            <span class="st" [class]="fmt.statusClass(p.status)">{{ fmt.statusLabel(p.status) }}</span>
+          </div>
+
+          <div class="proj-meta">
+            <span class="pill">{{ fmt.humanize(p.pillar) }}</span>
+            <span class="muted">{{ p.client?.name }}</span>
+            <span class="muted">· Lead {{ p.lead?.name ?? '—' }}</span>
+          </div>
+
+          <div class="prog" style="margin-top: 14px">
+            <div class="prog-track"><div class="prog-fill" [style.width.%]="p.progress ?? 0"></div></div>
+            <div class="prog-num">{{ p.progress ?? 0 }}%</div>
+          </div>
+
+          <div class="proj-figures">
+            <div>
+              <div class="lbl">Budget</div>
+              <div class="val">{{ fmt.money(p.budget) }}</div>
+            </div>
+            <div>
+              <div class="lbl">Spent</div>
+              <div class="val">{{ fmt.money(p.spent) }}</div>
+            </div>
+            <div>
+              <div class="lbl">Timeline</div>
+              <div class="val">{{ dueLabel(p) }}</div>
+            </div>
+          </div>
+
+          @if (stackTags(p).length) {
+            <div class="proj-tags">
+              @for (t of stackTags(p); track t) {
+                <span class="tag">{{ t }}</span>
+              }
+            </div>
+          }
+
+          @if (milestonesFor(p).length) {
+            <div class="timeline">
+              @for (m of milestonesFor(p); track m.id) {
+                <div class="ms" [class]="'ms-' + (m.state | lowercase)">
+                  <span class="dot"></span>
+                  <span class="ms-title">{{ m.title }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

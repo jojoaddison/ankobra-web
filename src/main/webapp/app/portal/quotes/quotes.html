@@ -1,0 +1,88 @@
+<div class="pview">
+  <div class="pview-head">
+    <div>
+      <h1>Quote builder</h1>
+      <p class="sub">Compose an estimate from the service catalogue.</p>
+    </div>
+  </div>
+
+  <div class="quote-grid">
+    <div class="panel builder">
+      <div class="builder-row">
+        <label>
+          <span class="fld-label">Add a service</span>
+          <select class="fld" (change)="addItem($any($event.target).value); $any($event.target).value = ''">
+            <option value="">Choose a catalogue item…</option>
+            @for (item of catalogue(); track item.id) {
+              <option [value]="item.id">{{ item.name }} — {{ fmt.money(item.rate) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (lines().length === 0) {
+        <div class="empty">No line items yet — add a service to start your estimate.</div>
+      } @else {
+        <table class="ptable" style="margin-top: 14px">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th style="width: 90px">Rate</th>
+              <th style="width: 90px">Qty</th>
+              <th style="width: 110px; text-align: right">Line total</th>
+              <th style="width: 40px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.item.id; let i = $index) {
+              <tr>
+                <td class="strong">{{ line.item.name }}</td>
+                <td>{{ fmt.money(line.item.rate) }}</td>
+                <td>
+                  <input
+                    class="qty"
+                    type="number"
+                    min="1"
+                    [value]="line.quantity"
+                    (input)="setQuantity(i, $any($event.target).value)"
+                    aria-label="Quantity"
+                  />
+                </td>
+                <td class="strong" style="text-align: right">{{ fmt.money(lineTotal(line)) }}</td>
+                <td>
+                  <button class="remove" type="button" (click)="remove(i)" aria-label="Remove">×</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="panel summary">
+      <div class="fld-label">Quote title</div>
+      <input class="fld" [value]="title()" (input)="title.set($any($event.target).value)" placeholder="e.g. Bedrock — phase 2 estimate" />
+
+      <div class="fld-label" style="margin-top: 14px">Client</div>
+      <select class="fld" [value]="clientId()" (change)="clientId.set(+$any($event.target).value || null)">
+        <option [value]="null">— No client —</option>
+        @for (c of clients(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+
+      <div class="total-row">
+        <span>Estimated total</span>
+        <span class="total-val">{{ fmt.money(total()) }}</span>
+      </div>
+
+      <button class="save-btn" type="button" [disabled]="lines().length === 0 || saving()" (click)="save()">
+        {{ saving() ? 'Saving…' : 'Save quote' }}
+      </button>
+
+      @if (savedRef()) {
+        <div class="saved-note">Saved as {{ savedRef() }}.</div>
+      }
+    </div>
+  </div>
+</div>

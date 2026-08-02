@@ -1,0 +1,30 @@
+<div class="pview">
+  <div class="pview-head">
+    <div>
+      <h1>Training</h1>
+      <p class="sub">Capacity-building courses and cohort progress.</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="panel empty">Loading courses…</div>
+  } @else if (courses().length === 0) {
+    <div class="panel empty">No courses yet.</div>
+  } @else {
+    <div class="pgrid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))">
+      @for (c of courses(); track c.id) {
+        <div class="pcard">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+            <h3 style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary)">{{ c.name }}</h3>
+            <span class="pill">{{ c.enrolledCount ?? 0 }} enrolled</span>
+          </div>
+          <div class="muted" style="font-size: 12.5px; margin-top: 6px">{{ meta(c) }}</div>
+          <div class="prog" style="margin-top: 16px">
+            <div class="prog-track"><div class="prog-fill" [style.width.%]="c.progress ?? 0"></div></div>
+            <div class="prog-num">{{ c.progress ?? 0 }}%</div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
