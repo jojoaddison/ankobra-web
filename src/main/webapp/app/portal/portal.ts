@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AccountService } from 'app/core/auth/account.service';
 import { LoginService } from 'app/login/login.service';
@@ -83,6 +83,14 @@ export default class Portal {
   ];
 
   private readonly loginService = inject(LoginService);
+  private readonly router = inject(Router);
+
+  protected runSearch(term: string): void {
+    const q = term.trim();
+    if (q) {
+      this.router.navigate(['/portal/search'], { queryParams: { q } });
+    }
+  }
 
   protected toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);

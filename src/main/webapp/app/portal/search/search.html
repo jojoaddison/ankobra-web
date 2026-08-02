@@ -1,0 +1,59 @@
+<div class="pview">
+  <div class="pview-head">
+    <div>
+      <h1>Search</h1>
+      @if (term()) {
+        <p class="sub">{{ totalMatches() }} result{{ totalMatches() === 1 ? '' : 's' }} for “{{ term() }}”.</p>
+      } @else {
+        <p class="sub">Type in the top-bar search to find projects, clients and tickets.</p>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="panel empty">Searching…</div>
+  } @else if (term() && totalMatches() === 0) {
+    <div class="panel empty">Nothing matched “{{ term() }}”.</div>
+  } @else if (term()) {
+    @if (matchedProjects().length) {
+      <div class="res-group">
+        <div class="res-head"><span>Projects</span><a routerLink="/portal/projects">View all</a></div>
+        @for (p of matchedProjects(); track p.id) {
+          <div class="res-row">
+            <span class="mono">{{ p.reference }}</span>
+            <span class="strong">{{ p.name }}</span>
+            <span class="muted">{{ p.client?.name }}</span>
+            <span class="st" [class]="fmt.statusClass(p.status)">{{ fmt.statusLabel(p.status) }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (matchedClients().length) {
+      <div class="res-group">
+        <div class="res-head"><span>Clients</span><a routerLink="/portal/clients">View all</a></div>
+        @for (c of matchedClients(); track c.id) {
+          <div class="res-row">
+            <span class="strong">{{ c.name }}</span>
+            <span class="muted">{{ fmt.humanize(c.sector) }}</span>
+            <span class="st" [class]="fmt.statusClass(c.health)">{{ fmt.statusLabel(c.health) }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    @if (matchedTickets().length) {
+      <div class="res-group">
+        <div class="res-head"><span>Tickets</span><a routerLink="/portal/support">View all</a></div>
+        @for (t of matchedTickets(); track t.id) {
+          <div class="res-row">
+            <span class="mono">{{ t.reference }}</span>
+            <span class="strong">{{ t.subject }}</span>
+            <span class="muted">{{ t.client?.name }}</span>
+            <span class="st" [class]="fmt.statusClass(t.priority)">{{ fmt.priorityLabel(t.priority) }}</span>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

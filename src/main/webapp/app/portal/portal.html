@@ -18,6 +18,7 @@
       <input
         [value]="search()"
         (input)="search.set($any($event.target).value)"
+        (keyup.enter)="runSearch(search())"
         placeholder="Search projects, clients, tickets…"
         aria-label="Search"
       />

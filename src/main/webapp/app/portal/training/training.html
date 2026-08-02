@@ -26,5 +26,6 @@
         </div>
       }
     </div>
+    <jhi-pager [page]="page()" [pageSize]="pageSize" [totalItems]="total()" (pageChange)="onPage($event)" />
   }
 </div>

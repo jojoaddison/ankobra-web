@@ -7,6 +7,7 @@ const portalRoutes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'overview' },
       { path: 'overview', loadComponent: () => import('./overview/overview'), title: 'Delivery overview' },
+      { path: 'search', loadComponent: () => import('./search/search'), title: 'Search' },
       { path: 'projects', loadComponent: () => import('./projects/projects'), title: 'Projects' },
       { path: 'clients', loadComponent: () => import('./clients/clients'), title: 'Clients' },
       { path: 'catalogue', loadComponent: () => import('./catalogue/catalogue'), title: 'Service catalogue' },

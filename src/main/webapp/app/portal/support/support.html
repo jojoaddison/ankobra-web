@@ -2,7 +2,7 @@
   <div class="pview-head">
     <div>
       <h1>Support desk</h1>
-      <p class="sub">{{ openCount() }} open ticket{{ openCount() === 1 ? '' : 's' }} across your engagements.</p>
+      <p class="sub">{{ total() }} ticket{{ total() === 1 ? '' : 's' }} across your engagements.</p>
     </div>
   </div>
 
@@ -41,5 +41,6 @@
         }
       </tbody>
     </table>
+    <jhi-pager [page]="page()" [pageSize]="pageSize" [totalItems]="total()" (pageChange)="onPage($event)" />
   }
 </div>

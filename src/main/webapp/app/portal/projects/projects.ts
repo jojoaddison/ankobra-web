@@ -1,24 +1,27 @@
 import { LowerCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
 
 import { IProject } from 'app/entities/project/project.model';
 import { ProjectService } from 'app/entities/project/service/project.service';
 import { IMilestone } from 'app/entities/milestone/milestone.model';
 import { MilestoneService } from 'app/entities/milestone/service/milestone.service';
 import { PortalFormat } from '../shared/portal-format';
+import Pager from '../shared/pager';
 
 @Component({
   selector: 'jhi-portal-projects',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './projects.html',
   styleUrl: './projects.scss',
-  imports: [LowerCasePipe],
+  imports: [LowerCasePipe, Pager],
 })
 export default class Projects implements OnInit {
   protected readonly fmt = PortalFormat;
   protected readonly loading = signal(true);
   protected readonly projects = signal<IProject[]>([]);
+  protected readonly page = signal(1);
+  protected readonly total = signal(0);
+  protected readonly pageSize = 6;
 
   protected readonly milestonesByProject = computed(() => {
     const map = new Map<number, IMilestone[]>();
@@ -42,17 +45,14 @@ export default class Projects implements OnInit {
   private readonly milestoneService = inject(MilestoneService);
 
   ngOnInit(): void {
-    forkJoin({
-      projects: this.projectService.query({ size: 100, sort: ['reference,asc'] }),
-      milestones: this.milestoneService.query({ size: 500, sort: ['position,asc'] }),
-    }).subscribe({
-      next: ({ projects, milestones }) => {
-        this.projects.set(projects.body ?? []);
-        this.milestones.set(milestones.body ?? []);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    // Milestones are few; fetch them all once, then paginate the projects.
+    this.milestoneService.query({ size: 500, sort: ['position,asc'] }).subscribe(res => this.milestones.set(res.body ?? []));
+    this.load();
+  }
+
+  protected onPage(page: number): void {
+    this.page.set(page);
+    this.load();
   }
 
   protected milestonesFor(project: IProject): IMilestone[] {
@@ -72,5 +72,17 @@ export default class Projects implements OnInit {
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
+  }
+
+  private load(): void {
+    this.loading.set(true);
+    this.projectService.query({ page: this.page() - 1, size: this.pageSize, sort: ['reference,asc'] }).subscribe({
+      next: res => {
+        this.projects.set(res.body ?? []);
+        this.total.set(Number(res.headers.get('X-Total-Count') ?? 0));
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
   }
 }

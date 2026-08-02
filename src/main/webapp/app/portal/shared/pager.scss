@@ -1,0 +1,41 @@
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.pager-info {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.pager-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pager-cur {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.pager-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  &:hover:not(:disabled) {
+    background: var(--surface-sunk);
+    border-color: var(--brand);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
