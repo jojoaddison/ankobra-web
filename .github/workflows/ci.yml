@@ -1,0 +1,57 @@
+name: CI
+
+# Build-and-test gate for pull requests and the default branch. Publishing the deployable image is a
+# separate concern (.github/workflows/publish.yml) that runs only on main and tags.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# One in-flight run per ref; a new push to a PR cancels the previous, still-running check.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (JDK 25)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # JDK 25, matching <java.version> in pom.xml and deploy/build.sh. JHipster's maven-enforcer
+      # accepts only 21-25, so the runner's default JDK would fail the build before it compiles.
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: pom.xml
+
+      # Backend unit + integration tests. Default profile — the Angular build is not part of this job
+      # (the frontend job covers the client); it belongs to -Pprod, which publish.yml runs.
+      - name: Verify
+        run: ./mvnw -ntp --batch-mode verify
+
+  frontend:
+    name: Frontend (Node 22)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` from the committed lockfile; .npmrc pins legacy-peer-deps=true, which npm 10.9's
+      # arborist needs to resolve the vitest 4 peer set without crashing (see .npmrc).
+      - name: Install
+        run: npm ci
+
+      # `npm test` runs pretest -> lint, then vitest.
+      - name: Lint + unit tests
+        run: npm test

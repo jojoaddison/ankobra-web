@@ -1,0 +1,181 @@
+name: Publish image (GHCR)
+
+# Builds the same image `deploy/build.sh` builds locally, but on a GitHub runner, and pushes it to
+# this repository's GitHub Container Registry namespace (ghcr.io/<owner>/ankobra-web) instead of the
+# private docker.jojoaddison.net one.
+#
+# Nothing here touches a production server. Releasing stays a deliberate, human-run step:
+#
+#   ./deploy/deploy.sh --channel github                  # deploy this commit's GHCR image
+#   TAG=<sha> ./deploy/deploy.sh --channel github        # roll back to any published tag
+#
+# One image, not two. This is a JHipster monolith: `-Pprod` compiles the Angular bundle into the
+# jar's static resources, so Spring Boot serves the marketing site, the public enquiry API and the
+# authenticated portal from one process.
+#
+# Built by **jib**, not `docker/build-push-action` — JHipster generates no Dockerfile, and the
+# `jib-maven-plugin` configuration in `pom.xml` (base image eclipse-temurin:25-jre-noble) is the
+# image definition. jib pushes straight to the registry from the JVM; the layer cache it benefits
+# from is `~/.m2`, handled by setup-java below.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch: # publish any branch on demand, e.g. to test a change on the server first
+
+# Serialise per ref and never cancel a run mid-push. A cancelled jib push can leave a manifest
+# referencing blobs it never finished uploading, which `deploy.sh --channel github` would then see
+# as a published tag that fails to pull.
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: ankobra-web
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # what pushing to ghcr.io with GITHUB_TOKEN requires
+    steps:
+      - uses: actions/checkout@v4
+
+      # JDK 25, not the runner's default. JHipster's maven-enforcer rejects anything outside 21-25,
+      # so the build fails before it compiles. Same pin as pom.xml's <java.version> and
+      # deploy/build.sh. No setup-node step: frontend-maven-plugin downloads its own Node
+      # (<node.version> in pom.xml) into the build directory during -Pprod.
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: pom.xml
+
+      # `npm install` runs inside -Pprod. Cache the npm download cache so it does not re-fetch the
+      # whole dependency tree every run; ~/.m2 holds the Node tarball but not the npm packages.
+      - name: Cache the npm download cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+
+      - name: Compute image tags
+        id: meta
+        run: |
+          set -euo pipefail
+
+          # GHCR namespaces are case-sensitive and must be lowercase; the owner name is not
+          # guaranteed to be, so fold it.
+          OWNER="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          REPO="ghcr.io/${OWNER}/ankobra-web"
+
+          # The fixed 7-char prefix of GITHUB_SHA depends on nothing, unlike `git rev-parse --short`
+          # whose length is object-count dependent and can differ on a shallow runner clone. Use it
+          # as the primary tag and let the git-abbreviated form ride along only when it differs.
+          SHA_TAG="${GITHUB_SHA:0:7}"
+          EXTRA=()
+          GIT_ABBREV="$(git rev-parse --short HEAD)"
+          [[ "$GIT_ABBREV" == "$SHA_TAG" ]] || EXTRA+=("$GIT_ABBREV")
+
+          # `latest` moves only on a default-branch build — never on a workflow_dispatch of a feature branch.
+          if [[ "${GITHUB_REF}" == "refs/heads/${{ github.event.repository.default_branch }}" ]]; then
+            EXTRA+=("latest")
+          fi
+
+          # A pushed release tag (v1.2.3) becomes an image tag of the same name.
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            EXTRA+=("${GITHUB_REF#refs/tags/}")
+          fi
+
+          # jib takes one fully-qualified image and the rest as bare tag names. extra_tags is empty
+          # for a workflow_dispatch run of a non-default branch — the build step must then omit
+          # -Djib.to.tags entirely rather than pass an empty one, which jib reads as a tag named "".
+          echo "image=${REPO}:${SHA_TAG}" >> "$GITHUB_OUTPUT"
+          echo "extra_tags=$(IFS=,; echo "${EXTRA[*]}")" >> "$GITHUB_OUTPUT"
+          echo "sha_tag=${SHA_TAG}" >> "$GITHUB_OUTPUT"
+          echo "all_tags=$(IFS=,; echo "${SHA_TAG}${EXTRA[@]+,${EXTRA[*]}}")" >> "$GITHUB_OUTPUT"
+          echo "repo=${REPO}" >> "$GITHUB_OUTPUT"
+
+          echo "Publishing:"
+          for t in "${SHA_TAG}" ${EXTRA[@]+"${EXTRA[@]}"}; do echo "  ${REPO}:${t}"; done
+
+      # jib reads ~/.docker/config.json for registry credentials, which is what this writes. It never
+      # talks to a Docker daemon. The -Djib.to.auth.* alternative would put the token on the process
+      # command line, which `ps` shows even though Actions masks the log.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push (jib, -Pprod, tests run)
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          EXTRA_TAGS: ${{ steps.meta.outputs.extra_tags }}
+          SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}
+          REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          ARGS=(-Djib.to.image="$IMAGE" -Djib.console=plain)
+          # Omitted, not passed empty: jib reads `-Djib.to.tags=` as a request for a tag named "".
+          [[ -n "$EXTRA_TAGS" ]] && ARGS+=(-Djib.to.tags="$EXTRA_TAGS")
+          # image.source links the published package back to this repository on GitHub.
+          ARGS+=(-Djib.container.labels="org.opencontainers.image.source=${SOURCE_URL},org.opencontainers.image.revision=${REVISION}")
+
+          # `verify` before `jib:build`, matching deploy/build.sh: the last gate before an image can
+          # be deployed. Testcontainers-style tests need a Docker daemon — ubuntu-latest ships one.
+          ./mvnw -ntp --batch-mode -Pprod verify jib:build "${ARGS[@]}"
+
+      # A push is not published until the registry serves it. Assert every tag resolves so a jib run
+      # that reports success but leaves a tag unresolvable fails here, not at deploy time. Retried,
+      # because a registry may serve a manifest a moment after accepting it — but bounded.
+      - name: Verify every tag resolves in the registry
+        env:
+          REPO: ${{ steps.meta.outputs.repo }}
+          ALL_TAGS: ${{ steps.meta.outputs.all_tags }}
+        run: |
+          set -euo pipefail
+
+          missing=()
+          for t in $(tr ',' ' ' <<<"$ALL_TAGS"); do
+            resolved=false
+            for attempt in 1 2 3 4 5 6; do
+              if docker buildx imagetools inspect "${REPO}:${t}" >/dev/null 2>&1; then
+                resolved=true
+                break
+              fi
+              sleep 5
+            done
+            if $resolved; then
+              echo "ok      ${REPO}:${t}"
+            else
+              echo "MISSING ${REPO}:${t}"
+              missing+=("$t")
+            fi
+          done
+
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "::error::jib reported success, but these tags do not resolve in the registry: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Summary
+        env:
+          REPO: ${{ steps.meta.outputs.repo }}
+          ALL_TAGS: ${{ steps.meta.outputs.all_tags }}
+          SHA_TAG: ${{ steps.meta.outputs.sha_tag }}
+        run: |
+          {
+            echo "### ankobra-web"
+            echo ""
+            echo '```'
+            tr ',' '\n' <<<"$ALL_TAGS" | sed "s|^|${REPO}:|"
+            echo '```'
+            echo ""
+            echo "Deploy with: \`TAG=${SHA_TAG} ./deploy/deploy.sh --channel github\`"
+          } >> "$GITHUB_STEP_SUMMARY"
