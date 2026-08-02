@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap/collapse';
@@ -45,6 +46,8 @@ export default class Navbar implements OnInit {
   readonly openAPIEnabled = signal(false);
   readonly version: string;
   readonly account = inject(AccountService).account;
+  /** The public marketing home renders its own header, so the JHipster navbar is hidden there. */
+  readonly hidden = signal(false);
 
   private readonly loginService = inject(LoginService);
   private readonly translateService = inject(TranslateService);
@@ -59,6 +62,11 @@ export default class Navbar implements OnInit {
     } else {
       this.version = '';
     }
+    const isHome = (url: string): boolean => url === '/' || url === '' || url.startsWith('/?') || url.startsWith('/#');
+    this.hidden.set(isHome(this.router.url));
+    this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe(e => {
+      this.hidden.set(isHome(e.urlAfterRedirects));
+    });
   }
 
   ngOnInit(): void {
