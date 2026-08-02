@@ -56,6 +56,8 @@ export default class Portal {
     return a.authorities.includes('ROLE_ADMIN') ? 'Consultant — Jojo Addison team' : 'Client';
   });
 
+  protected readonly isAdmin = computed(() => this.account()?.authorities.includes('ROLE_ADMIN') ?? false);
+
   protected readonly nav: NavGroup[] = [
     {
       group: 'Delivery',

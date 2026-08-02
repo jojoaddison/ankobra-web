@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -48,6 +48,8 @@ export default class Navbar implements OnInit {
   readonly account = inject(AccountService).account;
   /** The public marketing home renders its own header, so the JHipster navbar is hidden there. */
   readonly hidden = signal(false);
+  /** Entity management (the CMS + entity CRUD) is admin-only. */
+  readonly isAdmin = computed(() => this.account()?.authorities.includes('ROLE_ADMIN') ?? false);
 
   private readonly loginService = inject(LoginService);
   private readonly translateService = inject(TranslateService);

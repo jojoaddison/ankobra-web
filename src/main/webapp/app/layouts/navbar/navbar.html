@@ -28,7 +28,7 @@
               </span>
             </a>
           </li>
-          @if (account() !== null) {
+          @if (isAdmin()) {
             <li
               ngbDropdown
               class="nav-item dropdown pointer"
@@ -44,6 +44,13 @@
                 </span>
               </a>
               <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="entity-menu">
+                <li>
+                  <a class="dropdown-item" routerLink="/cms" routerLinkActive="active" (click)="collapseNavbar()" data-cy="cms">
+                    <fa-icon icon="database" [fixedWidth]="true" />
+                    <span>Content management</span>
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a
                     class="dropdown-item"

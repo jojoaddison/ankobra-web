@@ -1,0 +1,84 @@
+/* Content-management dashboard — styles off design tokens (global.scss .pview). */
+.cms {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 26px 24px 48px;
+
+  .cms-exit {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    &:hover {
+      color: var(--brand);
+    }
+  }
+
+  .cms-group {
+    margin-bottom: 26px;
+  }
+  .cms-group-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 12px;
+  }
+
+  .cms-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-2);
+      border-color: var(--brand);
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 14px 0 0;
+    }
+    p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 6px 0 0;
+    }
+  }
+  .cms-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cms-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-md);
+    background: var(--brand-soft);
+    color: var(--brand);
+  }
+  .cms-count {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    &.muted {
+      color: var(--text-muted);
+    }
+  }
+  .cms-manage {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--brand);
+  }
+}
