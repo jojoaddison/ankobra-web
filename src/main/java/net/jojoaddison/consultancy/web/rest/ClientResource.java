@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import net.jojoaddison.consultancy.repository.ClientRepository;
+import net.jojoaddison.consultancy.security.PortalSecurityService;
 import net.jojoaddison.consultancy.service.ClientQueryService;
 import net.jojoaddison.consultancy.service.ClientService;
 import net.jojoaddison.consultancy.service.criteria.ClientCriteria;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.service.filter.LongFilter;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -46,10 +48,18 @@ public class ClientResource {
 
     private final ClientQueryService clientQueryService;
 
-    public ClientResource(ClientService clientService, ClientRepository clientRepository, ClientQueryService clientQueryService) {
+    private final PortalSecurityService portalSecurity;
+
+    public ClientResource(
+        ClientService clientService,
+        ClientRepository clientRepository,
+        ClientQueryService clientQueryService,
+        PortalSecurityService portalSecurity
+    ) {
         this.clientService = clientService;
         this.clientRepository = clientRepository;
         this.clientQueryService = clientQueryService;
+        this.portalSecurity = portalSecurity;
     }
 
     /**
@@ -154,6 +164,13 @@ public class ClientResource {
     ) {
         LOG.debug("REST request to get Clients by criteria: {}", criteria);
 
+        // Role scoping: a client only sees their own client record.
+        if (!portalSecurity.isStaff()) {
+            LongFilter idScope = new LongFilter();
+            idScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setId(idScope);
+        }
+
         Page<ClientDTO> page = clientQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -180,7 +197,8 @@ public class ClientResource {
     @GetMapping("/{id}")
     public ResponseEntity<ClientDTO> getClient(@PathVariable("id") Long id) {
         LOG.debug("REST request to get Client : {}", id);
-        Optional<ClientDTO> clientDTO = clientService.findOne(id);
+        // Role scoping: a client cannot fetch another client's record by id.
+        Optional<ClientDTO> clientDTO = clientService.findOne(id).filter(dto -> portalSecurity.canAccessClient(dto.getId()));
         return ResponseUtil.wrapOrNotFound(clientDTO);
     }
 

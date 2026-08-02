@@ -34,4 +34,10 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
 
     @Query("select client from Client client left join fetch client.user where client.id =:id")
     Optional<Client> findOneWithToOneRelationships(@Param("id") Long id);
+
+    /** The client record owned by the given portal user, used for role-based scoping. */
+    @Query("select client.id from Client client where client.user.login = :login")
+    Optional<Long> findIdByUserLogin(@Param("login") String login);
+
+    Optional<Client> findOneByUserLogin(String login);
 }

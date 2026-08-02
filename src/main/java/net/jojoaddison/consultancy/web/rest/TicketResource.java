@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import net.jojoaddison.consultancy.repository.TicketRepository;
+import net.jojoaddison.consultancy.security.PortalSecurityService;
 import net.jojoaddison.consultancy.service.TicketQueryService;
 import net.jojoaddison.consultancy.service.TicketService;
 import net.jojoaddison.consultancy.service.criteria.TicketCriteria;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.service.filter.LongFilter;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -46,10 +48,18 @@ public class TicketResource {
 
     private final TicketQueryService ticketQueryService;
 
-    public TicketResource(TicketService ticketService, TicketRepository ticketRepository, TicketQueryService ticketQueryService) {
+    private final PortalSecurityService portalSecurity;
+
+    public TicketResource(
+        TicketService ticketService,
+        TicketRepository ticketRepository,
+        TicketQueryService ticketQueryService,
+        PortalSecurityService portalSecurity
+    ) {
         this.ticketService = ticketService;
         this.ticketRepository = ticketRepository;
         this.ticketQueryService = ticketQueryService;
+        this.portalSecurity = portalSecurity;
     }
 
     /**
@@ -154,6 +164,13 @@ public class TicketResource {
     ) {
         LOG.debug("REST request to get Tickets by criteria: {}", criteria);
 
+        // Role scoping: a client only sees tickets raised for their own client record.
+        if (!portalSecurity.isStaff()) {
+            LongFilter clientScope = new LongFilter();
+            clientScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setClientId(clientScope);
+        }
+
         Page<TicketDTO> page = ticketQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -180,7 +197,13 @@ public class TicketResource {
     @GetMapping("/{id}")
     public ResponseEntity<TicketDTO> getTicket(@PathVariable("id") Long id) {
         LOG.debug("REST request to get Ticket : {}", id);
-        Optional<TicketDTO> ticketDTO = ticketService.findOne(id);
+        Optional<TicketDTO> ticketDTO =
+            ticketService
+                .findOne(id)
+                // Role scoping: a client cannot fetch another client's ticket by id.
+                .filter(
+                    dto -> portalSecurity.isStaff() || (dto.getClient() != null && portalSecurity.canAccessClient(dto.getClient().getId()))
+                );
         return ResponseUtil.wrapOrNotFound(ticketDTO);
     }
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import net.jojoaddison.consultancy.repository.ProjectRepository;
+import net.jojoaddison.consultancy.security.PortalSecurityService;
 import net.jojoaddison.consultancy.service.ProjectQueryService;
 import net.jojoaddison.consultancy.service.ProjectService;
 import net.jojoaddison.consultancy.service.criteria.ProjectCriteria;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.service.filter.LongFilter;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -46,10 +48,18 @@ public class ProjectResource {
 
     private final ProjectQueryService projectQueryService;
 
-    public ProjectResource(ProjectService projectService, ProjectRepository projectRepository, ProjectQueryService projectQueryService) {
+    private final PortalSecurityService portalSecurity;
+
+    public ProjectResource(
+        ProjectService projectService,
+        ProjectRepository projectRepository,
+        ProjectQueryService projectQueryService,
+        PortalSecurityService portalSecurity
+    ) {
         this.projectService = projectService;
         this.projectRepository = projectRepository;
         this.projectQueryService = projectQueryService;
+        this.portalSecurity = portalSecurity;
     }
 
     /**
@@ -154,6 +164,13 @@ public class ProjectResource {
     ) {
         LOG.debug("REST request to get Projects by criteria: {}", criteria);
 
+        // Role scoping: a client only sees projects owned by their own client record.
+        if (!portalSecurity.isStaff()) {
+            LongFilter clientScope = new LongFilter();
+            clientScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setClientId(clientScope);
+        }
+
         Page<ProjectDTO> page = projectQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -180,7 +197,13 @@ public class ProjectResource {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDTO> getProject(@PathVariable("id") Long id) {
         LOG.debug("REST request to get Project : {}", id);
-        Optional<ProjectDTO> projectDTO = projectService.findOne(id);
+        Optional<ProjectDTO> projectDTO =
+            projectService
+                .findOne(id)
+                // Role scoping: a client cannot fetch another client's project by id.
+                .filter(
+                    dto -> portalSecurity.isStaff() || (dto.getClient() != null && portalSecurity.canAccessClient(dto.getClient().getId()))
+                );
         return ResponseUtil.wrapOrNotFound(projectDTO);
     }
 
