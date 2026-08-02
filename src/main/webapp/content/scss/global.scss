@@ -99,6 +99,15 @@ body {
   font-family: var(--font);
 }
 
+/* Brand wordmark on the login screen. */
+.login-logo {
+  display: block;
+  height: 46px;
+  width: auto;
+  margin: 6px 0 22px;
+  border-radius: var(--r-sm);
+}
+
 /* ==============================================================
 Bootstrap tweaks
 ===============================================================*/

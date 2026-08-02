@@ -62,7 +62,10 @@ public class SecurityConfiguration {
                 authz
                     .requestMatchers("/index.html", "/*.js", "/*.txt", "/*.json", "/*.map", "/*.css").permitAll()
                     .requestMatchers("/*.ico", "/*.png", "/*.svg", "/*.webapp").permitAll()
+                    .requestMatchers("/browserconfig.xml").permitAll()
                     .requestMatchers("/content/**").permitAll()
+                    // Publicly hosted static assets (e.g. business cards) under jojoaddison.net/static
+                    .requestMatchers("/static/**").permitAll()
                     .requestMatchers("/resources/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()

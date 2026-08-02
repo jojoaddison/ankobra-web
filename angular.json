@@ -34,10 +34,17 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/main/webapp/content",
+              "src/main/webapp/static",
               "src/main/webapp/favicon.ico",
+              "src/main/webapp/browserconfig.xml",
               "src/main/webapp/manifest.webapp",
               "src/main/webapp/robots.txt",
               "src/main/webapp/swagger-ui",
+              {
+                "glob": "*icon*.png",
+                "input": "src/main/webapp",
+                "output": "."
+              },
               {
                 "glob": "axios.min.js",
                 "input": "node_modules/axios/dist/",
