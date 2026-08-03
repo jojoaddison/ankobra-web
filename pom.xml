@@ -223,14 +223,13 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-        <!-- Distributed tracing: Micrometer Observation → OpenTelemetry, exported over OTLP. -->
+        <!-- Distributed tracing: the Spring Boot OpenTelemetry starter brings the Boot 4
+             tracing/OTLP autoconfiguration (Micrometer Observation → OTel Tracer → OTLP span
+             exporter) plus the bridge and exporter. The raw micrometer/otel jars alone do NOT
+             register that autoconfiguration in Boot 4, so no Tracer/exporter is ever created. -->
         <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-bridge-otel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-otlp</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-opentelemetry</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.cache</groupId>

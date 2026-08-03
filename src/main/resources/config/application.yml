@@ -77,6 +77,15 @@ management:
   otlp:
     tracing:
       endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+    # The OpenTelemetry starter also brings an OTLP metrics registry and log appender. Keep those
+    # off: metrics stay on Prometheus (scraped), logs stay on stdout → Alloy → Loki. Only traces
+    # go over OTLP.
+    metrics:
+      export:
+        enabled: false
+    logging:
+      export:
+        enabled: false
   observations:
     key-values:
       application: ${spring.application.name}
