@@ -91,8 +91,18 @@ jhipster:
 
 # application:
 management:
+  # No telemetry export during tests (no collector). Canonical Boot 4 keys.
   tracing:
-    enabled: false
+    export:
+      enabled: false
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  logging:
+    export:
+      otlp:
+        enabled: false
   health:
     mail:
       enabled: false
