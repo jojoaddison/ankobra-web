@@ -59,30 +59,30 @@ export default class Cms {
     {
       group: 'Delivery',
       items: [
-        { id: 'client', label: 'Clients', link: '/client', icon: 'users' },
-        { id: 'project', label: 'Projects', link: '/project', icon: 'folder' },
-        { id: 'milestone', label: 'Milestones', link: '/milestone', icon: 'flag' },
-        { id: 'ticket', label: 'Tickets', link: '/ticket', icon: 'headset' },
+        { id: 'client', label: 'Clients', link: '/cms/client', icon: 'users' },
+        { id: 'project', label: 'Projects', link: '/cms/project', icon: 'folder' },
+        { id: 'milestone', label: 'Milestones', link: '/cms/milestone', icon: 'flag' },
+        { id: 'ticket', label: 'Tickets', link: '/cms/ticket', icon: 'headset' },
       ],
     },
     {
       group: 'Commercial',
       items: [
-        { id: 'service-item', label: 'Service catalogue', link: '/service-item', icon: 'grid2' },
-        { id: 'quote', label: 'Quotes', link: '/quote', icon: 'file' },
-        { id: 'quote-line', label: 'Quote lines', link: '/quote-line', icon: 'list' },
+        { id: 'service-item', label: 'Service catalogue', link: '/cms/service-item', icon: 'grid2' },
+        { id: 'quote', label: 'Quotes', link: '/cms/quote', icon: 'file' },
+        { id: 'quote-line', label: 'Quote lines', link: '/cms/quote-line', icon: 'list' },
       ],
     },
     {
       group: 'Operations',
       items: [
-        { id: 'course', label: 'Courses', link: '/course', icon: 'cap' },
-        { id: 'team-member', label: 'Team', link: '/team-member', icon: 'user' },
+        { id: 'course', label: 'Courses', link: '/cms/course', icon: 'cap' },
+        { id: 'team-member', label: 'Team', link: '/cms/team-member', icon: 'user' },
       ],
     },
     {
       group: 'Leads',
-      items: [{ id: 'lead', label: 'Leads', link: '/lead', icon: 'inbox' }],
+      items: [{ id: 'lead', label: 'Leads', link: '/cms/lead', icon: 'inbox' }],
     },
   ];
 

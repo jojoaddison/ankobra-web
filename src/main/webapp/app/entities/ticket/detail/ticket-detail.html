@@ -47,7 +47,7 @@
           <dd>
             @if (ticket()!.owner) {
               <div>
-                <a [routerLink]="['/team-member', ticket()!.owner?.id, 'view']">{{ ticketRef.owner?.name }}</a>
+                <a [routerLink]="['/cms/team-member', ticket()!.owner?.id, 'view']">{{ ticketRef.owner?.name }}</a>
               </div>
             }
           </dd>
@@ -55,7 +55,7 @@
           <dd>
             @if (ticket()!.client) {
               <div>
-                <a [routerLink]="['/client', ticket()!.client?.id, 'view']">{{ ticketRef.client?.name }}</a>
+                <a [routerLink]="['/cms/client', ticket()!.client?.id, 'view']">{{ ticketRef.client?.name }}</a>
               </div>
             }
           </dd>
@@ -65,7 +65,7 @@
           <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
         </button>
 
-        <button type="button" [routerLink]="['/ticket', ticketRef.id, 'edit']" class="btn btn-primary">
+        <button type="button" [routerLink]="['/cms/ticket', ticketRef.id, 'edit']" class="btn btn-primary">
           <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
         </button>
       </div>

@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-quote"
-        [routerLink]="['/quote/new']"
+        [routerLink]="['/cms/quote/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.quote.home.createLabel">Create a new Quote</span>
@@ -83,7 +83,7 @@
           @for (quote of quotes(); track trackId(quote)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/quote', quote.id, 'view']">{{ quote.id }}</a>
+                <a [routerLink]="['/cms/quote', quote.id, 'view']">{{ quote.id }}</a>
               </td>
               <td>{{ quote.reference }}</td>
               <td>{{ quote.title }}</td>
@@ -94,18 +94,18 @@
               <td>
                 @if (quote.client) {
                   <div>
-                    <a [routerLink]="['/client', quote.client.id, 'view']">{{ quote.client.name }}</a>
+                    <a [routerLink]="['/cms/client', quote.client.id, 'view']">{{ quote.client.name }}</a>
                   </div>
                 }
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/quote', quote.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/quote', quote.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/quote', quote.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/quote', quote.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

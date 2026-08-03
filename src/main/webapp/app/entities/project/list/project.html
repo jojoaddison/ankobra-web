@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-project"
-        [routerLink]="['/project/new']"
+        [routerLink]="['/cms/project/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.project.home.createLabel">Create a new Project</span>
@@ -131,7 +131,7 @@
           @for (project of projects(); track trackId(project)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/project', project.id, 'view']">{{ project.id }}</a>
+                <a [routerLink]="['/cms/project', project.id, 'view']">{{ project.id }}</a>
               </td>
               <td>{{ project.reference }}</td>
               <td>{{ project.name }}</td>
@@ -159,25 +159,25 @@
               <td>
                 @if (project.lead) {
                   <div>
-                    <a [routerLink]="['/team-member', project.lead.id, 'view']">{{ project.lead.name }}</a>
+                    <a [routerLink]="['/cms/team-member', project.lead.id, 'view']">{{ project.lead.name }}</a>
                   </div>
                 }
               </td>
               <td>
                 @if (project.client) {
                   <div>
-                    <a [routerLink]="['/client', project.client.id, 'view']">{{ project.client.name }}</a>
+                    <a [routerLink]="['/cms/client', project.client.id, 'view']">{{ project.client.name }}</a>
                   </div>
                 }
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/project', project.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/project', project.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/project', project.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/project', project.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

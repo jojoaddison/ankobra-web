@@ -27,7 +27,7 @@
           <dd>
             @if (quoteLine()!.item) {
               <div>
-                <a [routerLink]="['/service-item', quoteLine()!.item?.id, 'view']">{{ quoteLineRef.item?.name }}</a>
+                <a [routerLink]="['/cms/service-item', quoteLine()!.item?.id, 'view']">{{ quoteLineRef.item?.name }}</a>
               </div>
             }
           </dd>
@@ -35,7 +35,7 @@
           <dd>
             @if (quoteLine()!.quote) {
               <div>
-                <a [routerLink]="['/quote', quoteLine()!.quote?.id, 'view']">{{ quoteLineRef.quote?.reference }}</a>
+                <a [routerLink]="['/cms/quote', quoteLine()!.quote?.id, 'view']">{{ quoteLineRef.quote?.reference }}</a>
               </div>
             }
           </dd>
@@ -45,7 +45,7 @@
           <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
         </button>
 
-        <button type="button" [routerLink]="['/quote-line', quoteLineRef.id, 'edit']" class="btn btn-primary">
+        <button type="button" [routerLink]="['/cms/quote-line', quoteLineRef.id, 'edit']" class="btn btn-primary">
           <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
         </button>
       </div>

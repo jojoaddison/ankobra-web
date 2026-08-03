@@ -37,7 +37,7 @@
           <dd>
             @if (quote()!.client) {
               <div>
-                <a [routerLink]="['/client', quote()!.client?.id, 'view']">{{ quoteRef.client?.name }}</a>
+                <a [routerLink]="['/cms/client', quote()!.client?.id, 'view']">{{ quoteRef.client?.name }}</a>
               </div>
             }
           </dd>
@@ -47,7 +47,7 @@
           <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
         </button>
 
-        <button type="button" [routerLink]="['/quote', quoteRef.id, 'edit']" class="btn btn-primary">
+        <button type="button" [routerLink]="['/cms/quote', quoteRef.id, 'edit']" class="btn btn-primary">
           <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
         </button>
       </div>

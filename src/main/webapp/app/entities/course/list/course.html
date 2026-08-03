@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-course"
-        [routerLink]="['/course/new']"
+        [routerLink]="['/cms/course/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.course.home.createLabel">Create a new Course</span>
@@ -98,7 +98,7 @@
           @for (course of courses(); track trackId(course)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/course', course.id, 'view']">{{ course.id }}</a>
+                <a [routerLink]="['/cms/course', course.id, 'view']">{{ course.id }}</a>
               </td>
               <td>{{ course.name }}</td>
               <td>{{ course.description }}</td>
@@ -111,12 +111,12 @@
               <td>{{ course.progress }}</td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/course', course.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/course', course.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/course', course.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/course', course.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

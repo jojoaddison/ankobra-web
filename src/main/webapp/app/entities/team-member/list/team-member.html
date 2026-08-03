@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-team-member"
-        [routerLink]="['/team-member/new']"
+        [routerLink]="['/cms/team-member/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.teamMember.home.createLabel">Create a new Team Member</span>
@@ -88,7 +88,7 @@
           @for (teamMember of teamMembers(); track trackId(teamMember)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/team-member', teamMember.id, 'view']">{{ teamMember.id }}</a>
+                <a [routerLink]="['/cms/team-member', teamMember.id, 'view']">{{ teamMember.id }}</a>
               </td>
               <td>{{ teamMember.name }}</td>
               <td>{{ teamMember.initials }}</td>
@@ -100,12 +100,12 @@
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/team-member', teamMember.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/team-member', teamMember.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/team-member', teamMember.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/team-member', teamMember.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

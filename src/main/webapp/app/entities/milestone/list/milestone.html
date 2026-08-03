@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-milestone"
-        [routerLink]="['/milestone/new']"
+        [routerLink]="['/cms/milestone/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.milestone.home.createLabel">Create a new Milestone</span>
@@ -74,7 +74,7 @@
           @for (milestone of milestones(); track trackId(milestone)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/milestone', milestone.id, 'view']">{{ milestone.id }}</a>
+                <a [routerLink]="['/cms/milestone', milestone.id, 'view']">{{ milestone.id }}</a>
               </td>
               <td>{{ milestone.title }}</td>
               <td [jhiTranslate]="'jojoaddisonApp.MilestoneState.' + (milestone.state ?? 'null')">
@@ -84,18 +84,18 @@
               <td>
                 @if (milestone.project) {
                   <div>
-                    <a [routerLink]="['/project', milestone.project.id, 'view']">{{ milestone.project.name }}</a>
+                    <a [routerLink]="['/cms/project', milestone.project.id, 'view']">{{ milestone.project.name }}</a>
                   </div>
                 }
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/milestone', milestone.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/milestone', milestone.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/milestone', milestone.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/milestone', milestone.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

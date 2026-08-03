@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-lead"
-        [routerLink]="['/lead/new']"
+        [routerLink]="['/cms/lead/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.lead.home.createLabel">Create a new Lead</span>
@@ -89,7 +89,7 @@
           @for (lead of leads(); track trackId(lead)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/lead', lead.id, 'view']">{{ lead.id }}</a>
+                <a [routerLink]="['/cms/lead', lead.id, 'view']">{{ lead.id }}</a>
               </td>
               <td>{{ lead.name }}</td>
               <td>{{ lead.email }}</td>
@@ -113,12 +113,12 @@
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/lead', lead.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/lead', lead.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/lead', lead.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/lead', lead.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

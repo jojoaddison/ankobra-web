@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-client"
-        [routerLink]="['/client/new']"
+        [routerLink]="['/cms/client/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.client.home.createLabel">Create a new Client</span>
@@ -90,7 +90,7 @@
           @for (client of clients(); track trackId(client)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/client', client.id, 'view']">{{ client.id }}</a>
+                <a [routerLink]="['/cms/client', client.id, 'view']">{{ client.id }}</a>
               </td>
               <td>{{ client.name }}</td>
               <td [jhiTranslate]="'jojoaddisonApp.Market.' + (client.sector ?? 'null')">
@@ -125,7 +125,7 @@
                 <div class="btn-group">
                   <button
                     type="submit"
-                    [routerLink]="['/project']"
+                    [routerLink]="['/cms/project']"
                     [queryParams]="{ 'filter[clientId.in]': client.id }"
                     class="btn btn-info btn-sm"
                     data-cy="filterOtherEntityButton"
@@ -140,7 +140,7 @@
                   </button>
                   <button
                     type="submit"
-                    [routerLink]="['/ticket']"
+                    [routerLink]="['/cms/ticket']"
                     [queryParams]="{ 'filter[clientId.in]': client.id }"
                     class="btn btn-info btn-sm"
                     data-cy="filterOtherEntityButton"
@@ -155,7 +155,7 @@
                   </button>
                   <button
                     type="submit"
-                    [routerLink]="['/quote']"
+                    [routerLink]="['/cms/quote']"
                     [queryParams]="{ 'filter[clientId.in]': client.id }"
                     class="btn btn-info btn-sm"
                     data-cy="filterOtherEntityButton"
@@ -168,12 +168,12 @@
                       >Show Quote</span
                     >
                   </button>
-                  <a [routerLink]="['/client', client.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/client', client.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/client', client.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/client', client.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

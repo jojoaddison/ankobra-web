@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-quote-line"
-        [routerLink]="['/quote-line/new']"
+        [routerLink]="['/cms/quote-line/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.quoteLine.home.createLabel">Create a new Quote Line</span>
@@ -73,32 +73,32 @@
           @for (quoteLine of quoteLines(); track trackId(quoteLine)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/quote-line', quoteLine.id, 'view']">{{ quoteLine.id }}</a>
+                <a [routerLink]="['/cms/quote-line', quoteLine.id, 'view']">{{ quoteLine.id }}</a>
               </td>
               <td>{{ quoteLine.quantity }}</td>
               <td>{{ quoteLine.rate }}</td>
               <td>
                 @if (quoteLine.item) {
                   <div>
-                    <a [routerLink]="['/service-item', quoteLine.item.id, 'view']">{{ quoteLine.item.name }}</a>
+                    <a [routerLink]="['/cms/service-item', quoteLine.item.id, 'view']">{{ quoteLine.item.name }}</a>
                   </div>
                 }
               </td>
               <td>
                 @if (quoteLine.quote) {
                   <div>
-                    <a [routerLink]="['/quote', quoteLine.quote.id, 'view']">{{ quoteLine.quote.reference }}</a>
+                    <a [routerLink]="['/cms/quote', quoteLine.quote.id, 'view']">{{ quoteLine.quote.reference }}</a>
                   </div>
                 }
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/quote-line', quoteLine.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/quote-line', quoteLine.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/quote-line', quoteLine.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/quote-line', quoteLine.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

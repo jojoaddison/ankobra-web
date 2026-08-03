@@ -33,7 +33,7 @@
           <dd>
             @if (milestone()!.project) {
               <div>
-                <a [routerLink]="['/project', milestone()!.project?.id, 'view']">{{ milestoneRef.project?.name }}</a>
+                <a [routerLink]="['/cms/project', milestone()!.project?.id, 'view']">{{ milestoneRef.project?.name }}</a>
               </div>
             }
           </dd>
@@ -43,7 +43,7 @@
           <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
         </button>
 
-        <button type="button" [routerLink]="['/milestone', milestoneRef.id, 'edit']" class="btn btn-primary">
+        <button type="button" [routerLink]="['/cms/milestone', milestoneRef.id, 'edit']" class="btn btn-primary">
           <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
         </button>
       </div>

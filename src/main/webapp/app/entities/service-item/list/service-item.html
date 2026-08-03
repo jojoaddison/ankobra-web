@@ -12,7 +12,7 @@
         id="jh-create-entity"
         data-cy="entityCreateButton"
         class="btn btn-primary jh-create-entity create-service-item"
-        [routerLink]="['/service-item/new']"
+        [routerLink]="['/cms/service-item/new']"
       >
         <fa-icon icon="plus" />
         <span jhiTranslate="jojoaddisonApp.serviceItem.home.createLabel">Create a new Service Item</span>
@@ -91,7 +91,7 @@
           @for (serviceItem of serviceItems(); track trackId(serviceItem)) {
             <tr data-cy="entityTable">
               <td>
-                <a [routerLink]="['/service-item', serviceItem.id, 'view']">{{ serviceItem.id }}</a>
+                <a [routerLink]="['/cms/service-item', serviceItem.id, 'view']">{{ serviceItem.id }}</a>
               </td>
               <td>{{ serviceItem.code }}</td>
               <td>{{ serviceItem.name }}</td>
@@ -122,12 +122,12 @@
               </td>
               <td class="text-end">
                 <div class="btn-group">
-                  <a [routerLink]="['/service-item', serviceItem.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
+                  <a [routerLink]="['/cms/service-item', serviceItem.id, 'view']" class="btn btn-info btn-sm" data-cy="entityDetailsButton">
                     <fa-icon icon="eye" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                   </a>
 
-                  <a [routerLink]="['/service-item', serviceItem.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
+                  <a [routerLink]="['/cms/service-item', serviceItem.id, 'edit']" class="btn btn-primary btn-sm" data-cy="entityEditButton">
                     <fa-icon icon="pencil-alt" />
                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                   </a>

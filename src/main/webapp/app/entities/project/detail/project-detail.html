@@ -70,7 +70,7 @@
           <dd>
             @if (project()!.lead) {
               <div>
-                <a [routerLink]="['/team-member', project()!.lead?.id, 'view']">{{ projectRef.lead?.name }}</a>
+                <a [routerLink]="['/cms/team-member', project()!.lead?.id, 'view']">{{ projectRef.lead?.name }}</a>
               </div>
             }
           </dd>
@@ -78,7 +78,7 @@
           <dd>
             @if (project()!.client) {
               <div>
-                <a [routerLink]="['/client', project()!.client?.id, 'view']">{{ projectRef.client?.name }}</a>
+                <a [routerLink]="['/cms/client', project()!.client?.id, 'view']">{{ projectRef.client?.name }}</a>
               </div>
             }
           </dd>
@@ -88,7 +88,7 @@
           <fa-icon icon="arrow-left" />&nbsp;<span jhiTranslate="entity.action.back">Back</span>
         </button>
 
-        <button type="button" [routerLink]="['/project', projectRef.id, 'edit']" class="btn btn-primary">
+        <button type="button" [routerLink]="['/cms/project', projectRef.id, 'edit']" class="btn btn-primary">
           <fa-icon icon="pencil-alt" />&nbsp;<span jhiTranslate="entity.action.edit">Edit</span>
         </button>
       </div>
