@@ -86,6 +86,11 @@ services:
       JHIPSTER_MAIL_BASE_URL: ${PUBLIC_URL}
 
       MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED: 'true'
+      # Distributed tracing is opt-in: off unless an OTLP collector is set in .env. When enabled,
+      # spans export to OTEL_EXPORTER_OTLP_ENDPOINT and trace ids appear in the JSON/console logs.
+      OTEL_TRACING_ENABLED: ${OTEL_TRACING_ENABLED:-false}
+      OTEL_TRACE_SAMPLING: ${OTEL_TRACE_SAMPLING:-0.1}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318/v1/traces}
       JAVA_OPTS: '-XX:MaxRAMPercentage=75 -XX:+UseZGC'
       # The generated entrypoint sleeps this many seconds before starting, a hook for waiting on
       # dependencies. depends_on/condition already does that properly, so no sleep.

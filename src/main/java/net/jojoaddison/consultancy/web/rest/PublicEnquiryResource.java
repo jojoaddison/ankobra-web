@@ -1,5 +1,8 @@
 package net.jojoaddison.consultancy.web.rest;
 
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -28,23 +31,35 @@ public class PublicEnquiryResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(PublicEnquiryResource.class);
 
-    private final LeadRepository leadRepository;
+    /** Business KPI: contact-form enquiries captured, tagged by the type of need. */
+    static final String ENQUIRIES_SUBMITTED_METER = "ankobra.enquiries.submitted";
 
-    public PublicEnquiryResource(LeadRepository leadRepository) {
+    private final LeadRepository leadRepository;
+    private final MeterRegistry meterRegistry;
+
+    public PublicEnquiryResource(LeadRepository leadRepository, MeterRegistry meterRegistry) {
         this.leadRepository = leadRepository;
+        this.meterRegistry = meterRegistry;
     }
 
     @PostMapping("/enquiries")
+    @Timed(value = "ankobra.enquiries.submit", description = "Time taken to capture a public enquiry")
     public ResponseEntity<Void> submitEnquiry(@Valid @RequestBody EnquiryRequest request) {
         LOG.debug("REST request to capture public enquiry from {}", request.email());
+        EnquiryType need = parseNeed(request.need());
         Lead lead = new Lead()
             .name(request.name())
             .email(request.email())
-            .need(parseNeed(request.need()))
+            .need(need)
             .message(request.message())
             .createdDate(Instant.now())
             .status(LeadStatus.NEW);
         leadRepository.save(lead);
+        Counter.builder(ENQUIRIES_SUBMITTED_METER)
+            .description("Public marketing contact-form enquiries captured as leads")
+            .tag("need", need.name())
+            .register(meterRegistry)
+            .increment();
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

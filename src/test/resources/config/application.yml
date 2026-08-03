@@ -91,6 +91,8 @@ jhipster:
 
 # application:
 management:
+  tracing:
+    enabled: false
   health:
     mail:
       enabled: false

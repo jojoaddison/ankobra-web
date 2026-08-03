@@ -24,6 +24,15 @@ management:
     metrics:
       export:
         enabled: false
+  # Tracing is opt-in in prod (the default single-container deploy has no collector). To enable:
+  # set OTEL_TRACING_ENABLED=true and OTEL_EXPORTER_OTLP_ENDPOINT=<collector>. Sampling defaults to 10%.
+  tracing:
+    enabled: ${OTEL_TRACING_ENABLED:false}
+    sampling:
+      probability: ${OTEL_TRACE_SAMPLING:0.1}
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
 
 spring:
   devtools:

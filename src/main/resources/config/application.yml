@@ -68,6 +68,15 @@ management:
       export:
         enabled: true
         step: 60
+  # Distributed tracing. Spans/trace-ids are always generated (and injected into logs); sampling and
+  # the OTLP collector endpoint are env-driven. Point OTEL_EXPORTER_OTLP_ENDPOINT at a collector
+  # (otel-collector / Tempo / Jaeger) to ship traces.
+  tracing:
+    sampling:
+      probability: ${OTEL_TRACE_SAMPLING:1.0}
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
   observations:
     key-values:
       application: ${spring.application.name}

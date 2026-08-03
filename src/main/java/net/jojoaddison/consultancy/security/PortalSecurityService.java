@@ -1,5 +1,6 @@
 package net.jojoaddison.consultancy.security;
 
+import io.micrometer.observation.annotation.Observed;
 import java.util.Optional;
 import net.jojoaddison.consultancy.repository.ClientRepository;
 import org.springframework.stereotype.Service;
@@ -36,11 +37,13 @@ public class PortalSecurityService {
      * The client id a non-staff user's queries must be filtered by. Returns a sentinel of {@code -1}
      * when a non-staff user has no linked client, so scoped queries match nothing rather than everything.
      */
+    @Observed(name = "portal.security", contextualName = "required-client-scope")
     public Long requiredClientScope() {
         return currentClientId().orElse(-1L);
     }
 
     /** Whether the current user may see data belonging to the given client id. */
+    @Observed(name = "portal.security", contextualName = "can-access-client")
     public boolean canAccessClient(Long clientId) {
         return isStaff() || (clientId != null && clientId.equals(currentClientId().orElse(null)));
     }
