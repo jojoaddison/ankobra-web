@@ -296,6 +296,15 @@
               placeholder="A sentence or two on the friction you're facing."
             ></textarea>
           </div>
+          <!--
+            Honeypot (SEC-08). Hidden from sighted users by position rather than `display:none`, since
+            some bots skip non-rendered inputs; aria-hidden and tabindex keep it out of the accessibility
+            tree and the tab order, and autocomplete="off" stops a browser helpfully filling it in.
+          -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="cf-website">Website</label>
+            <input id="cf-website" formControlName="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
           <div class="form-row">
             <button class="btn btn-primary lg" type="submit" [disabled]="sending()">
               {{ sending() ? 'Sending…' : 'Send enquiry' }}

@@ -55,6 +55,10 @@ export default class Home implements OnInit, OnDestroy {
     email: ['', [Validators.required, Validators.email, Validators.maxLength(160)]],
     need: ['BESPOKE_SOLUTION'],
     message: ['', [Validators.maxLength(2000)]],
+    // Honeypot (SEC-08): hidden from humans, irresistible to form-filling bots. Deliberately has no
+    // validator — a bot filling it should sail through the client and be discarded by the server, not
+    // be told the field is the problem.
+    website: [''],
   });
 
   protected readonly navLinks = [
@@ -307,18 +311,26 @@ export default class Home implements OnInit, OnDestroy {
     }
     this.sending.set(true);
     const value = this.contactForm.getRawValue();
-    this.enquiryService.submit({ name: value.name!, email: value.email!, need: value.need!, message: value.message ?? '' }).subscribe({
-      next: () => {
-        this.sending.set(false);
-        this.sent.set(true);
-        this.contactForm.reset({ need: 'BESPOKE_SOLUTION' });
-      },
-      error: () => {
-        // Even if the backend is unreachable, acknowledge the enquiry rather than dead-ending the visitor.
-        this.sending.set(false);
-        this.sent.set(true);
-      },
-    });
+    this.enquiryService
+      .submit({
+        name: value.name!,
+        email: value.email!,
+        need: value.need!,
+        message: value.message ?? '',
+        website: value.website ?? '',
+      })
+      .subscribe({
+        next: () => {
+          this.sending.set(false);
+          this.sent.set(true);
+          this.contactForm.reset({ need: 'BESPOKE_SOLUTION' });
+        },
+        error: () => {
+          // Even if the backend is unreachable, acknowledge the enquiry rather than dead-ending the visitor.
+          this.sending.set(false);
+          this.sent.set(true);
+        },
+      });
   }
 
   private typeTerminal(index: number): void {

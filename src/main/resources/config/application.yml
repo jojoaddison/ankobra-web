@@ -234,7 +234,14 @@ jhipster:
     license: unlicensed
     license-url:
   security:
-    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://storage.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+    # SEC-06 in docs/security-20260805-0936.md. Dropped from the generator default:
+    #   'unsafe-eval'               — production Angular is AOT-compiled and never evals templates.
+    #   https://storage.googleapis.com — a bucket host anyone can publish to, listed as a script source
+    #                                    by the generator; nothing in this app loads from it.
+    # 'unsafe-inline' remains on script-src and style-src and is the weak point: while it is there, CSP
+    # is not a meaningful XSS mitigation. Removing it needs nonces threaded through index.html and the
+    # Angular style pipeline, which is a larger change tracked as the rest of SEC-06.
+    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
 
 
 # jhipster-needle-add-application-yaml-document

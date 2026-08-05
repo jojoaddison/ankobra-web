@@ -42,11 +42,11 @@ export default class Register implements AfterViewInit {
     }),
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(4), Validators.maxLength(50)],
+      validators: [Validators.required, Validators.minLength(12), Validators.maxLength(50)],
     }),
     confirmPassword: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(4), Validators.maxLength(50)],
+      validators: [Validators.required, Validators.minLength(12), Validators.maxLength(50)],
     }),
   });
 

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +47,16 @@ public class PublicEnquiryResource {
     @Timed(value = "ankobra.enquiries.submit", description = "Time taken to capture a public enquiry")
     public ResponseEntity<Void> submitEnquiry(@Valid @RequestBody EnquiryRequest request) {
         LOG.debug("REST request to capture public enquiry from {}", request.email());
+
+        // Honeypot (SEC-08). The real form renders `website` hidden and off-screen, so a human never
+        // fills it and a form-filling bot almost always does. Answer 201 without persisting: telling the
+        // bot it was caught only teaches it which field to skip next time. The counter is deliberately
+        // not incremented — a discarded submission is not a lead.
+        if (StringUtils.hasText(request.website())) {
+            LOG.info("Discarded a public enquiry that filled the honeypot field");
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+
         EnquiryType need = parseNeed(request.need());
         Lead lead = new Lead()
             .name(request.name())
@@ -79,6 +90,8 @@ public class PublicEnquiryResource {
         @NotBlank @Size(max = 120) String name,
         @NotBlank @Email @Size(max = 160) String email,
         @Size(max = 40) String need,
-        @Size(max = 2000) String message
+        @Size(max = 2000) String message,
+        /** Honeypot. Must arrive empty; anything else marks the submission as automated. */
+        @Size(max = 200) String website
     ) {}
 }

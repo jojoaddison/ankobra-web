@@ -9,6 +9,11 @@ export interface Enquiry {
   email: string;
   need?: string;
   message?: string;
+  /**
+   * Honeypot. Rendered hidden and off-screen, so a human always leaves it empty; a form-filling bot
+   * usually does not. The server silently discards any submission that carries a value.
+   */
+  website?: string;
 }
 
 /** Posts contact-form enquiries to the public (unauthenticated) lead-capture endpoint. */

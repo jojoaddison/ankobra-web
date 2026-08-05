@@ -802,3 +802,17 @@ Jojo Addison — public marketing front. Styles off design tokens (global.scss).
     opacity: 0;
   }
 }
+
+/*
+  Honeypot field (SEC-08). Moved off-screen rather than `display: none` or `visibility: hidden`:
+  the cheap bots this is meant to catch increasingly skip inputs that are not rendered, so the field
+  has to be genuinely laid out and merely invisible. `aria-hidden` and `tabindex="-1"` on the markup
+  keep it away from screen readers and the tab order, so nothing here reaches a real user.
+*/
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

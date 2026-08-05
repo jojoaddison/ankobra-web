@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.*;
 import net.jojoaddison.consultancy.domain.User;
 import net.jojoaddison.consultancy.repository.UserRepository;
+import net.jojoaddison.consultancy.security.PasswordPolicy;
 import net.jojoaddison.consultancy.security.SecurityUtils;
 import net.jojoaddison.consultancy.service.MailService;
 import net.jojoaddison.consultancy.service.UserService;
@@ -12,7 +13,6 @@ import net.jojoaddison.consultancy.service.dto.PasswordChangeDTO;
 import net.jojoaddison.consultancy.web.rest.errors.*;
 import net.jojoaddison.consultancy.web.rest.vm.KeyAndPasswordVM;
 import net.jojoaddison.consultancy.web.rest.vm.ManagedUserVM;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -57,7 +57,7 @@ public class AccountResource {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
-        if (isPasswordLengthInvalid(managedUserVM.getPassword())) {
+        if (PasswordPolicy.isInvalid(managedUserVM.getPassword(), managedUserVM.getLogin())) {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
@@ -129,7 +129,8 @@ public class AccountResource {
      */
     @PostMapping(path = "/account/change-password")
     public void changePassword(@RequestBody PasswordChangeDTO passwordChangeDto) {
-        if (isPasswordLengthInvalid(passwordChangeDto.getNewPassword())) {
+        String login = SecurityUtils.getCurrentUserLogin().orElse(null);
+        if (PasswordPolicy.isInvalid(passwordChangeDto.getNewPassword(), login)) {
             throw new InvalidPasswordException();
         }
         userService.changePassword(passwordChangeDto.getCurrentPassword(), passwordChangeDto.getNewPassword());
@@ -161,7 +162,9 @@ public class AccountResource {
      */
     @PostMapping(path = "/account/reset-password/finish")
     public void finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
-        if (isPasswordLengthInvalid(keyAndPassword.getNewPassword())) {
+        // The login is not known until the reset key is resolved, so containment cannot be checked here.
+        // Length and the denylist still apply.
+        if (PasswordPolicy.isInvalid(keyAndPassword.getNewPassword(), null)) {
             throw new InvalidPasswordException();
         }
         Optional<User> user = userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
@@ -169,13 +172,5 @@ public class AccountResource {
         if (!user.isPresent()) {
             throw new AccountResourceException("No user was found for this reset key");
         }
-    }
-
-    private static boolean isPasswordLengthInvalid(String password) {
-        return (
-            StringUtils.isEmpty(password) ||
-            password.length() < ManagedUserVM.PASSWORD_MIN_LENGTH ||
-            password.length() > ManagedUserVM.PASSWORD_MAX_LENGTH
-        );
     }
 }

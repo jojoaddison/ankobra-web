@@ -5,12 +5,15 @@ import static net.jojoaddison.consultancy.security.SecurityUtils.JWT_ALGORITHM;
 import static net.jojoaddison.consultancy.security.SecurityUtils.USER_ID_CLAIM;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 import net.jojoaddison.consultancy.security.DomainUserDetailsService.UserWithId;
+import net.jojoaddison.consultancy.security.LoginAttemptService;
+import net.jojoaddison.consultancy.web.rest.errors.TooManyLoginAttemptsException;
 import net.jojoaddison.consultancy.web.rest.vm.LoginVM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -48,16 +52,39 @@ public class AuthenticateController {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    public AuthenticateController(JwtEncoder jwtEncoder, AuthenticationManagerBuilder authenticationManagerBuilder) {
+    private final LoginAttemptService loginAttemptService;
+
+    public AuthenticateController(
+        JwtEncoder jwtEncoder,
+        AuthenticationManagerBuilder authenticationManagerBuilder,
+        LoginAttemptService loginAttemptService
+    ) {
         this.jwtEncoder = jwtEncoder;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM) {
-        var authenticationToken = new UsernamePasswordAuthenticationToken(loginVM.getUsername(), loginVM.getPassword());
+    public ResponseEntity<JWTToken> authorize(@Valid @RequestBody LoginVM loginVM, HttpServletRequest request) {
+        // Throttled by source IP and by username independently — see LoginAttemptService. The check runs
+        // before authentication so a locked-out caller costs no bcrypt work, which is what makes an
+        // unthrottled login endpoint expensive to defend as well as easy to brute-force.
+        String ipKey = LoginAttemptService.ipKey(request.getRemoteAddr());
+        String userKey = LoginAttemptService.userKey(loginVM.getUsername());
+        loginAttemptService.lockoutRemaining(ipKey, userKey).ifPresent(remaining -> {
+            throw new TooManyLoginAttemptsException(remaining);
+        });
 
-        var authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        Authentication authentication;
+        try {
+            var authenticationToken = new UsernamePasswordAuthenticationToken(loginVM.getUsername(), loginVM.getPassword());
+            authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        } catch (AuthenticationException e) {
+            loginAttemptService.recordFailure(ipKey, userKey);
+            throw e;
+        }
+        loginAttemptService.recordSuccess(ipKey, userKey);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = this.createToken(authentication, loginVM.isRememberMe());
         var httpHeaders = new HttpHeaders();

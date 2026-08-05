@@ -52,6 +52,8 @@ APP_CONTAINER="ankobra-web-app"
 DB_CONTAINER="ankobra-web-postgres"
 APP_NETWORK="ankobrawebnet"
 NGINX_CONF="ankobra-web.conf"
+# http{}-context rate-limit zones; installed into conf.d/, not sites-available/. See --with-nginx below.
+NGINX_LIMITS_CONF="ankobra-web-limits.conf"
 
 HEALTH_TIMEOUT_SECS="${HEALTH_TIMEOUT_SECS:-600}"
 HEALTH_POLL_SECS=10
@@ -329,6 +331,12 @@ ok "${APP_CONTAINER} is healthy"
 if $WITH_NGINX; then
   step "Install the nginx site"
   confirm "install /etc/nginx/sites-available/${NGINX_CONF} on ${SSH_HOST} (needs sudo)?" || fail "aborted"
+
+  # The rate-limit zones must be installed FIRST and into conf.d/, not sites-available/: limit_req_zone
+  # is only valid in the http{} context, and the site file is included at the server{} level. Shipping
+  # the site without them fails `nginx -t` with "zone not found" and leaves nginx unreloadable.
+  scp -q "prod-server/${NGINX_LIMITS_CONF}" "${SSH_HOST}:/tmp/${NGINX_LIMITS_CONF}"
+  remote "sudo mv /tmp/${NGINX_LIMITS_CONF} /etc/nginx/conf.d/${NGINX_LIMITS_CONF}"
 
   scp -q "prod-server/${NGINX_CONF}" "${SSH_HOST}:/tmp/${NGINX_CONF}"
   remote "sudo mv /tmp/${NGINX_CONF} /etc/nginx/sites-available/${NGINX_CONF} \

@@ -127,7 +127,7 @@ class AccountResourceIT {
     void testRegisterValid() throws Exception {
         ManagedUserVM validUser = new ManagedUserVM();
         validUser.setLogin("test-register-valid");
-        validUser.setPassword("password");
+        validUser.setPassword("sufficiently-long-pass");
         validUser.setFirstName("Alice");
         validUser.setLastName("Test");
         validUser.setEmail("test-register-valid@example.com");
@@ -152,7 +152,7 @@ class AccountResourceIT {
         // Registration is admin-only: an anonymous caller must be rejected before any user is created.
         ManagedUserVM validUser = new ManagedUserVM();
         validUser.setLogin("test-register-anon");
-        validUser.setPassword("password");
+        validUser.setPassword("sufficiently-long-pass");
         validUser.setFirstName("Anon");
         validUser.setLastName("Ymous");
         validUser.setEmail("test-register-anon@example.com");
@@ -173,7 +173,7 @@ class AccountResourceIT {
     void testRegisterInvalidLogin() throws Exception {
         ManagedUserVM invalidUser = new ManagedUserVM();
         invalidUser.setLogin("funky-log(n"); // <-- invalid
-        invalidUser.setPassword("password");
+        invalidUser.setPassword("sufficiently-long-pass");
         invalidUser.setFirstName("Funky");
         invalidUser.setLastName("One");
         invalidUser.setEmail("funky@example.com");
@@ -239,7 +239,7 @@ class AccountResourceIT {
         // First registration
         ManagedUserVM firstUser = new ManagedUserVM();
         firstUser.setLogin("alice");
-        firstUser.setPassword("password");
+        firstUser.setPassword("sufficiently-long-pass");
         firstUser.setFirstName("Alice");
         firstUser.setLastName("Something");
         firstUser.setEmail("alice@example.com");
@@ -292,7 +292,7 @@ class AccountResourceIT {
         // First user
         ManagedUserVM firstUser = new ManagedUserVM();
         firstUser.setLogin("test-register-duplicate-email");
-        firstUser.setPassword("password");
+        firstUser.setPassword("sufficiently-long-pass");
         firstUser.setFirstName("Alice");
         firstUser.setLastName("Test");
         firstUser.setEmail("test-register-duplicate-email@example.com");
@@ -368,7 +368,7 @@ class AccountResourceIT {
     void testRegisterAdminIsIgnored() throws Exception {
         ManagedUserVM validUser = new ManagedUserVM();
         validUser.setLogin("badguy");
-        validUser.setPassword("password");
+        validUser.setPassword("sufficiently-long-pass");
         validUser.setFirstName("Bad");
         validUser.setLastName("Guy");
         validUser.setEmail("badguy@example.com");

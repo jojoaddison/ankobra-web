@@ -64,4 +64,48 @@ class PublicEnquiryResourceIT {
             .orElseThrow();
         assertThat(saved.getStatus()).isEqualTo(LeadStatus.NEW);
     }
+
+    /**
+     * SEC-08. A filled honeypot must look exactly like success from the outside — same 201, no error —
+     * while writing nothing. Telling the bot it was caught just teaches it which field to leave alone.
+     */
+    @Test
+    @Transactional
+    void submitEnquiryWithAFilledHoneypotIsSilentlyDiscarded() throws Exception {
+        long leadsBefore = leadRepository.count();
+        double submittedBefore = aggregate(meterRegistry.find(ENQUIRIES_SUBMITTED_METER).counters());
+
+        restMockMvc
+            .perform(
+                post("/api/public/enquiries")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"name\":\"Spam Bot\",\"email\":\"bot@example.com\",\"need\":\"OTHER\"," +
+                            "\"message\":\"buy things\",\"website\":\"http://spam.example\"}"
+                    )
+            )
+            .andExpect(status().isCreated());
+
+        assertThat(leadRepository.count()).as("no lead written").isEqualTo(leadsBefore);
+        assertThat(aggregate(meterRegistry.find(ENQUIRIES_SUBMITTED_METER).counters()))
+            .as("a discarded submission is not a captured lead, so the KPI must not move")
+            .isEqualTo(submittedBefore);
+    }
+
+    /** An absent honeypot field is the normal case for any client that predates it. */
+    @Test
+    @Transactional
+    void submitEnquiryWithoutTheHoneypotFieldStillWorks() throws Exception {
+        long leadsBefore = leadRepository.count();
+
+        restMockMvc
+            .perform(
+                post("/api/public/enquiries")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\":\"Grace Hopper\",\"email\":\"grace@example.com\",\"need\":\"OTHER\",\"message\":\"Hello\"}")
+            )
+            .andExpect(status().isCreated());
+
+        assertThat(leadRepository.count()).isEqualTo(leadsBefore + 1);
+    }
 }

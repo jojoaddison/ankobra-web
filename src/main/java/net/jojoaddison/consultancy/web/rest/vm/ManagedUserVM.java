@@ -8,7 +8,13 @@ import net.jojoaddison.consultancy.service.dto.AdminUserDTO;
  */
 public class ManagedUserVM extends AdminUserDTO {
 
-    public static final int PASSWORD_MIN_LENGTH = 4;
+    /**
+     * SEC-04 in docs/security-20260805-0936.md. Was generator-jhipster's default of 4, which is
+     * exhaustible in seconds against an endpoint that had no throttling. Raising this only governs
+     * passwords set from now on — any account created under the old floor keeps its short password until
+     * it is reset, so a forced reset is part of applying this, not a consequence of it.
+     */
+    public static final int PASSWORD_MIN_LENGTH = 12;
 
     public static final int PASSWORD_MAX_LENGTH = 100;
 

@@ -61,3 +61,40 @@ jobs:
       # so a budget or AOT error fails the PR, not the release.
       - name: Production webapp build
         run: npm run webapp:build:prod
+
+  # G-02 in docs/security-20260805-0936.md. Nothing scanned dependencies before this, which is exactly
+  # how three high-severity Angular XSS advisories sat in main undetected until a manual audit.
+  #
+  # --omit=dev on purpose: this gate covers what ships to a browser. Dev-only advisories (build tooling,
+  # test runners) are real but are not user-facing, and failing every PR on them trains people to ignore
+  # the gate. Review those with `npm audit` by hand.
+  audit:
+    name: Dependency audit (shipped deps)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Fail on high-severity advisories in shipped dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      # Filesystem scan of the Java tree. The backend had no CVE scanning at all, so its exposure was
+      # simply unknown. Not pinned to the image because the image is built in publish.yml, which only
+      # runs on main — a PR should learn about a vulnerable jar before it merges, not after.
+      - name: Scan Java dependencies
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
