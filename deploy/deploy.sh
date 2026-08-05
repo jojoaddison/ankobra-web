@@ -54,6 +54,9 @@ APP_NETWORK="ankobrawebnet"
 NGINX_CONF="ankobra-web.conf"
 # http{}-context rate-limit zones; installed into conf.d/, not sites-available/. See --with-nginx below.
 NGINX_LIMITS_CONF="ankobra-web-limits.conf"
+# Redirects the retired web.jojoaddison.net hostname to the apex this app serves. Tracked here because
+# the original block existed only on the host and was silently dropped in a refactor — see the file.
+NGINX_WEB_REDIRECT_CONF="web-jojoaddison.conf"
 
 HEALTH_TIMEOUT_SECS="${HEALTH_TIMEOUT_SECS:-600}"
 HEALTH_POLL_SECS=10
@@ -340,7 +343,14 @@ if $WITH_NGINX; then
 
   scp -q "prod-server/${NGINX_CONF}" "${SSH_HOST}:/tmp/${NGINX_CONF}"
   remote "sudo mv /tmp/${NGINX_CONF} /etc/nginx/sites-available/${NGINX_CONF} \
-       && sudo ln -sf /etc/nginx/sites-available/${NGINX_CONF} /etc/nginx/sites-enabled/${NGINX_CONF} \
+       && sudo ln -sf /etc/nginx/sites-available/${NGINX_CONF} /etc/nginx/sites-enabled/${NGINX_CONF}"
+
+  # web.jojoaddison.net -> apex. Shipped with the site rather than left on the host, because the block
+  # it replaces was lost exactly that way: it lived only in /etc/nginx, a refactor split the file, and
+  # nothing noticed the hostname had stopped resolving to any server block until a header audit.
+  scp -q "prod-server/${NGINX_WEB_REDIRECT_CONF}" "${SSH_HOST}:/tmp/${NGINX_WEB_REDIRECT_CONF}"
+  remote "sudo mv /tmp/${NGINX_WEB_REDIRECT_CONF} /etc/nginx/sites-available/${NGINX_WEB_REDIRECT_CONF} \
+       && sudo ln -sf /etc/nginx/sites-available/${NGINX_WEB_REDIRECT_CONF} /etc/nginx/sites-enabled/${NGINX_WEB_REDIRECT_CONF} \
        && sudo nginx -t"
   ok "nginx config valid"
   remote "sudo systemctl reload nginx"
