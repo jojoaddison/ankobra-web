@@ -29,6 +29,12 @@ spring:
   messages:
     basename: i18n/messages
   security:
+    filter:
+      # Mirrors the shipped config (SEC-14). This file shadows the main application.yml on the test
+      # classpath, so without repeating it here SpaSecurityHeadersIT would run against Spring Boot's
+      # default dispatcher types and pass for the wrong reason. The shipped value is guarded separately
+      # by ContentSecurityPolicyConfigTest, which reads the main file from disk.
+      dispatcher-types: async,error,forward,request
     oauth2:
       resourceserver:
         jwt:

@@ -166,6 +166,19 @@ spring:
     problemdetails:
       enabled: true
   security:
+    filter:
+      # SEC-14 in docs/security-20260805-0936.md. `forward` is NOT among Spring Boot's defaults
+      # (request, async, error). SpaWebFilter forwards every non-API path to /index.html, and without
+      # this the security chain — HeaderWriterFilter included — never runs on that dispatch, so
+      # `GET /`, the URL every visitor actually loads, came back with no CSP, no X-Frame-Options and
+      # no X-Content-Type-Options while /index.html had all three.
+      #
+      # Safe to add: SpaWebFilter is a OncePerRequestFilter and will not re-forward, and /index.html
+      # is already permitAll, so re-running authorization on the forwarded dispatch decides nothing new.
+      #
+      # Must live in THIS block, not a second `spring.security:` — a duplicate key in one YAML document
+      # makes Spring Boot's strict loader fail the whole context with "found duplicate key".
+      dispatcher-types: async,error,forward,request
     oauth2:
       resourceserver:
         jwt:
