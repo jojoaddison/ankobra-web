@@ -254,7 +254,18 @@ jhipster:
     # 'unsafe-inline' remains on script-src and style-src and is the weak point: while it is there, CSP
     # is not a meaningful XSS mitigation. Removing it needs nonces threaded through index.html and the
     # Angular style pipeline, which is a larger change tracked as the rest of SEC-06.
-    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+    # SEC-06. `script-src` is now plain 'self' — no 'unsafe-inline', no 'unsafe-eval'. Verified against
+    # the built output rather than assumed: 137 production chunks contain zero `eval(` and zero
+    # `new Function(`, and the single inline <script> the page carried (a loading-error helper) was moved
+    # to content/loading-error.js precisely so this could be dropped. Injected script now has no way to
+    # execute, which is the difference between CSP being a control and CSP being decoration.
+    #
+    # `style-src` keeps 'unsafe-inline' and this is the remaining gap: Angular injects component styles
+    # as <style> elements at runtime, so removing it needs per-request nonces (ngCspNonce), which needs
+    # index.html to be server-rendered rather than a static asset. Tracked as the rest of SEC-06.
+    # It is a much smaller hole than the script one: style injection can deface and can exfiltrate some
+    # data through selectors, but it cannot execute code.
+    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
 
 
 # jhipster-needle-add-application-yaml-document

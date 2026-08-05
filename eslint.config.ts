@@ -25,6 +25,17 @@ export default defineConfig(
     },
   },
   {
+    // Plain browser scripts served as static assets, not part of the Angular compilation. The default
+    // JS block above assumes Node globals, so without this they fail on `window` and `document`.
+    // Linted rather than ignored: they ship to every visitor and nothing else checks them.
+    files: ['src/main/webapp/content/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  {
     files: ['src/main/webapp/**/*.ts'],
     extends: [...tseslint.configs.strictTypeChecked, ...tseslint.configs.stylistic, ...angular.configs.tsRecommended],
     languageOptions: {

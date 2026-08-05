@@ -64,7 +64,14 @@
           },
           "configurations": {
             "production": {
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "fonts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
@@ -122,7 +129,15 @@
             "buildTarget": "::development",
             "runnerConfig": true,
             "coverageReporters": ["text", "lcov"],
-            "reporters": ["default", ["vitest-sonar-reporter", { "outputFile": "./target/test-results/TESTS-results-sonar-vitest.xml" }]],
+            "reporters": [
+              "default",
+              [
+                "vitest-sonar-reporter",
+                {
+                  "outputFile": "./target/test-results/TESTS-results-sonar-vitest.xml"
+                }
+              ]
+            ],
             "tsConfig": "tsconfig.spec.json"
           }
         }
