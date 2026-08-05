@@ -75,6 +75,12 @@ spring:
 server:
   port: 8080
   shutdown: graceful # see https://docs.spring.io/spring-boot/reference/web/graceful-shutdown.html#web.graceful-shutdown
+  # Honour nginx's X-Forwarded-Proto/Host. Without this the app rebuilds every request as
+  # `http://jojoaddison.net` (the loopback hop is plain HTTP), so the browser's `https://jojoaddison.net`
+  # Origin no longer matches and a same-origin request is classified as cross-origin — which drags
+  # every POST through the CORS filter. Also what makes generated absolute URLs (mail links,
+  # redirects) come out as https.
+  forward-headers-strategy: framework
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
@@ -90,6 +96,16 @@ jhipster:
   http:
     cache: # Used by the CachingHttpHeadersFilter
       timeToLiveInDays: 1461
+  cors:
+    # `allowed-origins` comes from JHIPSTER_CORS_ALLOWED_ORIGINS (compose.yml -> PUBLIC_URL). Setting
+    # only the origins is a trap: CorsConfiguration's default `allowed-methods` is GET+HEAD, so any
+    # origin that IS matched still has its POSTs rejected with 403 "Invalid CORS request" — which
+    # took out both login (POST /api/authenticate) and the contact form (POST /api/public/enquiries).
+    # Once a config is registered for /api/**, the verbs and headers must be spelled out too.
+    allowed-methods: '*'
+    allowed-headers: '*'
+    exposed-headers: 'Authorization,Link,X-Total-Count,X-${jhipster.clientApp.name}-alert,X-${jhipster.clientApp.name}-error,X-${jhipster.clientApp.name}-params'
+    max-age: 1800
   cache: # Cache configuration
     ehcache: # Ehcache configuration
       time-to-live-seconds: 3600 # By default objects stay 1 hour in the cache
