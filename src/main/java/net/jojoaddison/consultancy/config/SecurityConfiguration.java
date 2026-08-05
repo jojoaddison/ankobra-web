@@ -78,6 +78,31 @@ public class SecurityConfiguration {
                     .requestMatchers("/api/account/reset-password/finish").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/public/enquiries").permitAll()
                     .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                    // Domain API authorization — see docs/security-20260805-0936.md (SEC-01, SEC-02).
+                    // `/api/** -> authenticated` below is an AUTHENTICATION check; on its own it let any
+                    // logged-in client write and delete every other client's data. These rules are the
+                    // coarse, deny-by-default layer, so a resource regenerated from JDL is closed until
+                    // someone deliberately opens it. Per-object ownership lives in the resources.
+                    //
+                    // CMS-managed reference data: staff only, every verb. A client has no business
+                    // reading the lead pipeline (which is third-party PII off the public contact form),
+                    // the rate card, or the team roster.
+                    .requestMatchers("/api/leads/**", "/api/service-items/**", "/api/courses/**",
+                                     "/api/team-members/**", "/api/milestones/**", "/api/quote-lines/**")
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.CONSULTANT)
+                    // Client-facing entities: reads are scoped per-object inside the resource, writes are
+                    // staff-only. Tickets are deliberately absent — clients raise their own, so
+                    // TicketResource carries per-object ownership checks instead of a blanket role gate.
+                    .requestMatchers(HttpMethod.POST, "/api/projects/**", "/api/clients/**", "/api/quotes/**")
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.CONSULTANT)
+                    .requestMatchers(HttpMethod.PUT, "/api/projects/**", "/api/clients/**", "/api/quotes/**")
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.CONSULTANT)
+                    .requestMatchers(HttpMethod.PATCH, "/api/projects/**", "/api/clients/**", "/api/quotes/**")
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.CONSULTANT)
+                    // Nobody outside staff deletes anything, including a client's own tickets — a client
+                    // closes a ticket (a state change), they do not erase the support history.
+                    .requestMatchers(HttpMethod.DELETE, "/api/**")
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.CONSULTANT)
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers("/v3/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers("/management/health").permitAll()

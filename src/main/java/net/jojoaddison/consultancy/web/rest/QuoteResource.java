@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import net.jojoaddison.consultancy.repository.QuoteRepository;
+import net.jojoaddison.consultancy.security.PortalSecurityService;
 import net.jojoaddison.consultancy.service.QuoteQueryService;
 import net.jojoaddison.consultancy.service.QuoteService;
 import net.jojoaddison.consultancy.service.criteria.QuoteCriteria;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import tech.jhipster.service.filter.LongFilter;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -46,10 +48,18 @@ public class QuoteResource {
 
     private final QuoteQueryService quoteQueryService;
 
-    public QuoteResource(QuoteService quoteService, QuoteRepository quoteRepository, QuoteQueryService quoteQueryService) {
+    private final PortalSecurityService portalSecurity;
+
+    public QuoteResource(
+        QuoteService quoteService,
+        QuoteRepository quoteRepository,
+        QuoteQueryService quoteQueryService,
+        PortalSecurityService portalSecurity
+    ) {
         this.quoteService = quoteService;
         this.quoteRepository = quoteRepository;
         this.quoteQueryService = quoteQueryService;
+        this.portalSecurity = portalSecurity;
     }
 
     /**
@@ -153,7 +163,7 @@ public class QuoteResource {
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("REST request to get Quotes by criteria: {}", criteria);
-
+        applyClientScope(criteria);
         Page<QuoteDTO> page = quoteQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -168,6 +178,7 @@ public class QuoteResource {
     @GetMapping("/count")
     public ResponseEntity<Long> countQuotes(QuoteCriteria criteria) {
         LOG.debug("REST request to count Quotes by criteria: {}", criteria);
+        applyClientScope(criteria);
         return ResponseEntity.ok().body(quoteQueryService.countByCriteria(criteria));
     }
 
@@ -180,7 +191,14 @@ public class QuoteResource {
     @GetMapping("/{id}")
     public ResponseEntity<QuoteDTO> getQuote(@PathVariable("id") Long id) {
         LOG.debug("REST request to get Quote : {}", id);
-        Optional<QuoteDTO> quoteDTO = quoteService.findOne(id);
+        Optional<QuoteDTO> quoteDTO =
+            quoteService
+                .findOne(id)
+                // Role scoping: a client cannot fetch another client's quote by id. Quote.client is
+                // nullable, so an unassigned quote is staff-only — fail closed, not open.
+                .filter(
+                    dto -> portalSecurity.isStaff() || (dto.getClient() != null && portalSecurity.canAccessClient(dto.getClient().getId()))
+                );
         return ResponseUtil.wrapOrNotFound(quoteDTO);
     }
 
@@ -197,5 +215,17 @@ public class QuoteResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /**
+     * Restricts a non-staff caller's query to their own client's quotes. Overwrites any caller-supplied
+     * {@code clientId} filter rather than merging with it — merging would let the caller widen the scope.
+     */
+    private void applyClientScope(QuoteCriteria criteria) {
+        if (!portalSecurity.isStaff()) {
+            LongFilter clientScope = new LongFilter();
+            clientScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setClientId(clientScope);
+        }
     }
 }

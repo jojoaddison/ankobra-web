@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @IntegrationTest
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(authorities = "ROLE_CONSULTANT")
 class ServiceItemResourceIT {
 
     private static final String DEFAULT_CODE = "AAAAAAAAAA";

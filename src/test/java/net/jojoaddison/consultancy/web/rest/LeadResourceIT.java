@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @IntegrationTest
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(authorities = "ROLE_CONSULTANT")
 class LeadResourceIT {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";

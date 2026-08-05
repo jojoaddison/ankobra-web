@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @IntegrationTest
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(authorities = "ROLE_CONSULTANT")
 class MilestoneResourceIT {
 
     private static final String DEFAULT_TITLE = "AAAAAAAAAA";

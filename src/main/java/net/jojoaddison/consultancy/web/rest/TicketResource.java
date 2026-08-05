@@ -12,6 +12,7 @@ import net.jojoaddison.consultancy.security.PortalSecurityService;
 import net.jojoaddison.consultancy.service.TicketQueryService;
 import net.jojoaddison.consultancy.service.TicketService;
 import net.jojoaddison.consultancy.service.criteria.TicketCriteria;
+import net.jojoaddison.consultancy.service.dto.ClientDTO;
 import net.jojoaddison.consultancy.service.dto.TicketDTO;
 import net.jojoaddison.consultancy.web.rest.errors.BadRequestAlertException;
 import org.slf4j.Logger;
@@ -75,6 +76,7 @@ public class TicketResource {
         if (ticketDTO.getId() != null) {
             throw new BadRequestAlertException("A new ticket cannot already have an ID", ENTITY_NAME, "idexists");
         }
+        pinOwnerForClients(ticketDTO);
         ticketDTO = ticketService.save(ticketDTO);
         return ResponseEntity.created(new URI("/api/tickets/" + ticketDTO.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, ticketDTO.getId().toString()))
@@ -103,6 +105,8 @@ public class TicketResource {
         if (!Objects.equals(id, ticketDTO.getId())) {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
+
+        assertMayWriteExisting(id, ticketDTO);
 
         if (!ticketRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
@@ -138,6 +142,8 @@ public class TicketResource {
             throw new BadRequestAlertException("Invalid ID", ENTITY_NAME, "idinvalid");
         }
 
+        assertMayWriteExisting(id, ticketDTO);
+
         if (!ticketRepository.existsById(id)) {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
@@ -163,14 +169,7 @@ public class TicketResource {
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("REST request to get Tickets by criteria: {}", criteria);
-
-        // Role scoping: a client only sees tickets raised for their own client record.
-        if (!portalSecurity.isStaff()) {
-            LongFilter clientScope = new LongFilter();
-            clientScope.setEquals(portalSecurity.requiredClientScope());
-            criteria.setClientId(clientScope);
-        }
-
+        applyClientScope(criteria);
         Page<TicketDTO> page = ticketQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -185,6 +184,9 @@ public class TicketResource {
     @GetMapping("/count")
     public ResponseEntity<Long> countTickets(TicketCriteria criteria) {
         LOG.debug("REST request to count Tickets by criteria: {}", criteria);
+        // Scoped for the same reason as the list endpoint: unscoped, this answers questions about other
+        // clients' data that the list endpoint refuses, one criteria filter at a time.
+        applyClientScope(criteria);
         return ResponseEntity.ok().body(ticketQueryService.countByCriteria(criteria));
     }
 
@@ -220,5 +222,49 @@ public class TicketResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /**
+     * Restricts a non-staff caller's query to their own client. Overwrites any caller-supplied
+     * {@code clientId} filter rather than merging with it — merging would let the caller widen the scope.
+     */
+    private void applyClientScope(TicketCriteria criteria) {
+        if (!portalSecurity.isStaff()) {
+            LongFilter clientScope = new LongFilter();
+            clientScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setClientId(clientScope);
+        }
+    }
+
+    /**
+     * Pins a new ticket to the caller's own client when they are not staff, ignoring whatever owner the
+     * payload carried. Clients raise their own tickets, so this endpoint is open to them; taking the
+     * owner from the request body would let one client raise tickets against another's account.
+     */
+    private void pinOwnerForClients(TicketDTO ticketDTO) {
+        if (!portalSecurity.isStaff()) {
+            ClientDTO own = new ClientDTO();
+            own.setId(portalSecurity.requiredOwnClientId());
+            ticketDTO.setClient(own);
+        }
+    }
+
+    /**
+     * Authorizes a write against an existing ticket. Both halves matter: checking only the stored owner
+     * would let a client re-parent their own ticket onto someone else's account, and checking only the
+     * submitted owner would let them capture another client's ticket by sending their own id.
+     *
+     * <p>Runs before the existence check so a missing id and another client's id are indistinguishable
+     * to a non-staff caller — otherwise the pair of responses enumerates which ticket ids exist.
+     */
+    private void assertMayWriteExisting(Long id, TicketDTO submitted) {
+        if (portalSecurity.isStaff()) {
+            return;
+        }
+        Long storedOwner = ticketService.findOne(id).map(TicketDTO::getClient).map(ClientDTO::getId).orElse(null);
+        portalSecurity.assertCanAccessClient(storedOwner);
+        if (submitted.getClient() != null) {
+            portalSecurity.assertCanAccessClient(submitted.getClient().getId());
+        }
     }
 }

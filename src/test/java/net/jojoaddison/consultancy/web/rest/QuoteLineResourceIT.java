@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @IntegrationTest
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(authorities = "ROLE_CONSULTANT")
 class QuoteLineResourceIT {
 
     private static final Integer DEFAULT_QUANTITY = 1;

@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @IntegrationTest
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-@WithMockUser
+@WithMockUser(authorities = "ROLE_CONSULTANT")
 class TeamMemberResourceIT {
 
     private static final String DEFAULT_NAME = "AAAAAAAAAA";

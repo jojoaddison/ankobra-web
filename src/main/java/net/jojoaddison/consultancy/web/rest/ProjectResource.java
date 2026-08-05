@@ -163,14 +163,7 @@ public class ProjectResource {
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("REST request to get Projects by criteria: {}", criteria);
-
-        // Role scoping: a client only sees projects owned by their own client record.
-        if (!portalSecurity.isStaff()) {
-            LongFilter clientScope = new LongFilter();
-            clientScope.setEquals(portalSecurity.requiredClientScope());
-            criteria.setClientId(clientScope);
-        }
-
+        applyClientScope(criteria);
         Page<ProjectDTO> page = projectQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -185,6 +178,9 @@ public class ProjectResource {
     @GetMapping("/count")
     public ResponseEntity<Long> countProjects(ProjectCriteria criteria) {
         LOG.debug("REST request to count Projects by criteria: {}", criteria);
+        // Scoped for the same reason as the list endpoint: unscoped, this answers questions about other
+        // clients' data that the list endpoint refuses, one criteria filter at a time.
+        applyClientScope(criteria);
         return ResponseEntity.ok().body(projectQueryService.countByCriteria(criteria));
     }
 
@@ -220,5 +216,17 @@ public class ProjectResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /**
+     * Restricts a non-staff caller's query to their own client. Overwrites any caller-supplied
+     * {@code clientId} filter rather than merging with it — merging would let the caller widen the scope.
+     */
+    private void applyClientScope(ProjectCriteria criteria) {
+        if (!portalSecurity.isStaff()) {
+            LongFilter clientScope = new LongFilter();
+            clientScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setClientId(clientScope);
+        }
     }
 }

@@ -163,14 +163,7 @@ public class ClientResource {
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("REST request to get Clients by criteria: {}", criteria);
-
-        // Role scoping: a client only sees their own client record.
-        if (!portalSecurity.isStaff()) {
-            LongFilter idScope = new LongFilter();
-            idScope.setEquals(portalSecurity.requiredClientScope());
-            criteria.setId(idScope);
-        }
-
+        applyClientScope(criteria);
         Page<ClientDTO> page = clientQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
@@ -185,6 +178,9 @@ public class ClientResource {
     @GetMapping("/count")
     public ResponseEntity<Long> countClients(ClientCriteria criteria) {
         LOG.debug("REST request to count Clients by criteria: {}", criteria);
+        // Scoped for the same reason as the list endpoint: unscoped, this answers questions about other
+        // clients' data that the list endpoint refuses, one criteria filter at a time.
+        applyClientScope(criteria);
         return ResponseEntity.ok().body(clientQueryService.countByCriteria(criteria));
     }
 
@@ -215,5 +211,17 @@ public class ClientResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /**
+     * Restricts a non-staff caller's query to their own client record. Overwrites any caller-supplied
+     * {@code id} filter rather than merging with it — merging would let the caller widen the scope.
+     */
+    private void applyClientScope(ClientCriteria criteria) {
+        if (!portalSecurity.isStaff()) {
+            LongFilter idScope = new LongFilter();
+            idScope.setEquals(portalSecurity.requiredClientScope());
+            criteria.setId(idScope);
+        }
     }
 }
