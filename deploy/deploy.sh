@@ -270,9 +270,10 @@ if ! $VERIFY_ONLY; then
   scp -q prod-server/compose.yml "${SSH_HOST}:${REMOTE_DIR}/compose.yml"
   scp -q prod-server/start       "${SSH_HOST}:${REMOTE_DIR}/start"
   scp -q prod-server/backup.sh   "${SSH_HOST}:${REMOTE_DIR}/backup.sh"
+  scp -q prod-server/verify-restore.sh "${SSH_HOST}:${REMOTE_DIR}/verify-restore.sh"
   scp -q prod-server/infra.sh    "${SSH_HOST}:${REMOTE_DIR}/infra.sh"
-  remote "chmod +x ${REMOTE_DIR}/start ${REMOTE_DIR}/backup.sh ${REMOTE_DIR}/infra.sh"
-  ok "compose.yml, start, backup.sh, infra.sh"
+  remote "chmod +x ${REMOTE_DIR}/start ${REMOTE_DIR}/backup.sh ${REMOTE_DIR}/verify-restore.sh ${REMOTE_DIR}/infra.sh"
+  ok "compose.yml, start, backup.sh, verify-restore.sh, infra.sh"
 
   # Point .env at the registry and tag being deployed. sed in place rather than rewriting the file,
   # because it holds secrets this script must never read, let alone reconstruct. `|` as the sed

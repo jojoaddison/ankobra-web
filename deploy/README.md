@@ -164,14 +164,37 @@ seed data.
 when the new dump is suspiciously small, because a `pg_dump` that fails mid-stream still exits 0
 through a pipe.
 
-Add to root's crontab on the server, alongside the existing cert-renewal entry:
+**Encryption (SEC-10).** If `backup-pubkey.asc` sits next to `backup.sh`, the dump is piped straight
+into `gpg` and only ciphertext reaches disk. Generate the pair somewhere that is **not** this server
+and copy up only the public half — a private key stored beside the backups it protects is decoration:
 
-```cron
-15 3 * * * ~/webroot/01-jojoaddison/ankobra-web/backup.sh >> /var/log/ankobra-web-backup.log 2>&1
+```bash
+gpg --quick-generate-key "ankobra-web backup" default default never
+gpg --armor --export "ankobra-web backup" > backup-pubkey.asc
+scp backup-pubkey.asc webserver:~/webroot/01-jojoaddison/ankobra-web/
 ```
 
-A backup nobody has restored is a hypothesis. Do one restore drill into a scratch database before
-this carries real data.
+Without that file the dump is written unencrypted and the script says so on every run. That is
+deliberate: no backup is a worse outcome than an unencrypted `0600` one sitting on the same host as
+the live database it came from.
+
+**Scheduling.** Both entries are in root's crontab (added 2026-08-05 — until then nothing was
+scheduled and the database had never been backed up at all):
+
+```cron
+15 3 * * * /root/webroot/01-jojoaddison/ankobra-web/backup.sh >> /var/log/ankobra-web-backup.log 2>&1
+40 3 * * 0 /root/webroot/01-jojoaddison/ankobra-web/verify-restore.sh >> /var/log/ankobra-web-restore-drill.log 2>&1
+```
+
+**Restore drills (G-05).** `verify-restore.sh` dumps the live database, replays it into a throwaway
+PostgreSQL container, and compares row counts **source vs restored** for every table. Comparison
+rather than a fixed expectation, because most tables are legitimately empty today — "must be
+non-empty" would fail every run, and "must exist" would wave through a dump that restored the schema
+and none of the rows. It also asserts `jhi_user` is non-empty, since otherwise every `0 == 0`
+comparison would agree with itself on a dump that captured nothing.
+
+It deliberately does **not** decrypt a stored archive — it cannot, because the private key is off-host
+by design. That drill belongs wherever the key lives; see `docs/runbook-security.md`.
 
 ## Verification
 

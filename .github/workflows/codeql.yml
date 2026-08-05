@@ -1,0 +1,76 @@
+name: CodeQL
+
+# Static analysis gate (G-06 in docs/security-20260805-0936.md). Before this, sonar-project.properties
+# existed but nothing ever ran it — it points at http://localhost:9001, a SonarQube nobody starts in CI
+# — so the repository implied static-analysis coverage it did not have.
+#
+# CodeQL rather than Sonar because it needs no server to point at, and this repository is public, so it
+# is free. It reports into the Security tab; `security-events: write` is what lets it publish there.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly, so newly published query packs find old code. A gate that only runs on changed code never
+    # revisits what was already merged, and the queries improve faster than this codebase changes.
+    - cron: '31 4 * * 1'
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Java 25, matching <java.version> and deploy/build.sh. JHipster's maven-enforcer accepts only
+      # 21-25, so the runner's default JDK fails the build before anything compiles.
+      - name: Set up JDK 25
+        if: matrix.language == 'java-kotlin'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: pom.xml
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # security-and-quality is broader than the default, which is the point of a gate that runs
+          # weekly rather than a linter that runs on every keystroke.
+          queries: security-and-quality
+
+      # build-mode: manual, because autobuild would run the default profile and pull in the frontend
+      # plugin for no benefit. -DskipTests: CodeQL needs the classes, not the test results — the CI
+      # workflow already runs the suite, and doing it twice doubles the slowest job on the repository.
+      - name: Build backend classes
+        if: matrix.language == 'java-kotlin'
+        run: ./mvnw -ntp --batch-mode compile -DskipTests
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
