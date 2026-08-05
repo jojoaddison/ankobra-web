@@ -13,9 +13,12 @@ import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import net.jojoaddison.consultancy.security.TokenVersionValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.codec.Hex;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -24,6 +27,22 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 public class JwtAuthenticationTestUtils {
 
     public static final String BEARER = "Bearer ";
+
+    /**
+     * A permissive stand-in for the real SEC-09 validator. These tests exercise signature, expiry and
+     * malformed-token handling — not revocation — and the real one reads the user through JPA, which
+     * this slice deliberately does not start. Revocation itself is covered end-to-end by
+     * {@code TokenRevocationIT}.
+     */
+    @Bean
+    TokenVersionValidator permissiveTokenVersionValidator() {
+        return new TokenVersionValidator(null) {
+            @Override
+            public OAuth2TokenValidatorResult validate(Jwt token) {
+                return OAuth2TokenValidatorResult.success();
+            }
+        };
+    }
 
     @Bean
     private MeterRegistry meterRegistry() {

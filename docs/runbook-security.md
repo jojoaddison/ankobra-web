@@ -29,18 +29,32 @@ ssh webserver 'docker logs ankobra-web-app 2>&1 | grep -E "event=account\.(creat
 Logs also reach Grafana via Alloy → Loki, where `{app="ankobra-web"} |= "SECURITY_AUDIT"` is the same
 query with history beyond the container's lifetime. Prefer Loki if the container has been restarted.
 
-**Containment.** There is no per-session revocation (SEC-09 is open). Your options, cheapest first:
+**Containment.** Start here — this signs one account out everywhere, immediately, without touching
+anyone else (SEC-09):
 
-1. **Disable the account** — sign in as admin → `/admin` → user management → deactivate. This stops
-   *new* logins. It does **not** invalidate the token they already hold, which stays valid for up to
-   24 hours, or 7 days if they ticked remember-me.
-2. **Change their password** — same caveat: existing tokens survive it.
-3. **Rotate the signing key** — the only way to kill an issued token. See §2. This signs out
-   *everyone*, so it is correct for a confirmed compromise and heavy-handed for a suspected one.
+```bash
+curl -X POST https://jojoaddison.net/api/admin/users/<login>/revoke-sessions \
+  -H "Authorization: Bearer <your admin token>"        # 204 = every token they hold is now dead
+```
 
-**Judgement call:** if the account is an admin, go straight to §2. An admin token can create more
-admin accounts, and every hour it stays valid is an hour they can re-establish access through a route
-your containment did not cover.
+Then, in order:
+
+1. **Revoke their sessions** (above). Kills every token already issued to them. Does not stop them
+   logging in again, so pair it with 2 or 3.
+2. **Deactivate the account** — admin → user management → deactivate. Blocks new logins, and also
+   revokes their existing tokens on the active→inactive transition.
+3. **Change their password** — also revokes their sessions, including the one doing the changing.
+4. **Rotate the signing key** (§2) — now only needed for a *key* compromise, not an account one. It
+   signs out everybody.
+
+**Judgement call:** if the account is an admin, do 1 and 2 immediately and do not wait to investigate
+first. An admin token can create more admin accounts, and every minute it stays valid is a minute they
+can re-establish access through a route your containment did not cover.
+
+> **Do not bump `token_version` with SQL.** `findOneByLogin` is `@Cacheable`, and the validator reads
+> the user through it — a direct `UPDATE` is silently ineffective for up to the cache TTL (an hour in
+> production) and needs an app restart to take hold. Use the endpoint or the admin UI, both of which
+> evict. This was found by a test, not in production, but it would have failed exactly when it mattered.
 
 ---
 
@@ -144,9 +158,10 @@ one by hand, on the machine holding the private key, at least when the key chang
 1. Deactivate the account (`/admin` → user management). Do not delete it — the audit trail references
    the login, and deleting the row makes past events harder to attribute.
 2. Check what they touched: `grep 'actor="<login>"'` over the audit log.
-3. If they held `ROLE_ADMIN`, rotate the JWT signing key (§2). Deactivation does not invalidate a
-   token they may still hold, and an admin token is worth more than the inconvenience of signing
-   everyone out.
+3. Revoking sessions is now covered by step 1 — deactivation revokes on the active→inactive
+   transition. Confirm it took: `grep 'event=account.sessions_revoked' ` over the audit log, or check
+   that a token they held is refused. Rotating the signing key (§2) is no longer necessary for
+   offboarding; keep it for a suspected *key* leak.
 4. Rotate any shared credential they knew: `.env` secrets, the private registry login, SSH access.
 
 ---
@@ -155,8 +170,8 @@ one by hand, on the machine holding the private key, at least when the key chang
 
 Honest gaps, so nobody discovers them mid-incident:
 
-- **No per-session revocation** (SEC-09). Killing one session means rotating the key and signing out
-  everyone. That is the single biggest gap in this runbook.
+- **No self-service "sign out my other devices".** Per-user revocation exists (SEC-09) but only an
+  admin can trigger it; a user who suspects their own session is compromised has to ask.
 - **No alerting.** Every query here is something a human has to think to run. Nothing pages on a burst
   of `event=login.failure` or on `event=account.created`.
 - **No off-host backup copy.** The dumps live on the same host as the database. A host loss takes both.

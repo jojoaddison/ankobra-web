@@ -23,6 +23,12 @@ public final class SecurityUtils {
 
     public static final String USER_ID_CLAIM = "userId";
 
+    /**
+     * Token generation this token was issued under (SEC-09). Absent on tokens issued before the feature
+     * existed, which the validator reads as 0 so an upgrade does not sign everyone out.
+     */
+    public static final String TOKEN_VERSION_CLAIM = "tv";
+
     private SecurityUtils() {}
 
     /**

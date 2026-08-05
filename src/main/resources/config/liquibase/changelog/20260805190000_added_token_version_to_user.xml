@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        SEC-09 in docs/security-20260805-0936.md: per-user token revocation.
+
+        Logout is client-side only, so a copied JWT stayed valid until it expired — up to 7 days with
+        remember-me. The only revocation available was rotating the signing secret, which signs out
+        every user at once. That is the right answer to a leaked key and far too blunt for offboarding
+        one consultant.
+
+        Tokens now carry the value of this column at issue time, and a token whose claim no longer
+        matches the row is rejected. Bumping one user's version invalidates exactly that user's
+        sessions and nobody else's.
+
+        defaultValueNumeric 0 matters for the rollout: tokens issued before this change carry no
+        version claim at all, and the validator reads a missing claim as 0. Existing sessions
+        therefore survive the deploy rather than everyone being signed out by an upgrade — while the
+        first bump for any user still kills their old tokens immediately.
+    -->
+    <changeSet id="20260805190000-1" author="jhipster">
+        <addColumn tableName="jhi_user">
+            <column name="token_version" type="integer" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

@@ -7,13 +7,16 @@ import com.nimbusds.jose.util.Base64;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import net.jojoaddison.consultancy.management.SecurityMetersService;
+import net.jojoaddison.consultancy.security.TokenVersionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
@@ -26,8 +29,11 @@ public class SecurityJwtConfiguration {
     private String jwtKey;
 
     @Bean
-    public JwtDecoder jwtDecoder(SecurityMetersService metersService) {
+    public JwtDecoder jwtDecoder(SecurityMetersService metersService, TokenVersionValidator tokenVersionValidator) {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey()).macAlgorithm(JWT_ALGORITHM).build();
+        // SEC-09. Delegating rather than replacing: createDefault() is what enforces expiry and
+        // not-before, and dropping it to add revocation would trade one hole for a worse one.
+        jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefault(), tokenVersionValidator));
         return token -> {
             try {
                 return jwtDecoder.decode(token);

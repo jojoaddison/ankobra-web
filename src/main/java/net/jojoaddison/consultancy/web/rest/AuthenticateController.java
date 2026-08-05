@@ -2,6 +2,7 @@ package net.jojoaddison.consultancy.web.rest;
 
 import static net.jojoaddison.consultancy.security.SecurityUtils.AUTHORITIES_CLAIM;
 import static net.jojoaddison.consultancy.security.SecurityUtils.JWT_ALGORITHM;
+import static net.jojoaddison.consultancy.security.SecurityUtils.TOKEN_VERSION_CLAIM;
 import static net.jojoaddison.consultancy.security.SecurityUtils.USER_ID_CLAIM;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -134,6 +135,9 @@ public class AuthenticateController {
             .claim(AUTHORITIES_CLAIM, authorities);
         if (authentication.getPrincipal() instanceof UserWithId user) {
             builder.claim(USER_ID_CLAIM, user.getId());
+            // SEC-09: stamp the generation this token belongs to. TokenVersionValidator rejects the
+            // token once the user's row moves past it.
+            builder.claim(TOKEN_VERSION_CLAIM, user.getTokenVersion());
         }
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();

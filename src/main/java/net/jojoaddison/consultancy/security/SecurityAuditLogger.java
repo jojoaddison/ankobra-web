@@ -74,6 +74,11 @@ public class SecurityAuditLogger {
         AUDIT.info("event=account.updated actor=\"{}\" login=\"{}\" authorities=\"{}\"", actor, login, authorities);
     }
 
+    /** An admin signing one user out everywhere (SEC-09). */
+    public void sessionsRevoked(String actor, String login) {
+        AUDIT.warn("event=account.sessions_revoked actor=\"{}\" login=\"{}\"", actor, login);
+    }
+
     public void accountDeleted(String actor, String login) {
         AUDIT.warn("event=account.deleted actor=\"{}\" login=\"{}\"", actor, login);
     }

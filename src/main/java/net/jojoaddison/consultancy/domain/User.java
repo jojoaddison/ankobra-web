@@ -64,6 +64,15 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     @Column(name = "activated", nullable = false)
     private boolean activated = false;
 
+    /**
+     * Incremented to invalidate every token this user currently holds (SEC-09). Tokens carry the value
+     * at issue time; a token whose claim no longer matches this column is rejected. Scoped to one user,
+     * unlike rotating the signing secret, which signs out everybody.
+     */
+    @NotNull
+    @Column(name = "token_version", nullable = false)
+    private int tokenVersion = 0;
+
     @Size(min = 2, max = 10)
     @Column(name = "lang_key", length = 10)
     private String langKey;
@@ -159,6 +168,19 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(int tokenVersion) {
+        this.tokenVersion = tokenVersion;
+    }
+
+    /** Invalidates every token already issued to this user, and only this user. */
+    public void revokeIssuedTokens() {
+        this.tokenVersion++;
     }
 
     public String getActivationKey() {

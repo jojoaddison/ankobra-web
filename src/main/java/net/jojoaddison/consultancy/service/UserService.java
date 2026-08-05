@@ -11,6 +11,7 @@ import net.jojoaddison.consultancy.repository.AuthorityRepository;
 import net.jojoaddison.consultancy.repository.UserRepository;
 import net.jojoaddison.consultancy.security.AuthoritiesConstants;
 import net.jojoaddison.consultancy.security.SecurityUtils;
+import net.jojoaddison.consultancy.security.TokenVersionValidator;
 import net.jojoaddison.consultancy.service.dto.AdminUserDTO;
 import net.jojoaddison.consultancy.service.dto.UserDTO;
 import org.slf4j.Logger;
@@ -74,6 +75,9 @@ public class UserService {
                 user.setPassword(passwordEncoder.encode(newPassword));
                 user.setResetKey(null);
                 user.setResetDate(null);
+                // SEC-09. This is the recovery path: whoever is resetting may be locking an intruder
+                // out, so the intruder's existing sessions must die with the old password.
+                user.revokeIssuedTokens();
                 this.clearUserCaches(user);
                 return user;
             });
@@ -193,6 +197,12 @@ public class UserService {
                     user.setEmail(userDTO.getEmail().toLowerCase());
                 }
                 user.setImageUrl(userDTO.getImageUrl());
+                // SEC-09: deactivation is the offboarding action, and on its own it only blocks NEW
+                // logins — the token they already hold would keep working for up to 7 days. Revoke on
+                // the transition only, so routine edits to an active account do not sign them out.
+                if (user.isActivated() && !userDTO.isActivated()) {
+                    user.revokeIssuedTokens();
+                }
                 user.setActivated(userDTO.isActivated());
                 user.setLangKey(userDTO.getLangKey());
                 Set<Authority> managedAuthorities = user.getAuthorities();
@@ -257,6 +267,9 @@ public class UserService {
                 }
                 String encryptedPassword = passwordEncoder.encode(newPassword);
                 user.setPassword(encryptedPassword);
+                // SEC-09: changing a password that someone else may know has to end the sessions that
+                // password opened, otherwise the change protects nothing that is already logged in.
+                user.revokeIssuedTokens();
                 this.clearUserCaches(user);
                 LOG.debug("Changed password for User: {}", user);
             });
@@ -305,6 +318,27 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).toList();
+    }
+
+    /**
+     * Invalidates every token already issued to one user, without touching anyone else's sessions
+     * (SEC-09).
+     *
+     * <p>Go through here rather than bumping {@code token_version} in the database by hand.
+     * {@code findOneByLogin} is {@code @Cacheable}, and {@link TokenVersionValidator} reads the user
+     * through it — so a revocation that does not evict the cache is silently ineffective for the cache
+     * TTL, an hour in production. A direct SQL update needs an application restart to take effect.
+     *
+     * @return the user, or empty if no such login exists.
+     */
+    public Optional<User> revokeSessions(String login) {
+        return userRepository.findOneByLogin(login).map(user -> {
+            user.revokeIssuedTokens();
+            userRepository.save(user);
+            this.clearUserCaches(user);
+            LOG.debug("Revoked issued tokens for User: {}", login);
+            return user;
+        });
     }
 
     private void clearUserCaches(User user) {

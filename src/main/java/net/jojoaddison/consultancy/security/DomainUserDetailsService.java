@@ -59,13 +59,25 @@ public class DomainUserDetailsService implements UserDetailsService {
 
         private final Long id;
 
+        /** SEC-09: carried on the principal so token minting does not need a second query. */
+        private final int tokenVersion;
+
         public UserWithId(String login, String password, Collection<? extends GrantedAuthority> authorities, Long id) {
+            this(login, password, authorities, id, 0);
+        }
+
+        public UserWithId(String login, String password, Collection<? extends GrantedAuthority> authorities, Long id, int tokenVersion) {
             super(login, password, authorities);
             this.id = id;
+            this.tokenVersion = tokenVersion;
         }
 
         public Long getId() {
             return id;
+        }
+
+        public int getTokenVersion() {
+            return tokenVersion;
         }
 
         @Override
@@ -83,7 +95,8 @@ public class DomainUserDetailsService implements UserDetailsService {
                 user.getLogin(),
                 user.getPassword(),
                 user.getAuthorities().stream().map(Authority::getName).map(SimpleGrantedAuthority::new).toList(),
-                user.getId()
+                user.getId(),
+                user.getTokenVersion()
             );
         }
     }

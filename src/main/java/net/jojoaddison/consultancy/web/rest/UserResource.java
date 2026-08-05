@@ -208,6 +208,32 @@ public class UserResource {
     }
 
     /**
+     * {@code POST /admin/users/:login/revoke-sessions} : sign one user out everywhere (SEC-09).
+     *
+     * <p>The offboarding and suspected-compromise action. Deactivating an account only blocks new
+     * logins — a token already issued keeps working until it expires, up to 7 days with remember-me.
+     * Before this the only way to kill an issued token was rotating the signing secret, which signs
+     * out every user at once.
+     *
+     * @param login the login whose tokens to invalidate.
+     * @return {@code 204 (No Content)}, or {@code 404} if no such user exists.
+     */
+    @PostMapping("/users/{login}/revoke-sessions")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> revokeSessions(@PathVariable("login") @Pattern(regexp = Constants.LOGIN_REGEX) String login) {
+        LOG.debug("REST request to revoke sessions for User: {}", login);
+        return userService
+            .revokeSessions(login)
+            .map(user -> {
+                securityAudit.sessionsRevoked(securityAudit.currentActor(), login);
+                return ResponseEntity.noContent()
+                    .headers(HeaderUtil.createAlert(applicationName, "userManagement.sessionsRevoked", login))
+                    .<Void>build();
+            })
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
      * {@code DELETE /admin/users/:login} : delete the "login" User.
      *
      * @param login the login of the user to delete.

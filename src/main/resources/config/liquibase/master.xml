@@ -37,6 +37,9 @@
     <include file="config/liquibase/changelog/20260802131055_added_entity_constraints_Quote.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260802131056_added_entity_constraints_QuoteLine.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260802131058_added_entity_constraints_TeamMember.xml" relativeToChangelogFile="false"/>
+    <!-- SEC-09: per-user token revocation. Applies after the entity changelogs so it lands on the
+         final jhi_user table regardless of how the entity changelogs are regenerated. -->
+    <include file="config/liquibase/changelog/20260805190000_added_token_version_to_user.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>
