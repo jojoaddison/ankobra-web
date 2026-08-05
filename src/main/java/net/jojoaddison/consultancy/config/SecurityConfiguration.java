@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
@@ -19,6 +20,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import tech.jhipster.config.JHipsterConstants;
 import tech.jhipster.config.JHipsterProperties;
@@ -48,6 +50,27 @@ public class SecurityConfiguration {
             .addFilterAfter(new SpaWebFilter(), BasicAuthenticationFilter.class)
             .headers(headers ->
                 headers
+                    // SEC-14. HeaderWriterFilter defaults to writing headers when the response commits.
+                    // The SPA never commits inside this chain: SpaWebFilter forwards every client route
+                    // to /index.html, and the packaged app's static-resource handling commits the
+                    // forwarded response without the wrapper's hook firing — so `GET /`, the URL every
+                    // visitor loads, came back with no CSP and no frame options while /index.html had both.
+                    //
+                    // Writing eagerly puts the headers on the response BEFORE the forward. They survive
+                    // it because RequestDispatcher.forward() clears the buffer, not the headers.
+                    //
+                    // Adding `forward` to spring.security.filter.dispatcher-types does NOT fix this and
+                    // was tried: every filter in the chain extends OncePerRequestFilter, so on the
+                    // forward dispatch they all see the already-filtered attribute and skip.
+                    .withObjectPostProcessor(
+                        new ObjectPostProcessor<HeaderWriterFilter>() {
+                            @Override
+                            public <O extends HeaderWriterFilter> O postProcess(O filter) {
+                                filter.setShouldWriteHeadersEagerly(true);
+                                return filter;
+                            }
+                        }
+                    )
                     .contentSecurityPolicy(csp -> csp.policyDirectives(jHipsterProperties.getSecurity().getContentSecurityPolicy()))
                     .frameOptions(FrameOptionsConfig::sameOrigin)
                     .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
