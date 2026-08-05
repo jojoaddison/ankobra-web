@@ -13,6 +13,7 @@ import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.HstsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -71,6 +72,15 @@ public class SecurityConfiguration {
                             }
                         }
                     )
+                    // HSTS is nginx's job, not the app's (SEC-07). Spring's default writer emits
+                    // `max-age=31536000 ; includeSubDomains`, and it started firing once
+                    // forward-headers-strategy made request.isSecure() true behind the proxy — asserting
+                    // HTTPS-only for EVERY *.jojoaddison.net subdomain, for a year, from this app.
+                    // web.jojoaddison.net does not currently answer on HTTPS, so that would have broken
+                    // it for anyone who visited the apex first. nginx sends the deliberate policy
+                    // (no includeSubDomains); one source avoids the duplicate header too, which RFC 6797
+                    // leaves to the UA to disambiguate.
+                    .httpStrictTransportSecurity(HstsConfig::disable)
                     .contentSecurityPolicy(csp -> csp.policyDirectives(jHipsterProperties.getSecurity().getContentSecurityPolicy()))
                     .frameOptions(FrameOptionsConfig::sameOrigin)
                     .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
