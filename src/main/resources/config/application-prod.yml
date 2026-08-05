@@ -25,6 +25,19 @@ logging:
     SECURITY_AUDIT: INFO
 
 management:
+  health:
+    mail:
+      # SEC-13. Off deliberately, for two reasons that both bite once a real SMTP host is configured.
+      #
+      # Availability: compose.yml health-checks /management/health every 10s and restarts the container
+      # when it is not UP. The mail indicator opens a real SMTP connection, so a relay hiccup — or
+      # Google having a bad afternoon — would take the marketing site and the portal down over a
+      # feature that is not on the critical path. The contact form only writes a database row; mail is
+      # for account emails.
+      #
+      # Politeness: a 10s health check against smtp-relay.gmail.com is ~8,600 connections a day from
+      # one IP, which is how you get throttled or flagged.
+      enabled: false
   prometheus:
     metrics:
       export:
