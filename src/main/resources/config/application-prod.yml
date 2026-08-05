@@ -18,6 +18,11 @@ logging:
     ROOT: INFO
     tech.jhipster: INFO
     net.jojoaddison.consultancy: INFO
+    # G-04. Pinned rather than inherited from ROOT: this is the audit trail, and turning ROOT down to
+    # WARN to quieten a noisy deploy would otherwise silently delete every successful-login record —
+    # a failure you would only discover while trying to reconstruct an incident. Alloy ships these to
+    # Loki, where `event=` and `login=` parse without a custom pattern.
+    SECURITY_AUDIT: INFO
 
 management:
   prometheus:

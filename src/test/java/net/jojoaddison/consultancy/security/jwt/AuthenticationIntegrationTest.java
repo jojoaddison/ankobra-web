@@ -9,6 +9,7 @@ import net.jojoaddison.consultancy.config.SecurityJwtConfiguration;
 import net.jojoaddison.consultancy.config.WebConfigurer;
 import net.jojoaddison.consultancy.management.SecurityMetersService;
 import net.jojoaddison.consultancy.security.LoginAttemptService;
+import net.jojoaddison.consultancy.security.SecurityAuditLogger;
 import net.jojoaddison.consultancy.web.rest.AuthenticateController;
 import org.springframework.boot.test.context.SpringBootTest;
 import tech.jhipster.config.JHipsterProperties;
@@ -27,9 +28,10 @@ import tech.jhipster.config.JHipsterProperties;
         SecurityJwtConfiguration.class,
         SecurityMetersService.class,
         AuthenticateController.class,
-        // AuthenticateController throttles failed logins (SEC-04), so this slice has to supply the
-        // collaborator too — the context lists its beans explicitly rather than scanning.
+        // AuthenticateController throttles failed logins (SEC-04) and audits them (G-04), so this slice
+        // has to supply both collaborators — the context lists its beans explicitly rather than scanning.
         LoginAttemptService.class,
+        SecurityAuditLogger.class,
         JwtAuthenticationTestUtils.class,
     }
 )

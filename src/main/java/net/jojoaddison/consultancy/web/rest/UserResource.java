@@ -9,6 +9,7 @@ import net.jojoaddison.consultancy.config.Constants;
 import net.jojoaddison.consultancy.domain.User;
 import net.jojoaddison.consultancy.repository.UserRepository;
 import net.jojoaddison.consultancy.security.AuthoritiesConstants;
+import net.jojoaddison.consultancy.security.SecurityAuditLogger;
 import net.jojoaddison.consultancy.service.MailService;
 import net.jojoaddison.consultancy.service.UserService;
 import net.jojoaddison.consultancy.service.dto.AdminUserDTO;
@@ -84,10 +85,18 @@ public class UserResource {
 
     private final MailService mailService;
 
-    public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
+    private final SecurityAuditLogger securityAudit;
+
+    public UserResource(
+        UserService userService,
+        UserRepository userRepository,
+        MailService mailService,
+        SecurityAuditLogger securityAudit
+    ) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.mailService = mailService;
+        this.securityAudit = securityAudit;
     }
 
     /**
@@ -116,6 +125,9 @@ public class UserResource {
             throw new EmailAlreadyUsedException();
         } else {
             User newUser = userService.createUser(userDTO);
+            // Account creation is the highest-leverage admin action there is: every account in this
+            // system is admin-created (self-registration is closed), so this is the provenance record.
+            securityAudit.accountCreated(securityAudit.currentActor(), newUser.getLogin(), userDTO.getAuthorities());
             mailService.sendCreationEmail(newUser);
             return ResponseEntity.created(new URI("/api/admin/users/" + newUser.getLogin()))
                 .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", newUser.getLogin()))
@@ -147,6 +159,11 @@ public class UserResource {
             throw new LoginAlreadyUsedException();
         }
         Optional<AdminUserDTO> updatedUser = userService.updateUser(userDTO);
+        updatedUser.ifPresent(updated ->
+            // Authorities are recorded on every update, not only when they change: a privilege
+            // escalation is the event worth alerting on, and diffing is the alert's job, not ours.
+            securityAudit.accountUpdated(securityAudit.currentActor(), updated.getLogin(), updated.getAuthorities())
+        );
 
         return ResponseUtil.wrapOrNotFound(
             updatedUser,
@@ -201,6 +218,7 @@ public class UserResource {
     public ResponseEntity<Void> deleteUser(@PathVariable("login") @Pattern(regexp = Constants.LOGIN_REGEX) String login) {
         LOG.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
+        securityAudit.accountDeleted(securityAudit.currentActor(), login);
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login))
             .build();

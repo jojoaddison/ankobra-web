@@ -5,6 +5,7 @@ import java.util.*;
 import net.jojoaddison.consultancy.domain.User;
 import net.jojoaddison.consultancy.repository.UserRepository;
 import net.jojoaddison.consultancy.security.PasswordPolicy;
+import net.jojoaddison.consultancy.security.SecurityAuditLogger;
 import net.jojoaddison.consultancy.security.SecurityUtils;
 import net.jojoaddison.consultancy.service.MailService;
 import net.jojoaddison.consultancy.service.UserService;
@@ -40,10 +41,18 @@ public class AccountResource {
 
     private final MailService mailService;
 
-    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
+    private final SecurityAuditLogger securityAudit;
+
+    public AccountResource(
+        UserRepository userRepository,
+        UserService userService,
+        MailService mailService,
+        SecurityAuditLogger securityAudit
+    ) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
+        this.securityAudit = securityAudit;
     }
 
     /**
@@ -134,6 +143,7 @@ public class AccountResource {
             throw new InvalidPasswordException();
         }
         userService.changePassword(passwordChangeDto.getCurrentPassword(), passwordChangeDto.getNewPassword());
+        securityAudit.passwordChanged(login);
     }
 
     /**
@@ -145,6 +155,7 @@ public class AccountResource {
     public void requestPasswordReset(@RequestBody String mail) {
         Optional<User> user = userService.requestPasswordReset(mail);
         if (user.isPresent()) {
+            securityAudit.passwordResetRequested(user.orElseThrow().getLogin());
             mailService.sendPasswordResetMail(user.orElseThrow());
         } else {
             // Pretend the request has been successful to prevent checking which emails really exist
@@ -172,5 +183,6 @@ public class AccountResource {
         if (!user.isPresent()) {
             throw new AccountResourceException("No user was found for this reset key");
         }
+        securityAudit.passwordResetCompleted(user.orElseThrow().getLogin());
     }
 }

@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 import net.jojoaddison.consultancy.security.DomainUserDetailsService.UserWithId;
 import net.jojoaddison.consultancy.security.LoginAttemptService;
+import net.jojoaddison.consultancy.security.SecurityAuditLogger;
 import net.jojoaddison.consultancy.web.rest.errors.TooManyLoginAttemptsException;
 import net.jojoaddison.consultancy.web.rest.vm.LoginVM;
 import org.slf4j.Logger;
@@ -54,14 +55,18 @@ public class AuthenticateController {
 
     private final LoginAttemptService loginAttemptService;
 
+    private final SecurityAuditLogger securityAudit;
+
     public AuthenticateController(
         JwtEncoder jwtEncoder,
         AuthenticationManagerBuilder authenticationManagerBuilder,
-        LoginAttemptService loginAttemptService
+        LoginAttemptService loginAttemptService,
+        SecurityAuditLogger securityAudit
     ) {
         this.jwtEncoder = jwtEncoder;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.loginAttemptService = loginAttemptService;
+        this.securityAudit = securityAudit;
     }
 
     @PostMapping("/authenticate")
@@ -69,9 +74,11 @@ public class AuthenticateController {
         // Throttled by source IP and by username independently — see LoginAttemptService. The check runs
         // before authentication so a locked-out caller costs no bcrypt work, which is what makes an
         // unthrottled login endpoint expensive to defend as well as easy to brute-force.
-        String ipKey = LoginAttemptService.ipKey(request.getRemoteAddr());
+        String sourceIp = request.getRemoteAddr();
+        String ipKey = LoginAttemptService.ipKey(sourceIp);
         String userKey = LoginAttemptService.userKey(loginVM.getUsername());
         loginAttemptService.lockoutRemaining(ipKey, userKey).ifPresent(remaining -> {
+            securityAudit.loginBlocked(loginVM.getUsername(), sourceIp, remaining);
             throw new TooManyLoginAttemptsException(remaining);
         });
 
@@ -81,9 +88,13 @@ public class AuthenticateController {
             authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         } catch (AuthenticationException e) {
             loginAttemptService.recordFailure(ipKey, userKey);
+            // The exception type only — never the submitted password, and nothing the response itself
+            // does not already reveal about whether the account exists.
+            securityAudit.loginFailed(loginVM.getUsername(), sourceIp, e.getClass().getSimpleName());
             throw e;
         }
         loginAttemptService.recordSuccess(ipKey, userKey);
+        securityAudit.loginSucceeded(authentication.getName(), sourceIp);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = this.createToken(authentication, loginVM.isRememberMe());
