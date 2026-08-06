@@ -3,6 +3,7 @@ package net.jojoaddison.consultancy.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import net.jojoaddison.consultancy.security.*;
+import net.jojoaddison.consultancy.web.filter.CspNonceFilter;
 import net.jojoaddison.consultancy.web.filter.SpaWebFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +50,9 @@ public class SecurityConfiguration {
         http.cors(withDefaults())
             .csrf(csrf -> csrf.disable())
             .addFilterAfter(new SpaWebFilter(), BasicAuthenticationFilter.class)
+            // Before HeaderWriterFilter, which is where the policy is written — and since SEC-14 it
+            // writes eagerly, so a nonce minted any later would never reach the header (SEC-06).
+            .addFilterBefore(new CspNonceFilter(), HeaderWriterFilter.class)
             .headers(headers ->
                 headers
                     // SEC-14. HeaderWriterFilter defaults to writing headers when the response commits.
@@ -81,7 +85,11 @@ public class SecurityConfiguration {
                     // (no includeSubDomains); one source avoids the duplicate header too, which RFC 6797
                     // leaves to the UA to disambiguate.
                     .httpStrictTransportSecurity(HstsConfig::disable)
-                    .contentSecurityPolicy(csp -> csp.policyDirectives(jHipsterProperties.getSecurity().getContentSecurityPolicy()))
+                    // No .contentSecurityPolicy(...) call: that is what would register Spring Security's
+                    // own writer, and it can only emit a fixed string while the policy now carries a
+                    // per-response nonce. Omitting it leaves this writer as the only source, which
+                    // matters — two CSP headers intersect rather than merge, a confusing way to break.
+                    .addHeaderWriter(new NonceContentSecurityPolicyWriter(jHipsterProperties.getSecurity().getContentSecurityPolicy()))
                     .frameOptions(FrameOptionsConfig::sameOrigin)
                     .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                     .permissionsPolicyHeader(permissions ->

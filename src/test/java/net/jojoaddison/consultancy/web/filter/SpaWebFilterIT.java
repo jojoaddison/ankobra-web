@@ -1,6 +1,8 @@
 package net.jojoaddison.consultancy.web.filter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -12,6 +14,15 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+/**
+ * These assert the OUTCOME — the caller receives the SPA shell — rather than the mechanism.
+ *
+ * <p>They used to assert {@code forwardedUrl("/index.html")}, and every one of them broke when
+ * SpaWebFilter stopped forwarding: it now renders the shell itself so the per-request CSP nonce can be
+ * stamped into it (SEC-06), which a forward cannot do because the response would be the static file
+ * byte for byte. Asserting the mechanism made six tests fail over a change that altered nothing a user
+ * or an attacker can observe; asserting what the client actually gets does not.
+ */
 @AutoConfigureMockMvc
 @WithMockUser
 @IntegrationTest
@@ -20,9 +31,25 @@ class SpaWebFilterIT {
     @Autowired
     private MockMvc mockMvc;
 
+    /** Every client route must return the shell, whatever the filter does internally to produce it. */
+    private void expectSpaShell(String path) throws Exception {
+        String body = mockMvc
+            .perform(get(path))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith("text/html"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        assertThat(body).as("%s should return the Angular shell", path).contains("<jhi-app");
+        // The placeholder must have been substituted. Leaving it raw would ship `nonce-{nonce}` in the
+        // header too, which the browser treats as a nonce nothing matches — every runtime style blocked.
+        assertThat(body).as("%s should have its CSP nonce substituted", path).doesNotContain("{nonce}");
+    }
+
     @Test
-    void testFilterForwardsToIndex() throws Exception {
-        mockMvc.perform(get("/")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
+    void servesTheShellAtTheRoot() throws Exception {
+        expectSpaShell("/");
     }
 
     @Test
@@ -42,28 +69,28 @@ class SpaWebFilterIT {
     }
 
     @Test
-    void getBackendEndpoint() throws Exception {
-        mockMvc.perform(get("/test")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
+    void servesTheShellForAnUnmappedPath() throws Exception {
+        expectSpaShell("/test");
     }
 
     @Test
     void forwardUnmappedFirstLevelMapping() throws Exception {
-        mockMvc.perform(get("/first-level")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
+        expectSpaShell("/first-level");
     }
 
     @Test
     void forwardUnmappedSecondLevelMapping() throws Exception {
-        mockMvc.perform(get("/first-level/second-level")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
+        expectSpaShell("/first-level/second-level");
     }
 
     @Test
     void forwardUnmappedThirdLevelMapping() throws Exception {
-        mockMvc.perform(get("/first-level/second-level/third-level")).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
+        expectSpaShell("/first-level/second-level/third-level");
     }
 
     @Test
     void forwardUnmappedDeepMapping() throws Exception {
-        mockMvc.perform(get("/1/2/3/4/5/6/7/8/9/10")).andExpect(forwardedUrl("/index.html"));
+        expectSpaShell("/1/2/3/4/5/6/7/8/9/10");
     }
 
     @Test

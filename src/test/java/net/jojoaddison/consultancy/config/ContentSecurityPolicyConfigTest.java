@@ -33,6 +33,11 @@ class ContentSecurityPolicyConfigTest {
         assertThat(policy).doesNotContain("storage.googleapis.com");
         assertThat(policy).contains("default-src 'self'");
         assertThat(policy).contains("script-src 'self'");
+        // SEC-06: style-src must carry a nonce source and must NOT fall back to allowing every inline
+        // style. The placeholder is what NonceContentSecurityPolicyWriter substitutes per response;
+        // losing it would silently leave style-src at 'self' and break every runtime-injected style.
+        assertThat(policy).contains("'nonce-{nonce}'");
+        assertThat(policy).doesNotContain("style-src 'self' 'unsafe-inline'");
     }
 
     @Test

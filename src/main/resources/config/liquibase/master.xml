@@ -40,6 +40,8 @@
     <!-- SEC-09: per-user token revocation. Applies after the entity changelogs so it lands on the
          final jhi_user table regardless of how the entity changelogs are regenerated. -->
     <include file="config/liquibase/changelog/20260805190000_added_token_version_to_user.xml" relativeToChangelogFile="false"/>
+    <!-- SEC-16: drop the generator-seeded demo account in production. -->
+    <include file="config/liquibase/changelog/20260806030000_remove_seeded_demo_user.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>

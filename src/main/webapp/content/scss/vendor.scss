@@ -9,4 +9,12 @@ eg $input-color: red;
 // Import Bootstrap source files from node_modules
 @import 'bootstrap/scss/bootstrap';
 
+// FontAwesome's stylesheet, imported rather than injected (SEC-06). fontawesome-svg-core normally
+// appends its own <style> at runtime, and that element carries no nonce — Angular only stamps the ones
+// its own renderer creates — so under `style-src 'self' 'nonce-...'` it is blocked and every icon
+// renders at its natural SVG size, about 20x too large. Bundling it here makes it a <link>, which
+// 'self' already allows. Paired with `config.autoAddCss = false` in app.config.ts, which stops the
+// library attempting the injection at all.
+@import '@fortawesome/fontawesome-svg-core/styles.css';
+
 /* jhipster-needle-scss-add-vendor JHipster will add new css style */

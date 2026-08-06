@@ -21,7 +21,15 @@ import { authInterceptor } from 'app/core/interceptor/auth.interceptor';
 import { errorHandlerInterceptor } from 'app/core/interceptor/error-handler.interceptor';
 import { notificationInterceptor } from 'app/core/interceptor/notification.interceptor';
 
+import { config as faConfig } from '@fortawesome/fontawesome-svg-core';
+
 import './config/dayjs';
+
+// SEC-06: stop fontawesome-svg-core appending its own <style> at runtime. That element carries no CSP
+// nonce — Angular only stamps the ones its own renderer creates — so under
+// `style-src 'self' 'nonce-...'` the browser blocks it and every icon renders at its natural SVG size.
+// The stylesheet is bundled instead, via the import in content/scss/vendor.scss.
+faConfig.autoAddCss = false;
 import { TranslationModule } from 'app/shared/language/translation.module';
 
 import { AppPageTitleStrategy } from './app-page-title-strategy';

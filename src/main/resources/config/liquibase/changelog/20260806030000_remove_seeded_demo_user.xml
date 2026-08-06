@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        SEC-16 in docs/security-20260805-0936.md: never let the generator's demo account reach
+        production in the first place.
+
+        config/liquibase/data/user.csv seeds `user` with the bcrypt of the word "user", activated, with
+        ROLE_USER — and that row was live in production, answering 200 to user/user, for the entire life
+        of the deployment. It was deleted by hand on 2026-08-06, which fixed the running database and
+        nothing else: the changelog would seed it again into any database built from scratch, so a
+        restore onto a new host would have quietly reintroduced the same credentials.
+
+        SampleSecretGuard now refuses to start on exactly this pattern, which turns the silent
+        reintroduction into a loud one. That is the backstop; this is the fix. Without it a rebuild would
+        seed the account and then fail to boot on it, leaving the app unstartable until someone deleted
+        the row by hand — a fine outcome for an attacker and a miserable one during a recovery.
+
+        context="prod" because it is a production concern. The test context seeds and relies on this
+        account, and the guard only runs under the prod profile, so nothing else needs to change.
+
+        Idempotent by nature: Liquibase runs a changeset once per database, and on the production
+        database the row is already gone, so this is a no-op there.
+    -->
+    <changeSet author="jhipster" id="20260806030000-1" context="prod">
+        <comment>Remove the generator-seeded demo account so production never carries default credentials</comment>
+
+        <!-- Authority rows first: jhi_user_authority.user_id references jhi_user. -->
+        <delete tableName="jhi_user_authority">
+            <where>user_id IN (SELECT id FROM jhi_user WHERE login = 'user')</where>
+        </delete>
+
+        <delete tableName="jhi_user">
+            <where>login = 'user'</where>
+        </delete>
+    </changeSet>
+
+</databaseChangeLog>

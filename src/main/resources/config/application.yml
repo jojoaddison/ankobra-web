@@ -265,7 +265,18 @@ jhipster:
     # index.html to be server-rendered rather than a static asset. Tracked as the rest of SEC-06.
     # It is a much smaller hole than the script one: style injection can deface and can exfiltrate some
     # data through selectors, but it cannot execute code.
-    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+    # `{nonce}` is substituted per response by NonceContentSecurityPolicyWriter from the value
+    # CspNonceFilter mints; SpaWebFilter stamps the same value onto <jhi-app ngCspNonce>. Angular then
+    # puts it on every <style> it injects at runtime, which is what lets style-src drop 'unsafe-inline'
+    # — an injected <style> block, which could restyle or overlay the whole page, no longer runs.
+    #
+    # style-src-attr stays 'unsafe-inline' and this is the remaining sliver: a nonce cannot cover
+    # `style="..."` attributes, and the app has 43 of them (9 in the shell's troubleshooting block, 34
+    # bespoke one-offs in portal and CMS templates). Removing them is a markup refactor rather than a
+    # security control, and inventing thirty single-use utility classes would be worse code than the
+    # attributes are. Weaker than the <style> hole it replaces: an attribute styles only the element it
+    # sits on, where a <style> block can restyle everything already on the page.
+    content-security-policy: "default-src 'self'; frame-src 'self' data:; script-src 'self'; style-src 'self' 'nonce-{nonce}'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
 
 
 # jhipster-needle-add-application-yaml-document
