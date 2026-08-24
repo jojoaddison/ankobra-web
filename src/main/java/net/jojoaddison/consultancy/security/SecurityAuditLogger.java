@@ -89,6 +89,11 @@ public class SecurityAuditLogger {
         AUDIT.info("event=account.updated actor=\"{}\" login=\"{}\" authorities=\"{}\"", actor, login, authorities);
     }
 
+    /** An admin requiring one user to replace their password before using the account (SEC-04). */
+    public void passwordChangeRequired(String actor, String login) {
+        AUDIT.warn("event=account.password_change_required actor=\"{}\" login=\"{}\"", actor, login);
+    }
+
     /** An admin signing one user out everywhere (SEC-09). */
     public void sessionsRevoked(String actor, String login) {
         AUDIT.warn("event=account.sessions_revoked actor=\"{}\" login=\"{}\"", actor, login);

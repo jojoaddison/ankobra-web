@@ -2,8 +2,10 @@ package net.jojoaddison.consultancy.config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import net.jojoaddison.consultancy.repository.UserRepository;
 import net.jojoaddison.consultancy.security.*;
 import net.jojoaddison.consultancy.web.filter.CspNonceFilter;
+import net.jojoaddison.consultancy.web.filter.PasswordChangeRequiredFilter;
 import net.jojoaddison.consultancy.web.filter.SpaWebFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
@@ -35,9 +38,12 @@ public class SecurityConfiguration {
 
     private final JHipsterProperties jHipsterProperties;
 
-    public SecurityConfiguration(Environment env, JHipsterProperties jHipsterProperties) {
+    private final UserRepository userRepository;
+
+    public SecurityConfiguration(Environment env, JHipsterProperties jHipsterProperties, UserRepository userRepository) {
         this.env = env;
         this.jHipsterProperties = jHipsterProperties;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -162,7 +168,12 @@ public class SecurityConfiguration {
                     .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                     .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
             )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
+            // SEC-04. Last in the chain, after AuthorizationFilter, so it only sees requests that were
+            // already going to be allowed — it can narrow what a session may reach, never widen it. An
+            // account whose password predates the 12-character floor gets its own profile and the
+            // change-password endpoint and nothing else, until it complies.
+            .addFilterAfter(new PasswordChangeRequiredFilter(userRepository), AuthorizationFilter.class);
         if (env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))) {
             http.authorizeHttpRequests(authz -> authz.requestMatchers("/h2-console/**").permitAll());
         }

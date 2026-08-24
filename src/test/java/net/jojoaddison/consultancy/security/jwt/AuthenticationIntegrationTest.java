@@ -33,6 +33,11 @@ import tech.jhipster.config.JHipsterProperties;
         LoginAttemptService.class,
         SecurityAuditLogger.class,
         JwtAuthenticationTestUtils.class,
+        // SEC-04: SecurityConfiguration builds PasswordChangeRequiredFilter, which needs a
+        // UserRepository. This slice lists its beans explicitly and has no JPA context, so the
+        // repository is mocked — nothing here is about the forced-password-change flow, and a mock
+        // returning empty means the filter waves every request through.
+        MockUserRepositoryConfiguration.class,
     }
 )
 public @interface AuthenticationIntegrationTest {}

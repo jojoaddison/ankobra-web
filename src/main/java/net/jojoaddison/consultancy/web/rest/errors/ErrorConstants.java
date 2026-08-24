@@ -13,5 +13,12 @@ public final class ErrorConstants {
     public static final URI EMAIL_ALREADY_USED_TYPE = URI.create(PROBLEM_BASE_URL + "/email-already-used");
     public static final URI LOGIN_ALREADY_USED_TYPE = URI.create(PROBLEM_BASE_URL + "/login-already-used");
 
+    /**
+     * The account's password predates the current policy and must be changed before anything else
+     * (SEC-04). A distinct type rather than a bare 403 because the client has to tell this apart from
+     * "you may not do that" — one is a dead end, the other is a redirect to the password screen.
+     */
+    public static final URI PASSWORD_CHANGE_REQUIRED_TYPE = URI.create(PROBLEM_BASE_URL + "/password-change-required");
+
     private ErrorConstants() {}
 }

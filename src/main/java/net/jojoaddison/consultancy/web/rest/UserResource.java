@@ -234,6 +234,36 @@ public class UserResource {
     }
 
     /**
+     * {@code POST /admin/users/:login/require-password-change} : make one user replace their password
+     * before they can use the account again (SEC-04).
+     *
+     * <p>The migration flags accounts whose password predates the 12-character floor. This is the same
+     * thing on demand — for a password that was shared over chat, written on a whiteboard, or reused
+     * somewhere that has since been breached.
+     *
+     * <p>It deliberately does not sign the user out: they need a working session to reach the
+     * change-password endpoint. If the worry is that somebody else is already in the account, call
+     * {@code revoke-sessions} as well, in that order.
+     *
+     * @param login the login that must change its password.
+     * @return {@code 204 (No Content)}, or {@code 404} if no such user exists.
+     */
+    @PostMapping("/users/{login}/require-password-change")
+    @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+    public ResponseEntity<Void> requirePasswordChange(@PathVariable("login") @Pattern(regexp = Constants.LOGIN_REGEX) String login) {
+        LOG.debug("REST request to require a password change for User: {}", login);
+        return userService
+            .requirePasswordChange(login)
+            .map(user -> {
+                securityAudit.passwordChangeRequired(securityAudit.currentActor(), login);
+                return ResponseEntity.noContent()
+                    .headers(HeaderUtil.createAlert(applicationName, "userManagement.passwordChangeRequired", login))
+                    .<Void>build();
+            })
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
      * {@code DELETE /admin/users/:login} : delete the "login" User.
      *
      * @param login the login of the user to delete.
