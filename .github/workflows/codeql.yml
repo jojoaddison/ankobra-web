@@ -25,6 +25,7 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       security-events: write
       packages: read
@@ -60,7 +61,8 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           # security-and-quality is broader than the default, which is the point of a gate that runs
-          # weekly rather than a linter that runs on every keystroke.
+          # weekly rather than a linter that runs on every keystroke. The quality half cannot fail the
+          # build: the gate below keys on `security-severity`, which only security queries carry.
           queries: security-and-quality
 
       # build-mode: manual, because autobuild would run the default profile and pull in the frontend
@@ -74,3 +76,71 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: /language:${{ matrix.language }}
+          # Keep a copy of the SARIF on disk for the gate below. Publishing to the Security tab is not
+          # by itself a gate: code scanning raises alerts, and whether an alert blocks a merge is a
+          # repository branch-protection setting, not something this file controls. Relying on that
+          # setting would make the gate invisible from the code — and silently absent on a fork or a
+          # freshly cloned repo.
+          output: sarif-results
+          upload: always
+
+      # `security-severity` is CVSS-shaped and lives on the *rule*, not the result, so a finding's
+      # severity has to be looked up by rule id. 7.0 is the high/critical boundary, matching the
+      # --audit-level=high and severity: HIGH,CRITICAL thresholds already used in ci.yml — one bar
+      # across all three scanners rather than three different ideas of what counts as serious.
+      - name: Fail on high-severity findings
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(sarif-results/*.sarif)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::No SARIF produced for ${{ matrix.language }} — the analysis did not run."
+            exit 1
+          fi
+
+          # Rules can be declared by the driver or by a query pack loaded as an extension; a rule id
+          # found in neither place carries no severity metadata and is treated as below the bar. That
+          # is the safe direction here: every security query does carry it, and the ones that do not
+          # are the quality half of security-and-quality.
+          jq -s -r '
+            [ .[].runs[]
+              | (.tool.driver.rules // []) + ([ .tool.extensions[]?.rules // [] ] | add // [])
+            ]
+            | add // []
+            | map({ key: .id, value: ((.properties["security-severity"] // "0") | tonumber) })
+            | from_entries
+          ' "${files[@]}" > severity-by-rule.json
+
+          jq -s -r --slurpfile sev severity-by-rule.json '
+            .[].runs[].results[]?
+            | select(($sev[0][.ruleId] // 0) >= 7.0)
+            | "\(.ruleId)  \(.locations[0].physicalLocation.artifactLocation.uri // "?"):\(.locations[0].physicalLocation.region.startLine // 0)"
+          ' "${files[@]}" > high-severity.txt
+
+          # Accepted findings, one per line as "<rule-id> <path-prefix>". See the file's header for why
+          # the hatch exists and how narrow it is meant to stay.
+          allowlist=.github/codeql-allowlist.txt
+          if [ -f "$allowlist" ]; then
+            while IFS= read -r entry || [ -n "$entry" ]; do
+              entry="${entry%%#*}"
+              rule="${entry%% *}"
+              path="${entry#* }"
+              path="${path%% *}"
+              # A blank line, a pure comment, or a line with only one field: nothing to exempt.
+              if [ -z "$rule" ] || [ -z "$path" ] || [ "$rule" = "$path" ]; then
+                continue
+              fi
+              if grep -q "^${rule}  ${path}" high-severity.txt; then
+                echo "::notice::Allowlisted: ${rule} in ${path}"
+                grep -v "^${rule}  ${path}" high-severity.txt > allowed.tmp || true
+                mv allowed.tmp high-severity.txt
+              fi
+            done < "$allowlist"
+          fi
+
+          if [ -s high-severity.txt ]; then
+            echo "::error::CodeQL found high-severity issues in ${{ matrix.language }}:"
+            while IFS= read -r line; do echo "::error::$line"; done < high-severity.txt
+            exit 1
+          fi
+          echo "No high-severity CodeQL findings in ${{ matrix.language }}."
