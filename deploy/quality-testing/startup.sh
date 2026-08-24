@@ -324,10 +324,20 @@ refute "no 'unsafe-inline' survives under any directive" "$csp" "unsafe-inline"
 refute "and style-src-attr is gone entirely" "$csp" "style-src-attr"
 refute "and 'unsafe-eval' is still gone" "$csp" "unsafe-eval"
 
-# The nonce is only a control if it is per-response and if the HTML agrees with the header. A static
-# nonce is decoration, and a header that disagrees with the markup blocks every Angular style.
-nonce_hdr=$(sed -n "s/.*'nonce-\([^']*\)'.*/\1/p" <<<"$csp")
-nonce_html=$(curl -s --max-time 15 "$BASE/" | grep -oi 'ngcspnonce="[^"]*"' | head -1 | sed 's/.*="\(.*\)"/\1/')
+# The nonce is only a control if it is per-response AND if the markup agrees with the header of the
+# SAME response. A static nonce is decoration; a header disagreeing with its own markup blocks every
+# Angular style.
+#
+# Header and body from ONE request, which is the whole point. Fetching them separately compares two
+# different responses, and because the nonce is correctly per-response they never match — a check
+# that fails on a perfectly healthy stack, which is how a suite teaches people to ignore it. That is
+# exactly what this did on its first real run.
+one_hdr=$(mktemp)
+one_body=$(mktemp)
+curl -s --max-time 15 -D "$one_hdr" -o "$one_body" "$BASE/" || true
+nonce_hdr=$(tr -d '\r' <"$one_hdr" | sed -n "s/.*'nonce-\([^']*\)'.*/\1/p")
+nonce_html=$(grep -oi 'ngcspnonce="[^"]*"' "$one_body" | head -1 | sed 's/.*="\(.*\)"/\1/')
+rm -f "$one_hdr" "$one_body"
 second=$(curl -sI --max-time 15 "$BASE/" | tr -d '\r' | sed -n "s/.*'nonce-\([^']*\)'.*/\1/p")
 check "a nonce is stamped into the served HTML" "${nonce_html:-none}" '^.{8,}$'
 check "the header's nonce and the markup's agree within one response" \
@@ -399,19 +409,29 @@ check "and a matching token pair reaches the controller" \
 #
 # SEC-08's honeypot, checked on its effect rather than its status code, because the whole design is
 # that a caught submission is INDISTINGUISHABLE from a real one to the sender: both answer 201. The
-# only way to tell them apart is to count what was written.
-leads_before=$(curl -s -b "$JAR" --max-time 15 "$BASE/api/leads/count" | tr -dc '0-9')
-enquiry='{"name":"Quality Check","email":"quality@example.com","need":"Consultancy","message":"Automated verification"}'
-honeypot='{"name":"Spam Bot","email":"bot@example.com","need":"Consultancy","message":"Automated verification","website":"http://spam.example"}'
+# only way to tell them apart is to look at what was written.
+#
+# Read from the plain list with a large page size, and NOT from /api/leads/count or an
+# `email.equals=` filter. Neither exists on LeadResource: `count` is parsed as an {id} path variable
+# and answers 400, and a criteria parameter is silently ignored — `email.equals=anything` returns
+# every lead. The first version of this check used both, so it compared digits scraped out of a 400
+# body and would have passed just as happily against a filter that does nothing.
+#
+# Stamped addresses so a re-run cannot be satisfied by a previous run's rows.
+stamp=$(date -u +%s)
+genuine="quality-${stamp}@example.com"
+caught="bot-${stamp}@example.com"
+enquiry="{\"name\":\"Quality Check\",\"email\":\"${genuine}\",\"need\":\"Consultancy\",\"message\":\"Automated verification\"}"
+honeypot="{\"name\":\"Spam Bot\",\"email\":\"${caught}\",\"need\":\"Consultancy\",\"message\":\"Automated verification\",\"website\":\"http://spam.example\"}"
 check "the public contact form accepts a genuine enquiry" \
     "$(code -b "$JAR" -X POST "$BASE/api/public/enquiries" -H 'Content-Type: application/json' \
         -H "X-XSRF-TOKEN: $xsrf" -d "$enquiry")" '^201$'
 check "and answers a honeypot submission identically" \
     "$(code -b "$JAR" -X POST "$BASE/api/public/enquiries" -H 'Content-Type: application/json' \
         -H "X-XSRF-TOKEN: $xsrf" -d "$honeypot")" '^201$'
-leads_after=$(curl -s -b "$JAR" --max-time 15 "$BASE/api/leads/count" | tr -dc '0-9')
-check "but only one of the two was written" \
-    "$((${leads_after:-0} - ${leads_before:-0}))" '^1$'
+leads=$(curl -s -b "$JAR" --max-time 15 "$BASE/api/leads?size=2000" || true)
+check "the genuine enquiry was written" "$(grep -c "$genuine" <<<"$leads")" '^1$'
+refute "and the honeypot submission was silently discarded" "$leads" "$caught"
 
 # --- Signing out -------------------------------------------------------------------------------
 #
