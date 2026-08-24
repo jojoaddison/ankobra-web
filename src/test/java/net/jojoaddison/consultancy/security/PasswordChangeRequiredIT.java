@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import java.util.Optional;
 import net.jojoaddison.consultancy.IntegrationTest;
 import net.jojoaddison.consultancy.domain.User;
@@ -108,15 +109,15 @@ class PasswordChangeRequiredIT {
     /** Authentication still succeeds — the session is ordinary, and the narrowing happens per request. */
     @Test
     void aFlaggedAccountCanStillLogIn() throws Exception {
-        assertThat(login(FLAGGED_LOGIN, PASSWORD)).isNotBlank();
+        assertThat(login(FLAGGED_LOGIN, PASSWORD).getValue()).isNotBlank();
     }
 
     @Test
     void aFlaggedAccountIsRefusedTheRestOfTheApi() throws Exception {
-        String token = login(FLAGGED_LOGIN, PASSWORD);
+        Cookie token = login(FLAGGED_LOGIN, PASSWORD);
 
         restMockMvc
-            .perform(get("/api/projects").header("Authorization", "Bearer " + token))
+            .perform(get("/api/projects").cookie(token))
             .andExpect(status().isForbidden())
             // The type is the contract with the client: without it this is indistinguishable from
             // "you are not allowed to see projects", and the user is stuck with no next step.
@@ -126,19 +127,19 @@ class PasswordChangeRequiredIT {
     /** The client cannot render anything, including the password form, without this call. */
     @Test
     void aFlaggedAccountCanStillReadItsOwnProfile() throws Exception {
-        String token = login(FLAGGED_LOGIN, PASSWORD);
+        Cookie token = login(FLAGGED_LOGIN, PASSWORD);
 
-        restMockMvc.perform(get("/api/account").header("Authorization", "Bearer " + token)).andExpect(status().isOk());
+        restMockMvc.perform(get("/api/account").cookie(token)).andExpect(status().isOk());
     }
 
     @Test
     void changingThePasswordClearsTheFlagAndRestoresAccess() throws Exception {
-        String token = login(FLAGGED_LOGIN, PASSWORD);
+        Cookie token = login(FLAGGED_LOGIN, PASSWORD);
 
         restMockMvc
             .perform(
                 post("/api/account/change-password")
-                    .header("Authorization", "Bearer " + token)
+                    .cookie(token)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"currentPassword\":\"" + PASSWORD + "\",\"newPassword\":\"" + NEW_PASSWORD + "\"}")
             )
@@ -148,15 +149,15 @@ class PasswordChangeRequiredIT {
 
         // The old token died with the password change (SEC-09), so this proves the release end to end:
         // log in again with the new password and the rest of the API answers normally.
-        String fresh = login(FLAGGED_LOGIN, NEW_PASSWORD);
-        restMockMvc.perform(get("/api/projects").header("Authorization", "Bearer " + fresh)).andExpect(status().isOk());
+        Cookie fresh = login(FLAGGED_LOGIN, NEW_PASSWORD);
+        restMockMvc.perform(get("/api/projects").cookie(fresh)).andExpect(status().isOk());
     }
 
     @Test
     void anUnflaggedAccountIsUnaffected() throws Exception {
-        String token = login(UNFLAGGED_LOGIN, PASSWORD);
+        Cookie token = login(UNFLAGGED_LOGIN, PASSWORD);
 
-        restMockMvc.perform(get("/api/projects").header("Authorization", "Bearer " + token)).andExpect(status().isOk());
+        restMockMvc.perform(get("/api/projects").cookie(token)).andExpect(status().isOk());
     }
 
     /**
@@ -193,16 +194,15 @@ class PasswordChangeRequiredIT {
             .andExpect(status().isCreated());
     }
 
-    private String login(String login, String password) throws Exception {
+    private Cookie login(String login, String password) throws Exception {
         LoginVM vm = new LoginVM();
         vm.setUsername(login);
         vm.setPassword(password);
-        String body = restMockMvc
+        return restMockMvc
             .perform(post("/api/authenticate").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(vm)))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
-            .getContentAsString();
-        return om.readTree(body).get("id_token").asText();
+            .getCookie(AccessTokenCookie.NAME);
     }
 }

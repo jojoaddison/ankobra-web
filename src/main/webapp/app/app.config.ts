@@ -17,7 +17,6 @@ import { NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap/datepicker';
 import { environment } from 'environments/environment';
 
 import { authExpiredInterceptor } from 'app/core/interceptor/auth-expired.interceptor';
-import { authInterceptor } from 'app/core/interceptor/auth.interceptor';
 import { errorHandlerInterceptor } from 'app/core/interceptor/error-handler.interceptor';
 import { notificationInterceptor } from 'app/core/interceptor/notification.interceptor';
 import { passwordChangeRequiredInterceptor } from 'app/core/interceptor/password-change-required.interceptor';
@@ -64,7 +63,6 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(TranslationModule),
     provideHttpClient(
       withInterceptors([
-        authInterceptor,
         authExpiredInterceptor,
         // Before errorHandlerInterceptor: a password-change 403 is a redirect, not an error to surface.
         passwordChangeRequiredInterceptor,

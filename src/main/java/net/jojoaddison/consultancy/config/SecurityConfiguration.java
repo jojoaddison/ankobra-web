@@ -4,6 +4,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import net.jojoaddison.consultancy.repository.UserRepository;
 import net.jojoaddison.consultancy.security.*;
+import net.jojoaddison.consultancy.web.filter.CookieAccessTokenFilter;
 import net.jojoaddison.consultancy.web.filter.CspNonceFilter;
 import net.jojoaddison.consultancy.web.filter.PasswordChangeRequiredFilter;
 import net.jojoaddison.consultancy.web.filter.SpaWebFilter;
@@ -25,6 +26,9 @@ import org.springframework.security.oauth2.server.resource.web.access.BearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import tech.jhipster.config.JHipsterConstants;
@@ -51,10 +55,43 @@ public class SecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Forces the CSRF token to be created on every request rather than only when something reads it.
+     *
+     * <p>Spring Security defers token loading by default, which is a sensible optimisation for a
+     * server-rendered application that puts the token in a form. It is wrong for an SPA: the client
+     * gets its token from the {@code XSRF-TOKEN} cookie, nothing on the server ever reads the token
+     * during a plain {@code GET}, so with deferred loading the cookie is never written and the first
+     * {@code POST} — the login — fails with 403 forever.
+     *
+     * <p>Setting the request-attribute name to {@code null} opts out of the deferral. It also opts out
+     * of the XOR masking {@code XorCsrfTokenRequestAttributeHandler} adds against BREACH, which is a
+     * compression-oracle attack needing an attacker-controlled reflection in a compressed response;
+     * this application has none, and the masked variant cannot be combined with a cookie the client
+     * reads directly.
+     */
+    private static CsrfTokenRequestAttributeHandler csrfTokenRequestHandler() {
+        CsrfTokenRequestAttributeHandler handler = new CsrfTokenRequestAttributeHandler();
+        handler.setCsrfRequestAttributeName(null);
+        return handler;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http.cors(withDefaults())
-            .csrf(csrf -> csrf.disable())
+            // SEC-06. This was `csrf.disable()`, justified by the bearer-token design: a token the
+            // client had to attach by hand could not be attached by a hostile page. Moving the token
+            // into an HttpOnly cookie (AccessTokenCookie) takes that justification away — the browser
+            // now sends the session automatically on every request to this origin, including ones
+            // another site provokes. So the two changes are one change, and the migration is not
+            // finished without this half.
+            //
+            // Double-submit cookie: Spring writes XSRF-TOKEN readable by script, and requires it back
+            // in an X-XSRF-TOKEN header, which a cross-origin page cannot read to copy. Those names
+            // are Angular's HttpClient defaults, so the client needs no code for this at all.
+            .csrf(csrf ->
+                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).csrfTokenRequestHandler(csrfTokenRequestHandler())
+            )
             .addFilterAfter(new SpaWebFilter(), BasicAuthenticationFilter.class)
             // Before HeaderWriterFilter, which is where the policy is written — and since SEC-14 it
             // writes eagerly, so a nonce minted any later would never reach the header (SEC-06).
@@ -121,6 +158,9 @@ public class SecurityConfiguration {
                     .requestMatchers("/swagger-ui/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/authenticate").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/authenticate").permitAll()
+                    // Clearing your own cookie needs no authority, and must work when the session has
+                    // already expired — otherwise a stale cookie cannot be got rid of at all.
+                    .requestMatchers(HttpMethod.POST, "/api/logout").permitAll()
                     // Registration is not public: only an authenticated admin may create accounts.
                     // (Activation stays public so an invited user can confirm their email.)
                     .requestMatchers("/api/register").hasAuthority(AuthoritiesConstants.ADMIN)
@@ -169,6 +209,20 @@ public class SecurityConfiguration {
                     .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
+            // SEC-06. The token arrives in a cookie; this presents it to the chain as an Authorization
+            // header, and it MUST run after CsrfFilter.
+            //
+            // Not a BearerTokenResolver, which is the obvious shape and is a trap:
+            // OAuth2ResourceServerConfigurer exempts from CSRF every request its resolver can read a
+            // token from. That is correct for headers — a browser never attaches one cross-site — and
+            // catastrophic for cookies, which it always attaches. A cookie-reading resolver therefore
+            // turns CSRF protection off for exactly the authenticated requests it exists to protect.
+            // Measured against the running app before this was changed; see CookieAccessTokenFilter.
+            //
+            // Placed after CsrfFilter so the CSRF check sees a request with no Authorization header,
+            // finds no token to exempt, and runs. The header appears immediately afterwards, in time
+            // for BearerTokenAuthenticationFilter.
+            .addFilterAfter(new CookieAccessTokenFilter(), CsrfFilter.class)
             // SEC-04. Last in the chain, after AuthorizationFilter, so it only sees requests that were
             // already going to be allowed — it can narrow what a session may reach, never widen it. An
             // account whose password predates the 12-character floor gets its own profile and the

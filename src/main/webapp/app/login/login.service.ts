@@ -18,6 +18,13 @@ export class LoginService {
   }
 
   logout(): void {
-    this.authServerProvider.logout().subscribe({ complete: () => this.accountService.authenticate(null) });
+    // SEC-06: logout is a server call now — only the server can clear an HttpOnly cookie. The local
+    // identity is dropped either way: if the request fails, leaving the UI believing it is still
+    // signed in would be worse than a cookie that outlives the click, and every subsequent request
+    // will 401 anyway.
+    this.authServerProvider.logout().subscribe({
+      complete: () => this.accountService.authenticate(null),
+      error: () => this.accountService.authenticate(null),
+    });
   }
 }
