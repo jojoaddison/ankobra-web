@@ -47,7 +47,7 @@ REPO_ROOT=$(cd ../.. && pwd)
 HOSTNAME_LOCAL="${HOSTNAME_LOCAL:-jojoaddison.local}"
 SSH_HOST="${SSH_HOST:-jacserver}"
 REMOTE_DIR="${REMOTE_DIR:-~/webroot/01-jojoaddison/quality}" # expanded remotely
-APP_PORT="${APP_PORT:-18090}"                                # what the vhost proxies to
+APP_PORT="${APP_PORT:-18092}"                                # what the vhost proxies to; see host-site.conf
 REGISTRY="${REGISTRY:-ghcr.io/jojoaddison}"
 BASE="http://${HOSTNAME_LOCAL}"
 

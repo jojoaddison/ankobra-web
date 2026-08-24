@@ -75,9 +75,15 @@ sudo nginx -t && sudo systemctl reload nginx
 
 `startup.sh` prints that and runs none of it — `/etc` is root-owned and not this repository's to edit.
 
-The container publishes on `127.0.0.1:18090`, so the vhost is the only way in. nginx cannot read the
+The container publishes on `127.0.0.1:18092`, so the vhost is the only way in. nginx cannot read the
 environment, so that port is written in both `host-site.conf` and `compose.yml`; `startup.sh` checks
 they still agree, because the failure mode is a 502 that reads like a dead application.
+
+jacserver is shared, and the 18xxx range is busy: `18080`-`18086`, `18090`-`18091` and
+`18100`-`18103` belong to the health-connect stacks, and `18090` in particular is
+`hc-professional-quality-service`. A vhost pointed at a port another project owns does not fail —
+it proxies `jojoaddison.local` into somebody else's application, which answers 200 and reads as a
+deployment gone strange rather than a port clash. Check with `ss -lntH` before changing the port.
 
 **The vhost deliberately sets no security headers**, which is the opposite of the sibling stacks on
 this host. ankobra-web sets its own, including a CSP carrying a per-response nonce. Two CSP headers
