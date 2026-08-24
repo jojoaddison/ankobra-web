@@ -251,6 +251,18 @@ Jojo Addison — public marketing front. Styles off design tokens (global.scss).
       height: 11px;
       border-radius: 50%;
     }
+    /* macOS window-control colours, verbatim — this is a picture of a terminal, so they are literals
+       rather than theme tokens on purpose. Classes rather than inline styles since SEC-06 dropped
+       `style-src-attr 'unsafe-inline'`. */
+    .dot-close {
+      background: #ff5f57;
+    }
+    .dot-min {
+      background: #febc2e;
+    }
+    .dot-max {
+      background: #28c840;
+    }
     .term-title {
       margin-left: 10px;
       font-family: var(--mono);

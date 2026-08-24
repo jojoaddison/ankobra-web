@@ -593,10 +593,24 @@ portal screens under app/portal/*. Everything styles off tokens.
     text-align: right;
   }
 
-  /* card grid */
+  /* card grid. The column floor is the only thing that varies per screen, so it is a modifier rather
+     than the inline style it used to be — SEC-06 dropped `style-src-attr 'unsafe-inline'`, so a
+     `style="…"` attribute is now silently ignored by the browser rather than merely inelegant. */
   .pgrid {
     display: grid;
     gap: 16px;
+  }
+  .pgrid-260 {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .pgrid-280 {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  .pgrid-300 {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .pgrid-420 {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
   }
   .pcard {
     background: var(--surface-2);
@@ -604,6 +618,80 @@ portal screens under app/portal/*. Everything styles off tokens.
     border-radius: var(--r-lg);
     box-shadow: var(--shadow-1);
     padding: 18px 20px;
+  }
+
+  /* Card internals. Named for the role they play rather than the declarations they carry, so the next
+     screen reuses one of these instead of inventing a fourth nearly-identical heading row. Catalogue,
+     training and team were each carrying their own copy inline before SEC-06 forced the question. */
+  .pcard-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  /* For a heading beside a value rather than beside a badge: baselines line up, centres do not. */
+  .pcard-head-baseline {
+    align-items: baseline;
+  }
+  .pcard-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+  }
+  .pcard-title-lg {
+    font-size: 16px;
+  }
+  .pcard-note {
+    font-size: 13px;
+    margin: 8px 0 0;
+  }
+  .pcard-meta {
+    font-size: 12.5px;
+    margin-top: 6px;
+  }
+  /* A headline number with its unit trailing it — "GHS 12,000  per phase". */
+  .pcard-figure {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 14px;
+
+    .amount {
+      font-size: 18px;
+      color: var(--text-primary);
+    }
+    .unit {
+      font-size: 12.5px;
+    }
+  }
+
+  /* A titled band of cards. The CMS overview has its own .cms-group/.cms-group-label doing the same
+     job; they are worth merging the next time either is touched. */
+  .pgroup {
+    margin-bottom: 26px;
+  }
+  .pgroup-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 12px;
+  }
+
+  /* A progress bar sitting under card body text. Projects and quotes used 14px and training 16px;
+     that was drift rather than intent, so both are 14px now. */
+  .prog-inset {
+    margin-top: 14px;
+  }
+
+  /* Right-align a numeric column — header and cell both, or the two disagree. */
+  .ptable .num {
+    text-align: right;
+  }
+  .ptable-inset {
+    margin-top: 14px;
   }
 
   .pill {
@@ -631,6 +719,31 @@ portal screens under app/portal/*. Everything styles off tokens.
     text-align: center;
     color: var(--text-muted);
     font-size: 14px;
+  }
+
+  /* Team card: avatar beside name and role. */
+  .pt-person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pt-name {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+  .pt-role {
+    font-size: 12.5px;
+    color: var(--brand);
+    font-weight: 650;
+  }
+  .pt-qual {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .pt-bio {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 10px;
   }
 
   .pt-avatar {

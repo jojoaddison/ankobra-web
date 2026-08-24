@@ -150,3 +150,25 @@
   -webkit-animation-delay: 0s;
   animation-delay: 0s;
 }
+
+/* ==============================================================
+   Troubleshooting block (index.html #jhipster-error)
+
+   These two rules used to be inline `style="…"` attributes. SEC-06 dropped
+   `style-src-attr 'unsafe-inline'` from the CSP, so a style attribute is now
+   ignored by the browser rather than merely inelegant — the error block would
+   have been visible on every page load.
+
+   This file is already load-bearing for the page it styles: the loading spinner
+   above comes from here too, and it is linked from <head> as a same-origin
+   static file. If it fails to load the page is broken regardless.
+   =============================================================*/
+#jhipster-error.is-hidden {
+  display: none;
+}
+
+/* Deliberately literal red, not a theme token: this block renders when the
+   application bundle has failed to boot, so no theme variables exist yet. */
+#jhipster-error code {
+  color: red;
+}

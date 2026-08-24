@@ -11,7 +11,7 @@
   } @else if (projects().length === 0) {
     <div class="panel empty">No projects to show.</div>
   } @else {
-    <div class="pgrid" style="grid-template-columns: repeat(auto-fill, minmax(420px, 1fr))">
+    <div class="pgrid pgrid-420">
       @for (p of projects(); track p.id) {
         <div class="pcard proj">
           <div class="proj-top">
@@ -28,7 +28,7 @@
             <span class="muted">· Lead {{ p.lead?.name ?? '—' }}</span>
           </div>
 
-          <div class="prog" style="margin-top: 14px">
+          <div class="prog prog-inset">
             <div class="prog-track"><div class="prog-fill" [style.width.%]="p.progress ?? 0"></div></div>
             <div class="prog-num">{{ p.progress ?? 0 }}%</div>
           </div>
