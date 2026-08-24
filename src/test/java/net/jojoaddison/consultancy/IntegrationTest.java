@@ -20,6 +20,9 @@ import org.springframework.boot.test.context.SpringBootTest;
         JacksonConfiguration.class,
         AsyncSyncConfiguration.class,
         net.jojoaddison.consultancy.config.JacksonHibernateConfiguration.class,
+        // SEC-06: CSRF protection is on now, so every MockMvc request carries a token by default —
+        // see the class for why that is a default rather than a bypass.
+        net.jojoaddison.consultancy.config.MockMvcCsrfConfiguration.class,
     }
 )
 @EmbeddedSQL

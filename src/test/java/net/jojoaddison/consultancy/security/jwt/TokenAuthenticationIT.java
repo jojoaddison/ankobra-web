@@ -1,9 +1,10 @@
 package net.jojoaddison.consultancy.security.jwt;
 
 import static net.jojoaddison.consultancy.security.jwt.JwtAuthenticationTestUtils.*;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import jakarta.servlet.http.Cookie;
+import net.jojoaddison.consultancy.security.AccessTokenCookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,13 +43,13 @@ class TokenAuthenticationIT {
     }
 
     private void expectOk(String token) throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/authenticate").header(AUTHORIZATION, BEARER + token)).andExpect(
+        mvc.perform(MockMvcRequestBuilders.get("/api/authenticate").cookie(new Cookie(AccessTokenCookie.NAME, token))).andExpect(
             status().isNoContent()
         );
     }
 
     private void expectUnauthorized(String token) throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/authenticate").header(AUTHORIZATION, BEARER + token)).andExpect(
+        mvc.perform(MockMvcRequestBuilders.get("/api/authenticate").cookie(new Cookie(AccessTokenCookie.NAME, token))).andExpect(
             status().isUnauthorized()
         );
     }

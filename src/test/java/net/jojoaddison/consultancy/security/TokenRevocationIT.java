@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import net.jojoaddison.consultancy.IntegrationTest;
 import net.jojoaddison.consultancy.domain.User;
 import net.jojoaddison.consultancy.repository.UserRepository;
@@ -78,24 +79,24 @@ class TokenRevocationIT {
 
     @Test
     void aTokenWorksUntilItsUsersSessionsAreRevoked() throws Exception {
-        String token = login(LOGIN);
+        Cookie token = login(LOGIN);
         assertAccepted(token);
 
         revokeSessionsFor(LOGIN);
 
         // Same token, same signature, still unexpired — and now refused. This is the capability the
         // runbook previously had to answer with "rotate the key and sign out everybody".
-        restMockMvc.perform(get("/api/account").header("Authorization", "Bearer " + token)).andExpect(status().isUnauthorized());
+        restMockMvc.perform(get("/api/account").cookie(token)).andExpect(status().isUnauthorized());
     }
 
     @Test
     void revokingOneUserLeavesEveryoneElseSignedIn() throws Exception {
-        String victim = login(LOGIN);
-        String bystander = login(OTHER_LOGIN);
+        Cookie victim = login(LOGIN);
+        Cookie bystander = login(OTHER_LOGIN);
 
         revokeSessionsFor(LOGIN);
 
-        restMockMvc.perform(get("/api/account").header("Authorization", "Bearer " + victim)).andExpect(status().isUnauthorized());
+        restMockMvc.perform(get("/api/account").cookie(victim)).andExpect(status().isUnauthorized());
         // The whole point of per-user revocation over rotating the signing secret.
         assertAccepted(bystander);
     }
@@ -111,22 +112,22 @@ class TokenRevocationIT {
 
     @Test
     void aTokenForADeletedAccountIsRefused() throws Exception {
-        String token = login(LOGIN);
+        Cookie token = login(LOGIN);
         assertAccepted(token);
 
         deleteUser(LOGIN);
 
-        restMockMvc.perform(get("/api/account").header("Authorization", "Bearer " + token)).andExpect(status().isUnauthorized());
+        restMockMvc.perform(get("/api/account").cookie(token)).andExpect(status().isUnauthorized());
     }
 
     @Test
     void changingAPasswordEndsTheSessionsThatPasswordOpened() throws Exception {
-        String token = login(LOGIN);
+        Cookie token = login(LOGIN);
 
         restMockMvc
             .perform(
                 post("/api/account/change-password")
-                    .header("Authorization", "Bearer " + token)
+                    .cookie(token)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"currentPassword\":\"" + PASSWORD + "\",\"newPassword\":\"another-fine-passphrase\"}")
             )
@@ -134,11 +135,11 @@ class TokenRevocationIT {
 
         // Including the session that performed the change — a password change that leaves the old
         // sessions alive protects nothing that is already logged in.
-        restMockMvc.perform(get("/api/account").header("Authorization", "Bearer " + token)).andExpect(status().isUnauthorized());
+        restMockMvc.perform(get("/api/account").cookie(token)).andExpect(status().isUnauthorized());
     }
 
-    private void assertAccepted(String token) throws Exception {
-        restMockMvc.perform(get("/api/account").header("Authorization", "Bearer " + token)).andExpect(status().isOk());
+    private void assertAccepted(Cookie token) throws Exception {
+        restMockMvc.perform(get("/api/account").cookie(token)).andExpect(status().isOk());
     }
 
     /**
@@ -158,16 +159,15 @@ class TokenRevocationIT {
         userRepository.flush();
     }
 
-    private String login(String login) throws Exception {
+    private Cookie login(String login) throws Exception {
         LoginVM vm = new LoginVM();
         vm.setUsername(login);
         vm.setPassword(PASSWORD);
-        String body = restMockMvc
+        return restMockMvc
             .perform(post("/api/authenticate").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsBytes(vm)))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
-            .getContentAsString();
-        return om.readTree(body).get("id_token").asText();
+            .getCookie(AccessTokenCookie.NAME);
     }
 }

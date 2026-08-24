@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { AUTHENTICATION_TOKEN_KEY } from 'app/shared/jhipster/constants';
-
+/**
+ * Small pieces of client state that survive a navigation — the URL to return to after login, and the
+ * chosen locale.
+ *
+ * <p>The authentication token used to live here too, in `localStorage` or `sessionStorage` depending
+ * on "remember me". It does not any more (SEC-06): it is in an `HttpOnly` cookie the server sets, out
+ * of reach of every script including this one. Nothing in this file is a credential, which is why it
+ * can go on using web storage without further thought.
+ */
 @Injectable({ providedIn: 'root' })
 export class StateStorageService {
   private readonly previousUrlKey = 'previousUrl';
-  private readonly authenticationKey = AUTHENTICATION_TOKEN_KEY;
   private readonly localeKey = 'locale';
 
   storeUrl(url: string): void {
@@ -19,26 +25,6 @@ export class StateStorageService {
 
   clearUrl(): void {
     sessionStorage.removeItem(this.previousUrlKey);
-  }
-
-  storeAuthenticationToken(authenticationToken: string, rememberMe: boolean): void {
-    authenticationToken = JSON.stringify(authenticationToken);
-    this.clearAuthenticationToken();
-    if (rememberMe) {
-      localStorage.setItem(this.authenticationKey, authenticationToken);
-    } else {
-      sessionStorage.setItem(this.authenticationKey, authenticationToken);
-    }
-  }
-
-  getAuthenticationToken(): string | null {
-    const authenticationToken = localStorage.getItem(this.authenticationKey) ?? sessionStorage.getItem(this.authenticationKey);
-    return authenticationToken ? (JSON.parse(authenticationToken) as string | null) : authenticationToken;
-  }
-
-  clearAuthenticationToken(): void {
-    sessionStorage.removeItem(this.authenticationKey);
-    localStorage.removeItem(this.authenticationKey);
   }
 
   storeLocale(locale: string): void {

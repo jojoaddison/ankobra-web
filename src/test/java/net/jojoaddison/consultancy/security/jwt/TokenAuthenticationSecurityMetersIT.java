@@ -2,11 +2,12 @@ package net.jojoaddison.consultancy.security.jwt;
 
 import static net.jojoaddison.consultancy.security.jwt.JwtAuthenticationTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.servlet.http.Cookie;
 import java.util.Collection;
+import net.jojoaddison.consultancy.security.AccessTokenCookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,7 +80,7 @@ class TokenAuthenticationSecurityMetersIT {
     }
 
     private void tryToAuthenticate(String token) throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/authenticate").header(AUTHORIZATION, BEARER + token));
+        mvc.perform(MockMvcRequestBuilders.get("/api/authenticate").cookie(new Cookie(AccessTokenCookie.NAME, token)));
     }
 
     private double aggregate(Collection<Counter> counters) {

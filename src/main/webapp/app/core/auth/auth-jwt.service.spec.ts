@@ -1,84 +1,61 @@
-import { beforeEach, describe, expect, it, vitest } from 'vitest';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AuthServerProvider } from 'app/core/auth/auth-jwt.service';
-import { AUTHENTICATION_TOKEN_KEY } from 'app/shared/jhipster/constants';
 
-import { StateStorageService } from './state-storage.service';
-
+/**
+ * Rewritten for SEC-06. The old version of this suite asserted where in web storage the token was
+ * written; there is no token here any more, so every assertion below is about the absence of one and
+ * about logout being a server call.
+ */
 describe('Auth JWT', () => {
   let service: AuthServerProvider;
   let httpMock: HttpTestingController;
-  let mockStorageService: StateStorageService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClientTesting()],
-    });
-
-    mockStorageService = TestBed.inject(StateStorageService);
+    TestBed.configureTestingModule({ providers: [provideHttpClientTesting()] });
     httpMock = TestBed.inject(HttpTestingController);
     service = TestBed.inject(AuthServerProvider);
+    localStorage.clear();
+    sessionStorage.clear();
   });
 
-  describe('Get Token', () => {
-    it('should return empty token if not found in local storage nor session storage', () => {
-      const result = service.getToken();
-      expect(result).toEqual('');
-    });
-
-    it('should return token from session storage if local storage is empty', () => {
-      sessionStorage.setItem(AUTHENTICATION_TOKEN_KEY, JSON.stringify('sessionStorageToken'));
-      const result = service.getToken();
-      expect(result).toEqual('sessionStorageToken');
-    });
-
-    it('should return token from localstorage storage', () => {
-      localStorage.setItem(AUTHENTICATION_TOKEN_KEY, JSON.stringify('localStorageToken'));
-      const result = service.getToken();
-      expect(result).toEqual('localStorageToken');
-    });
+  afterEach(() => {
+    httpMock.verify();
   });
 
-  describe('Login', () => {
-    it('should clear session storage and save in local storage when rememberMe is true', () => {
-      // GIVEN
-      mockStorageService.storeAuthenticationToken = vitest.fn();
+  describe('login', () => {
+    it('should post the credentials and store nothing', () => {
+      service.login({ username: 'kojo', password: 'a-perfectly-fine-passphrase', rememberMe: false }).subscribe();
 
-      // WHEN
-      service.login({ username: 'John', password: '123', rememberMe: true }).subscribe();
-      httpMock.expectOne('api/authenticate').flush({ id_token: '1' });
+      const request = httpMock.expectOne({ method: 'POST', url: 'api/authenticate' });
+      expect(request.request.body).toEqual({ username: 'kojo', password: 'a-perfectly-fine-passphrase', rememberMe: false });
+      request.flush(null);
 
-      // THEN
-      httpMock.verify();
-      expect(mockStorageService.storeAuthenticationToken).toHaveBeenCalledWith('1', true);
+      // The session lives in an HttpOnly cookie the server sets. Anything written here would be
+      // readable by script, which is the exact thing the migration removed.
+      expect(localStorage.length).toBe(0);
+      expect(sessionStorage.length).toBe(0);
     });
 
-    it('should clear local storage and save in session storage when rememberMe is false', () => {
-      // GIVEN
-      mockStorageService.storeAuthenticationToken = vitest.fn();
+    it('should pass rememberMe through, since the server decides the cookie lifetime', () => {
+      service.login({ username: 'kojo', password: 'a-perfectly-fine-passphrase', rememberMe: true }).subscribe();
 
-      // WHEN
-      service.login({ username: 'John', password: '123', rememberMe: false }).subscribe();
-      httpMock.expectOne('api/authenticate').flush({ id_token: '1' });
-
-      // THEN
-      httpMock.verify();
-      expect(mockStorageService.storeAuthenticationToken).toHaveBeenCalledWith('1', false);
+      const request = httpMock.expectOne({ method: 'POST', url: 'api/authenticate' });
+      expect(request.request.body.rememberMe).toBe(true);
+      request.flush(null);
     });
   });
 
-  describe('Logout', () => {
-    it('should clear storage', () => {
-      // GIVEN
-      mockStorageService.clearAuthenticationToken = vitest.fn();
+  describe('logout', () => {
+    it('should call the server, because script cannot delete an HttpOnly cookie', () => {
+      let completed = false;
+      service.logout().subscribe({ complete: () => (completed = true) });
 
-      // WHEN
-      service.logout().subscribe();
+      httpMock.expectOne({ method: 'POST', url: 'api/logout' }).flush(null);
 
-      // THEN
-      expect(mockStorageService.clearAuthenticationToken).toHaveBeenCalled();
+      expect(completed).toBe(true);
     });
   });
 });
