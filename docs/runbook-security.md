@@ -166,6 +166,59 @@ one by hand, on the machine holding the private key, at least when the key chang
 
 ---
 
+## 6. Forcing a password change
+
+For a password that was shared over chat, written down, or reused on a service that has since been
+breached — anything short of "somebody is in the account right now", which is §1.
+
+```bash
+# As an admin. Sets jhi_user.must_change_password; the account can then reach only its own profile
+# and the change-password endpoint until it complies.
+curl -sS -X POST -H "Authorization: Bearer $ADMIN_TOKEN" \
+  https://jojoaddison.net/api/admin/users/<login>/require-password-change -o /dev/null -w '%{http_code}\n'   # 204
+```
+
+Two things about this that are easy to get wrong:
+
+- **Do not set the column with SQL.** `findOneByLogin` is `@Cacheable` and the filter reads through it,
+  so a direct `UPDATE` has no effect until the cache entry expires — an hour in production. Exactly the
+  trap §2 records for token revocation. Use the endpoint, or `UserService.requirePasswordChange`.
+- **This does not sign them out**, deliberately: a user needs a live session to reach the password
+  form. If the concern is that someone else is already using the account, revoke sessions *as well*
+  (§1), and in that order — revoke first and the user cannot comply until they log in again.
+
+To confirm it took: `grep 'event=account.password_change_required' ` over the audit log, and
+`event=account.password_changed` for the same login once they have complied.
+
+---
+
+## 7. Standing up a `*.jojoaddison.net` subdomain
+
+Since 2026-08-24 the apex sends `Strict-Transport-Security: max-age=31536000; includeSubDomains`.
+That assertion is inherited by **every** subdomain of `jojoaddison.net`, whether or not it is served
+from this host or by this project.
+
+**Any new or restored subdomain must be HTTPS-only from its first request.** A browser that has
+visited `https://jojoaddison.net` within the past year will refuse a plain-HTTP connection to it
+outright — no warning, no click-through, and nothing served from the subdomain can override it. The
+apex would have to stop sending `includeSubDomains` *and* a year would have to pass.
+
+The one known case: **`dev.jojoaddison.net` resolves to `46.124.145.61`, which is not this server**
+and currently answers on neither port 80 nor 443. It was a documented accepted risk when
+`includeSubDomains` went in. Whoever brings it back needs a certificate before it will be reachable.
+
+```bash
+# Before assuming a subdomain works, check it the way a browser will.
+curl -sI https://<name>.jojoaddison.net/ -o /dev/null -w 'https=%{http_code} verify=%{ssl_verify_result}\n'
+# verify=0 means the certificate chain is good. Anything else is a subdomain that will look broken.
+```
+
+If a subdomain genuinely cannot be served over HTTPS, the fix is to drop `includeSubDomains` from
+`deploy/prod-server/ankobra-web.conf` and `web-jojoaddison.conf` and redeploy — but that only helps
+browsers that have not already cached the assertion.
+
+---
+
 ## What is still missing
 
 Honest gaps, so nobody discovers them mid-incident:
