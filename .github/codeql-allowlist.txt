@@ -1,0 +1,14 @@
+# Findings the CodeQL gate in .github/workflows/codeql.yml must not fail the build on.
+#
+# A gate with no escape hatch does not survive its first false positive — it gets commented out, and
+# then nothing is scanning at all. This file is the hatch, deliberately narrow: one line per accepted
+# finding, with the reason in the open where a reviewer sees it in the diff.
+#
+# Format:  <rule-id> <path-prefix> # why
+# Matching is by rule id AND path prefix, so an exemption granted to one file does not silently cover
+# the next occurrence somewhere else. Entries stop applying if the code moves.
+#
+# Suppressed alerts still appear in the Security tab. This only decides what blocks a merge.
+#
+# Before adding a line here, be sure the finding is wrong rather than inconvenient. "We know about it"
+# is not a reason; "the query's assumption does not hold, and here is why" is.
