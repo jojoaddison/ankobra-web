@@ -117,7 +117,7 @@ services:
       # Loopback only. jacserver's own nginx owns the hostname and is the sole way in — see
       # host-site.conf. Keep this number in step with APP_PORT there; nginx cannot read the
       # environment, so it is written in both places and startup.sh checks they agree.
-      - '127.0.0.1:${APP_PORT:-18090}:8080'
+      - '127.0.0.1:${APP_PORT:-18092}:8080'
     networks: [quality]
     read_only: true
     tmpfs:
