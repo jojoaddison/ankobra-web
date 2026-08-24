@@ -1,0 +1,149 @@
+# The ankobra-web stack as it runs on jacserver, at http://jojoaddison.local.
+#
+# Deliberately a near-copy of ../prod-server/compose.yml, because that is the entire point: this
+# stack exists to show what production will do, and every difference between the two is a place where
+# quality can pass and production still fail. The differences that remain are listed here rather than
+# left to be discovered:
+#
+#   - the image comes from GHCR by tag rather than the private registry
+#   - no `monitoring` network and no OTLP collector, so tracing is off by default
+#   - the published port and the database volume are quality's own
+#   - PUBLIC_URL is http://jojoaddison.local, so nothing here exercises TLS or HSTS
+#
+# Everything else — the `prod` profile, PostgreSQL, the read-only root filesystem, the dropped
+# capabilities, the loopback-only port — is production's configuration unchanged.
+#
+# ONE image, not four. ankobra-web is a JHipster monolith: Spring Boot serves the compiled Angular
+# bundle from its own classpath, so there is no separate web container, no gateway and no broker.
+# (If you are looking at this file's history: it began as a copy of an hc-admin stack, which is a
+# microservice system and needed all four.)
+#
+# The `prod` profile matters more than it looks. It is what makes Liquibase run its prod-context
+# changesets — the SEC-16 demo-account removal and the SEC-04 must-change-password migration — so
+# those are exercised here rather than first meeting a real database on the production host. It also
+# means DataSeeder does NOT run: this stack starts with the `admin` account and no fixture data, the
+# same as production on its first boot.
+name: ankobra-web-quality
+
+services:
+  postgresql:
+    image: postgres:18.4
+    container_name: ankobra-web-quality-postgres
+    restart: unless-stopped
+    networks: [quality]
+    environment:
+      POSTGRES_DB: jojoaddison
+      POSTGRES_USER: jojoaddison
+      # No POSTGRES_HOST_AUTH_METHOD=trust, matching production. This container publishes no port, but
+      # jacserver is a shared machine and every other stack on it can reach this network's neighbours.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?generated into .env by startup.sh}
+    volumes:
+      # /var/lib/postgresql, NOT /var/lib/postgresql/data — the 18+ images keep data in a
+      # major-version subdirectory and refuse to start when they find a volume on the old path.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  app:
+    # GHCR, by tag, and nothing is built here. The tag is this repository's HEAD, which is the scheme
+    # `deploy.sh --channel github` uses — so what runs here is what that command would deploy next,
+    # image digest for image digest, with no build context that can drift.
+    image: ${REGISTRY:-ghcr.io/jojoaddison}/ankobra-web:${TAG:?set by startup.sh}
+    container_name: ankobra-web-quality-app
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      # `prod` only, exactly as production. Do NOT add `dev` to get demo data: the dev profile swaps
+      # PostgreSQL for H2 and turns on DataSeeder's published kojo/ama logins, which would make this
+      # a different application from the one being verified — and put known credentials on a machine
+      # several people can reach.
+      SPRING_PROFILES_ACTIVE: prod
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/jojoaddison
+      SPRING_DATASOURCE_USERNAME: jojoaddison
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?generated into .env by startup.sh}
+      SPRING_LIQUIBASE_URL: jdbc:postgresql://postgresql:5432/jojoaddison
+
+      # Generated on the target by startup.sh and kept there, not committed and not a fixture.
+      #
+      # A hard-coded key here would be the SEC-12 mistake repeated: this file is public, and a key in
+      # it is a key anyone can sign a token with. SampleSecretGuard would not save us either — it
+      # refuses to start on the *committed dev sample* key specifically, so a different published
+      # constant would sail straight past it.
+      #
+      # Kept rather than rotated on every start, because rotating it invalidates every session and
+      # would sign the tester out mid-verification for no reason.
+      JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET: ${JWT_BASE64_SECRET:?generated into .env by startup.sh}
+
+      # Applied to the seeded `admin` account at every boot by AdminPasswordInitializer. Also
+      # generated on the target; startup.sh prints it at the end so you can sign in.
+      ANKOBRA_ADMIN_PASSWORD: ${ANKOBRA_ADMIN_PASSWORD:?generated into .env by startup.sh}
+
+      # Same-origin only, which is what the monolith needs — it serves its own frontend.
+      JHIPSTER_CORS_ALLOWED_ORIGINS: ${PUBLIC_URL:-http://jojoaddison.local}
+
+      # Mail is deliberately unconfigured. Nothing on the path this stack verifies sends any: the
+      # contact form only writes a Lead row, and account recovery is not what is being checked.
+      # Leaving SPRING_MAIL_HOST empty is also what makes the mail health indicator stay out of the
+      # container's health status (SEC-13).
+      SPRING_MAIL_HOST: ${SMTP_HOST:-}
+      JHIPSTER_MAIL_BASE_URL: ${PUBLIC_URL:-http://jojoaddison.local}
+
+      MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED: 'true'
+
+      # Off unless a collector is actually there, and startup.sh only turns it on when it finds one.
+      #
+      # Production runs with this on, so leaving it off IS a difference from production — an accepted
+      # one. Enabled with nothing listening, the exporter retries in the background forever: harmless
+      # to the application, and a steady stream of connection errors in the logs that makes the one
+      # error worth reading harder to find.
+      OTEL_TRACING_ENABLED: ${OTEL_TRACING_ENABLED:-false}
+      OTEL_TRACE_SAMPLING: ${OTEL_TRACE_SAMPLING:-1.0}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318/v1/traces}
+
+      # Matching production. This is not decoration: ankobra-web instruments itself with Micrometer
+      # Tracing, so unlike the microservice stacks on this host there is no OpenTelemetry javaagent to
+      # mount and no JAVA_TOOL_OPTIONS to be careful with. Setting JAVA_OPTS here does not disturb
+      # anything the image bakes in.
+      JAVA_OPTS: '-XX:MaxRAMPercentage=75 -XX:+UseZGC'
+      JHIPSTER_SLEEP: '0'
+    ports:
+      # Loopback only. jacserver's own nginx owns the hostname and is the sole way in — see
+      # host-site.conf. Keep this number in step with APP_PORT there; nginx cannot read the
+      # environment, so it is written in both places and startup.sh checks they agree.
+      - '127.0.0.1:${APP_PORT:-18090}:8080'
+    networks: [quality]
+    read_only: true
+    tmpfs:
+      # Spring Boot and Liquibase both write here. With a read-only root and no tmpfs the container
+      # starts and then dies on the first temporary file — worth carrying from production, because
+      # this is exactly the kind of thing that only fails outside a developer machine.
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    healthcheck:
+      # bash's /dev/tcp rather than curl or wget: the temurin JRE base image ships neither, so the
+      # obvious healthcheck reports unhealthy forever on a container that is perfectly fine.
+      test:
+        - CMD-SHELL
+        - "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080; printf \"GET /management/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3; grep -q \"\\\"status\\\":\\\"UP\\\"\" <&3'"
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # Wide on purpose: Liquibase runs every entity changelog on first boot against an empty
+      # database. Minutes, not seconds, and that is expected rather than a hang.
+      start_period: 120s
+
+networks:
+  # Owned by this project, unlike production's `ankobrawebnet`, which infra.sh creates because the
+  # backup and monitoring tooling joins it too. Nothing else on jacserver needs to reach this one.
+  quality:
+
+volumes:
+  postgres-data:
