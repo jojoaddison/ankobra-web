@@ -20,6 +20,7 @@ import { authExpiredInterceptor } from 'app/core/interceptor/auth-expired.interc
 import { authInterceptor } from 'app/core/interceptor/auth.interceptor';
 import { errorHandlerInterceptor } from 'app/core/interceptor/error-handler.interceptor';
 import { notificationInterceptor } from 'app/core/interceptor/notification.interceptor';
+import { passwordChangeRequiredInterceptor } from 'app/core/interceptor/password-change-required.interceptor';
 
 import { config as faConfig } from '@fortawesome/fontawesome-svg-core';
 
@@ -61,7 +62,16 @@ export const appConfig: ApplicationConfig = {
     // Set this to true to enable service worker (PWA)
     provideServiceWorker('ngsw-worker.js', { enabled: false }),
     importProvidersFrom(TranslationModule),
-    provideHttpClient(withInterceptors([authInterceptor, authExpiredInterceptor, errorHandlerInterceptor, notificationInterceptor])),
+    provideHttpClient(
+      withInterceptors([
+        authInterceptor,
+        authExpiredInterceptor,
+        // Before errorHandlerInterceptor: a password-change 403 is a redirect, not an error to surface.
+        passwordChangeRequiredInterceptor,
+        errorHandlerInterceptor,
+        notificationInterceptor,
+      ]),
+    ),
     Title,
     { provide: LOCALE_ID, useValue: 'en' },
     { provide: NgbDateAdapter, useClass: NgbDateDayjsAdapter },

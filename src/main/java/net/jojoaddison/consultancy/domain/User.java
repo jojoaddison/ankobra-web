@@ -73,6 +73,19 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     @Column(name = "token_version", nullable = false)
     private int tokenVersion = 0;
 
+    /**
+     * The account's password predates the 12-character policy (SEC-04) and must be replaced before the
+     * account can do anything else.
+     *
+     * <p>Raising a length floor does not retroactively invalidate anything: bcrypt hashes carry no
+     * length, so there is no way to ask which stored passwords would fail today's rules. Flagging the
+     * accounts that existed before the rules did is the only available answer, and it is a one-way
+     * marker — set by migration, cleared by a successful password change, never set again.
+     */
+    @NotNull
+    @Column(name = "must_change_password", nullable = false)
+    private boolean mustChangePassword = false;
+
     @Size(min = 2, max = 10)
     @Column(name = "lang_key", length = 10)
     private String langKey;
@@ -181,6 +194,14 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
     /** Invalidates every token already issued to this user, and only this user. */
     public void revokeIssuedTokens() {
         this.tokenVersion++;
+    }
+
+    public boolean isMustChangePassword() {
+        return mustChangePassword;
+    }
+
+    public void setMustChangePassword(boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
     }
 
     public String getActivationKey() {

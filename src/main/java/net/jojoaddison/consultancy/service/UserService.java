@@ -78,6 +78,10 @@ public class UserService {
                 // SEC-09. This is the recovery path: whoever is resetting may be locking an intruder
                 // out, so the intruder's existing sessions must die with the old password.
                 user.revokeIssuedTokens();
+                // SEC-04: a reset satisfies the requirement as fully as a change does — AccountResource
+                // applies the same policy to both, and this path is the one a flagged user who has
+                // forgotten their old password has to take.
+                user.setMustChangePassword(false);
                 this.clearUserCaches(user);
                 return user;
             });
@@ -270,6 +274,9 @@ public class UserService {
                 // SEC-09: changing a password that someone else may know has to end the sessions that
                 // password opened, otherwise the change protects nothing that is already logged in.
                 user.revokeIssuedTokens();
+                // SEC-04: the new password went through the current policy on its way in, so whatever
+                // this account was carrying from before it is now gone.
+                user.setMustChangePassword(false);
                 this.clearUserCaches(user);
                 LOG.debug("Changed password for User: {}", user);
             });
@@ -337,6 +344,30 @@ public class UserService {
             userRepository.save(user);
             this.clearUserCaches(user);
             LOG.debug("Revoked issued tokens for User: {}", login);
+            return user;
+        });
+    }
+
+    /**
+     * Requires one user to replace their password before the account can be used again (SEC-04).
+     *
+     * <p>The migration flags accounts that predate the 12-character floor; this is the manual equivalent,
+     * for a password suspected of being shared, written down or reused. It does not sign the user out —
+     * they need a live session to comply — so pair it with {@link #revokeSessions(String)} when the
+     * concern is that somebody else is already using the account.
+     *
+     * <p>Goes through this method rather than a SQL update for the same reason as {@code revokeSessions}:
+     * {@code findOneByLogin} is {@code @Cacheable} and {@code PasswordChangeRequiredFilter} reads through
+     * it, so a direct update is invisible until the cache entry expires — an hour in production.
+     *
+     * @return the user, or empty if no such login exists.
+     */
+    public Optional<User> requirePasswordChange(String login) {
+        return userRepository.findOneByLogin(login).map(user -> {
+            user.setMustChangePassword(true);
+            userRepository.save(user);
+            this.clearUserCaches(user);
+            LOG.debug("Required a password change for User: {}", login);
             return user;
         });
     }

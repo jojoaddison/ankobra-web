@@ -42,6 +42,9 @@
     <include file="config/liquibase/changelog/20260805190000_added_token_version_to_user.xml" relativeToChangelogFile="false"/>
     <!-- SEC-16: drop the generator-seeded demo account in production. -->
     <include file="config/liquibase/changelog/20260806030000_remove_seeded_demo_user.xml" relativeToChangelogFile="false"/>
+    <!-- SEC-04: flag accounts whose password predates the 12-character floor. After the SEC-16 removal,
+         so the account deleted there is never pointlessly flagged on its way out. -->
+    <include file="config/liquibase/changelog/20260824120000_added_must_change_password_to_user.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
 </databaseChangeLog>
