@@ -12,32 +12,21 @@
     <div class="panel empty">No catalogue items yet.</div>
   } @else {
     @for (group of groups(); track group.key) {
-      <div style="margin-bottom: 26px">
-        <div
-          style="
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--brand);
-            margin-bottom: 12px;
-          "
-        >
-          {{ group.label }}
-        </div>
-        <div class="pgrid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))">
+      <div class="pgroup">
+        <div class="pgroup-label">{{ group.label }}</div>
+        <div class="pgrid pgrid-300">
           @for (item of group.items; track item.id) {
             <div class="pcard">
-              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px">
-                <h3 style="font-size: 15px; font-weight: 700; margin: 0; color: var(--text-primary)">{{ item.name }}</h3>
+              <div class="pcard-head pcard-head-baseline">
+                <h3 class="pcard-title">{{ item.name }}</h3>
                 <span class="mono">{{ item.code }}</span>
               </div>
               @if (item.description) {
-                <p class="muted" style="font-size: 13px; margin: 8px 0 0">{{ item.description }}</p>
+                <p class="muted pcard-note">{{ item.description }}</p>
               }
-              <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 14px">
-                <span class="strong" style="font-size: 18px; color: var(--text-primary)">{{ fmt.money(item.rate) }}</span>
-                <span class="muted" style="font-size: 12.5px">{{ fmt.humanize(item.unit) | lowercase }}</span>
+              <div class="pcard-figure">
+                <span class="strong amount">{{ fmt.money(item.rate) }}</span>
+                <span class="muted unit">{{ fmt.humanize(item.unit) | lowercase }}</span>
               </div>
             </div>
           }

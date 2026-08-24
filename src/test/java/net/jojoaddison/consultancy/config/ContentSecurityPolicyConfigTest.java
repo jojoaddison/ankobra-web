@@ -2,10 +2,14 @@ package net.jojoaddison.consultancy.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -20,6 +24,9 @@ import org.yaml.snakeyaml.Yaml;
 class ContentSecurityPolicyConfigTest {
 
     private static final Path APPLICATION_YML = Path.of("src/main/resources/config/application.yml");
+
+    /** Matches the HTML attribute only — not `[style.width.%]`, `[ngStyle]`, or the word in a comment. */
+    private static final Pattern INLINE_STYLE_ATTRIBUTE = Pattern.compile("\\sstyle\\s*=\\s*\"");
 
     @Test
     @SuppressWarnings("unchecked")
@@ -38,6 +45,48 @@ class ContentSecurityPolicyConfigTest {
         // losing it would silently leave style-src at 'self' and break every runtime-injected style.
         assertThat(policy).contains("'nonce-{nonce}'");
         assertThat(policy).doesNotContain("style-src 'self' 'unsafe-inline'");
+        // SEC-06, 2026-08-24: the last 'unsafe-inline' is gone. It existed for 43 `style="…"`
+        // attributes, all of which are now classes. Asserting on the whole policy rather than on
+        // style-src-attr specifically, because the failure this guards against is somebody adding
+        // 'unsafe-inline' back under *any* directive to make one stubborn element render.
+        assertThat(policy).doesNotContain("unsafe-inline");
+        assertThat(policy).doesNotContain("style-src-attr");
+    }
+
+    /**
+     * The corollary of the assertion above: with no {@code style-src-attr 'unsafe-inline'} in the
+     * policy, a {@code style="…"} attribute in a template is dead markup — the browser drops it, the
+     * element renders unstyled, and nothing anywhere reports an error. Neither the built HTML nor any
+     * other test in this suite would notice, so this is the guard.
+     *
+     * <p>Angular's {@code [style.x]} bindings are fine and deliberately not matched here: they are
+     * CSSOM writes at runtime, which CSP does not police.
+     */
+    @Test
+    void noTemplateCarriesAnInlineStyleAttribute() throws Exception {
+        Path webapp = Path.of("src/main/webapp");
+        assertThat(webapp).as("run from the project root").exists();
+
+        try (var paths = Files.walk(webapp)) {
+            List<String> offenders = paths
+                .filter(path -> path.toString().endsWith(".html"))
+                // Vendored, and not ours to reformat.
+                .filter(path -> !path.toString().contains("swagger-ui"))
+                .filter(ContentSecurityPolicyConfigTest::hasInlineStyleAttribute)
+                .map(Path::toString)
+                .sorted()
+                .toList();
+
+            assertThat(offenders).as("templates with a style=\"…\" attribute, which the shipped CSP silently ignores").isEmpty();
+        }
+    }
+
+    private static boolean hasInlineStyleAttribute(Path path) {
+        try {
+            return INLINE_STYLE_ATTRIBUTE.matcher(Files.readString(path)).find();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Test

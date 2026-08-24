@@ -18,7 +18,7 @@
           <th>Sector</th>
           <th>Since</th>
           <th>Health</th>
-          <th style="text-align: right">Total spend</th>
+          <th class="num">Total spend</th>
         </tr>
       </thead>
       <tbody>
@@ -30,7 +30,7 @@
             <td>
               <span class="st" [class]="fmt.statusClass(c.health)">{{ fmt.statusLabel(c.health) }}</span>
             </td>
-            <td class="strong" style="text-align: right">{{ fmt.money(c.totalSpend) }}</td>
+            <td class="strong num">{{ fmt.money(c.totalSpend) }}</td>
           </tr>
         }
       </tbody>

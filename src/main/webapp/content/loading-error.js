@@ -15,9 +15,10 @@ window.onload = function () {
   setTimeout(showError, 4000);
 };
 
+// Toggles a class rather than writing errorElm.style.display. CSP's style-src-attr no longer allows
+// inline style attributes (SEC-06); assigning to the CSSOM `style` property happens to remain outside
+// what CSP checks, but relying on that distinction to keep a control working is how a control breaks
+// later for reasons nobody remembers. The class is defined in content/css/loading.css.
 function showError() {
-  const errorElm = document.getElementById('jhipster-error');
-  if (errorElm?.style) {
-    errorElm.style.display = 'block';
-  }
+  document.getElementById('jhipster-error')?.classList.remove('is-hidden');
 }

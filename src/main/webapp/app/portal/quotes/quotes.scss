@@ -19,6 +19,22 @@
   margin-bottom: 6px;
   display: block;
 }
+/* Second and subsequent field labels in the summary panel, which need air above them. */
+.fld-label-spaced {
+  margin-top: 14px;
+}
+
+/* Line-item table columns. Widths belong here rather than on the <th> now that SEC-06 has dropped
+   `style-src-attr 'unsafe-inline'` and an inline style would simply not apply. */
+.col-narrow {
+  width: 90px;
+}
+.col-total {
+  width: 110px;
+}
+.col-action {
+  width: 40px;
+}
 .fld {
   width: 100%;
   padding: 10px 12px;
