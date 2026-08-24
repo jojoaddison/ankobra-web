@@ -291,3 +291,20 @@ jhipster:
 # ===================================================================
 
 # application:
+
+ankobra:
+  security:
+    hibp:
+      # Have I Been Pwned breach-corpus check on every password set (SEC-04). k-anonymous: only the
+      # first five characters of the SHA-1 leave this process, so the password itself is never sent —
+      # see BreachedPasswordChecker for the full reasoning.
+      #
+      # On by default, including in dev, so the outbound call is exercised where it is cheap to notice
+      # rather than first attempted in production. The test profile turns it off (see
+      # src/test/resources/config/application.yml): a unit suite must not depend on a third party being
+      # reachable, and a test that silently passes because the check failed open is worse than no test.
+      enabled: true
+      base-url: https://api.pwnedpasswords.com/range
+      # Fail-open is the policy, but only after a bounded wait — an unbounded one parks the request
+      # thread and is neither open nor closed. Every failure is counted and audited.
+      timeout-millis: 2000

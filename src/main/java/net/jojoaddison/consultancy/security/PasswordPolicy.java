@@ -13,10 +13,14 @@ import org.apache.commons.lang3.StringUtils;
  * being a well-known phrase, and passwords built out of the account's own login, which is the most
  * common real-world weak choice and one a length rule cannot see.
  *
- * <p><strong>Known limitation:</strong> the denylist is a small local one, not a breach corpus. The
- * audit's suggestion of a Have I Been Pwned k-anonymity range query would give real coverage and remains
- * open — it was left out here to avoid putting an outbound network call, and a fail-open/fail-closed
- * decision, on the account-creation path. Treat this as raising the floor, not as strength checking.
+ * <p>The denylist here is a small local one, not a breach corpus — deliberately, because this class is
+ * pure: no I/O, no failure modes, no reason for a password check to depend on anything being reachable.
+ * Breach coverage lives next door in {@link BreachedPasswordChecker}, which does make an outbound call
+ * and does have to answer the fail-open question. Callers run both; {@code AccountResource} keeps that
+ * pairing in one private method so a new password path cannot pick up one and miss the other.
+ *
+ * <p>So: treat this as raising the floor, and the breach check as the part that knows which passwords
+ * are actually being used.
  */
 public final class PasswordPolicy {
 

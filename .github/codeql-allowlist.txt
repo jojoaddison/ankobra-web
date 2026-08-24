@@ -12,3 +12,5 @@
 #
 # Before adding a line here, be sure the finding is wrong rather than inconvenient. "We know about it"
 # is not a reason; "the query's assumption does not hold, and here is why" is.
+
+java/weak-cryptographic-algorithm src/main/java/net/jojoaddison/consultancy/security/BreachedPasswordChecker.java # SHA-1 is the HIBP range API's lookup key, not a credential hash; password storage is bcrypt and untouched. See the class javadoc.
