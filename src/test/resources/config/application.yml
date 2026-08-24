@@ -112,3 +112,12 @@ management:
   health:
     mail:
       enabled: false
+
+ankobra:
+  security:
+    hibp:
+      # No outbound call during tests. A suite that reaches api.pwnedpasswords.com is slow, flaky and
+      # fails offline; worse, because the check fails open, an unreachable HIBP would make every
+      # password test pass for the wrong reason. BreachedPasswordCheckerTest drives the client directly
+      # against a mocked transport instead.
+      enabled: false

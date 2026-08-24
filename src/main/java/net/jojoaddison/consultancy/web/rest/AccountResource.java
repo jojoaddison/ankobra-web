@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.*;
 import net.jojoaddison.consultancy.domain.User;
 import net.jojoaddison.consultancy.repository.UserRepository;
+import net.jojoaddison.consultancy.security.BreachedPasswordChecker;
 import net.jojoaddison.consultancy.security.PasswordPolicy;
 import net.jojoaddison.consultancy.security.SecurityAuditLogger;
 import net.jojoaddison.consultancy.security.SecurityUtils;
@@ -43,16 +44,37 @@ public class AccountResource {
 
     private final SecurityAuditLogger securityAudit;
 
+    private final BreachedPasswordChecker breachedPasswords;
+
     public AccountResource(
         UserRepository userRepository,
         UserService userService,
         MailService mailService,
-        SecurityAuditLogger securityAudit
+        SecurityAuditLogger securityAudit,
+        BreachedPasswordChecker breachedPasswords
     ) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.mailService = mailService;
         this.securityAudit = securityAudit;
+        this.breachedPasswords = breachedPasswords;
+    }
+
+    /**
+     * Every rule that applies wherever a password is set: the local floor ({@link PasswordPolicy}) and
+     * the breach corpus ({@link BreachedPasswordChecker}). Kept in one place so a future password path
+     * cannot pick up one and forget the other — which is how the register endpoint and the reset
+     * endpoint drift apart.
+     *
+     * <p>Local rules run first: they are free, and there is no reason to send a prefix over the network
+     * for a password that is already going to be rejected for being eight characters long.
+     *
+     * @param login may be null when the account is not yet known (the reset-key path).
+     */
+    private void rejectUnacceptablePassword(String password, String login) {
+        if (PasswordPolicy.isInvalid(password, login) || breachedPasswords.isBreached(password, login)) {
+            throw new InvalidPasswordException();
+        }
     }
 
     /**
@@ -66,9 +88,7 @@ public class AccountResource {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
-        if (PasswordPolicy.isInvalid(managedUserVM.getPassword(), managedUserVM.getLogin())) {
-            throw new InvalidPasswordException();
-        }
+        rejectUnacceptablePassword(managedUserVM.getPassword(), managedUserVM.getLogin());
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
         mailService.sendActivationEmail(user);
     }
@@ -139,9 +159,7 @@ public class AccountResource {
     @PostMapping(path = "/account/change-password")
     public void changePassword(@RequestBody PasswordChangeDTO passwordChangeDto) {
         String login = SecurityUtils.getCurrentUserLogin().orElse(null);
-        if (PasswordPolicy.isInvalid(passwordChangeDto.getNewPassword(), login)) {
-            throw new InvalidPasswordException();
-        }
+        rejectUnacceptablePassword(passwordChangeDto.getNewPassword(), login);
         userService.changePassword(passwordChangeDto.getCurrentPassword(), passwordChangeDto.getNewPassword());
         securityAudit.passwordChanged(login);
     }
@@ -174,10 +192,8 @@ public class AccountResource {
     @PostMapping(path = "/account/reset-password/finish")
     public void finishPasswordReset(@RequestBody KeyAndPasswordVM keyAndPassword) {
         // The login is not known until the reset key is resolved, so containment cannot be checked here.
-        // Length and the denylist still apply.
-        if (PasswordPolicy.isInvalid(keyAndPassword.getNewPassword(), null)) {
-            throw new InvalidPasswordException();
-        }
+        // Length, the denylist and the breach corpus still apply.
+        rejectUnacceptablePassword(keyAndPassword.getNewPassword(), null);
         Optional<User> user = userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
 
         if (!user.isPresent()) {

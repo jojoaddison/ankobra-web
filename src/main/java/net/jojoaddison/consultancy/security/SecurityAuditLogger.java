@@ -57,6 +57,21 @@ public class SecurityAuditLogger {
         AUDIT.info("event=account.password_changed login=\"{}\"", login);
     }
 
+    /** A password refused because it appears in the breach corpus (SEC-04). */
+    public void passwordRejectedAsBreached(String login) {
+        AUDIT.info("event=account.password_rejected_breached login=\"{}\"", login);
+    }
+
+    /**
+     * The breach check could not be performed, so the password was accepted without it. Fail-open is
+     * only a defensible choice while this line exists — see {@link BreachedPasswordChecker}.
+     *
+     * @param reason an exception type or a short token, never the password or any part of its hash.
+     */
+    public void breachCheckUnavailable(String reason) {
+        AUDIT.warn("event=account.breach_check_unavailable reason=\"{}\"", reason);
+    }
+
     public void passwordResetRequested(String login) {
         AUDIT.info("event=account.password_reset_requested login=\"{}\"", login);
     }
