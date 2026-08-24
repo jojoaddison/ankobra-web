@@ -79,11 +79,15 @@ public class SecurityConfiguration {
                     // HSTS is nginx's job, not the app's (SEC-07). Spring's default writer emits
                     // `max-age=31536000 ; includeSubDomains`, and it started firing once
                     // forward-headers-strategy made request.isSecure() true behind the proxy — asserting
-                    // HTTPS-only for EVERY *.jojoaddison.net subdomain, for a year, from this app.
-                    // web.jojoaddison.net does not currently answer on HTTPS, so that would have broken
-                    // it for anyone who visited the apex first. nginx sends the deliberate policy
-                    // (no includeSubDomains); one source avoids the duplicate header too, which RFC 6797
-                    // leaves to the UA to disambiguate.
+                    // HTTPS-only for EVERY *.jojoaddison.net subdomain, for a year, from this app,
+                    // before anyone had checked whether they could all serve it.
+                    //
+                    // As of 2026-08-24 they have been checked and nginx does now send includeSubDomains
+                    // (see deploy/prod-server/ankobra-web.conf), so the *policies* agree. This writer
+                    // stays disabled anyway: the decision of what transport policy this domain asserts
+                    // belongs at the edge, where every site on the host is configured together, not in
+                    // one application that happens to sit behind it. One source also avoids the
+                    // duplicate header, which RFC 6797 leaves to the UA to disambiguate.
                     .httpStrictTransportSecurity(HstsConfig::disable)
                     // No .contentSecurityPolicy(...) call: that is what would register Spring Security's
                     // own writer, and it can only emit a fixed string while the policy now carries a
