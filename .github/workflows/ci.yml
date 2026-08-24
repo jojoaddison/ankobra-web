@@ -89,8 +89,12 @@ jobs:
       # Filesystem scan of the Java tree. The backend had no CVE scanning at all, so its exposure was
       # simply unknown. Not pinned to the image because the image is built in publish.yml, which only
       # runs on main — a PR should learn about a vulnerable jar before it merges, not after.
+      # Pinned to a tag that exists. This read `@0.28.0`; the tags are `v`-prefixed, so the
+      # reference never resolved, "Set up job" failed before any step ran, and THE WHOLE JOB never
+      # executed — npm audit included. G-02 was decorative from the day it was added, and CI was red
+      # on main for weeks without anyone noticing.
       - name: Scan Java dependencies
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
