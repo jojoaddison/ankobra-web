@@ -55,7 +55,11 @@ public class UserService {
     }
 
     public Optional<User> activateRegistration(String key) {
-        LOG.debug("Activating user for activation key {}", key);
+        // The key is NOT logged. An activation key is a credential — whoever holds it can activate
+        // the account — so putting it in a log moves the credential somewhere with different readers
+        // and a different retention policy. The login is recorded by SecurityAuditLogger once the key
+        // resolves, which is the signal worth having anyway.
+        LOG.debug("Activating a user from an activation key");
         return userRepository.findOneByActivationKey(key).map(user -> {
             // activate given user for the registration key.
             user.setActivated(true);
@@ -67,7 +71,12 @@ public class UserService {
     }
 
     public Optional<User> completePasswordReset(String newPassword, String key) {
-        LOG.debug("Reset user password for reset key {}", key);
+        // Nor this one. A reset key is enough to complete somebody else's password reset, and this
+        // line put it in the application log on every attempt. CodeQL flags it as java/sensitive-log;
+        // it was also a direct contradiction of SecurityAuditLogger's own instruction never to pass a
+        // reset key to a logger. Production logs at INFO so it never fired there, which made it
+        // latent rather than harmless: one logging-level change away from leaking live credentials.
+        LOG.debug("Completing a password reset");
         return userRepository
             .findOneByResetKey(key)
             .filter(user -> user.getResetDate().isAfter(Instant.now().minus(1, ChronoUnit.DAYS)))
