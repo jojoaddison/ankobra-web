@@ -456,9 +456,29 @@ fi
 # 401 *before* method routing, so a GET (which the permitAll does not cover) is 401 and proves
 # nothing. POST an empty body instead: it clears security (not 401) and reaches the controller, where
 # @Valid rejects it with 400 — so 400 confirms both permitAll and routing, without creating a Lead.
-enquiry_code="$(remote "curl -s -o /dev/null -w '%{http_code}' -m 10 -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:${APP_PORT}/api/public/enquiries" || echo "000")"
+#
+# The token is fetched first, and that is not incidental. Since SEC-06 the endpoint is NOT exempt
+# from CSRF — deliberately, so there is one rule rather than one rule and an exception — so a POST
+# without one is refused at the filter with 403 and never reaches the controller. Sending the token
+# restores what this check was written to prove, and asserts the CSRF plumbing end to end as a side
+# effect: the cookie is issued eagerly on a plain GET, and the header pairs with it.
+#
+# Without this the check warns on every deploy of a perfectly healthy stack, which is precisely how a
+# verification step teaches people to skip reading it.
+csrf_jar='/tmp/ankobra-deploy-verify-csrf.$$'
+enquiry_code="$(remote "
+  curl -s -c ${csrf_jar} -o /dev/null -m 10 http://127.0.0.1:${APP_PORT}/ || true
+  xsrf=\$(awk '/XSRF-TOKEN/ {print \$7}' ${csrf_jar} 2>/dev/null)
+  curl -s -b ${csrf_jar} -o /dev/null -w '%{http_code}' -m 10 -X POST \
+       -H 'Content-Type: application/json' -H \"X-XSRF-TOKEN: \${xsrf}\" -d '{}' \
+       http://127.0.0.1:${APP_PORT}/api/public/enquiries
+  rm -f ${csrf_jar}" || echo "000")"
 if [[ "$enquiry_code" == "400" ]]; then
-  ok "internal  /api/public/enquiries accepts anonymous POSTs (400 to an empty body = permitted + validated)"
+  ok "internal  /api/public/enquiries accepts anonymous POSTs (400 to an empty body = permitted + validated + CSRF)"
+elif [[ "$enquiry_code" == "403" ]]; then
+  warn "/api/public/enquiries answered 403 — the CSRF token did not pair. Either the XSRF-TOKEN cookie"
+  warn "is no longer issued on a plain GET (CsrfTokenRequestAttributeHandler must load it eagerly), or"
+  warn "the repository/header names have changed from Angular's XSRF-TOKEN / X-XSRF-TOKEN defaults."
 else
   warn "/api/public/enquiries answered ${enquiry_code} to an empty POST — expected 400 (permitted, then validation rejects)"
 fi
