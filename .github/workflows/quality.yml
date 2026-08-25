@@ -1,0 +1,121 @@
+name: Quality verification
+
+# Runs deploy/quality-testing/startup.sh against the image that was just published, so a regression
+# in the things only a browser and an edge can see fails here rather than at deploy time.
+#
+# Three defects have shipped through a fully green suite in this repository: an inlineCritical
+# stylesheet stuck at media="print", security headers that never reached GET /, and a
+# BearerTokenResolver that exempted every authenticated request from CSRF while 583 tests passed.
+# None of them is reachable from MockMvc, which has no browser, no edge and no cookie jar. This job
+# is the layer that can see them.
+#
+# --- Why workflow_run and not push -------------------------------------------------------------
+#
+# The stack runs the PUBLISHED image — the same one production pulls, by tag — so it cannot start
+# until publish.yml has finished pushing it. Triggering on push would race the build and fail on a
+# tag that does not exist yet.
+on:
+  workflow_run:
+    workflows: ['Publish image (GHCR)']
+    types: [completed]
+    branches: [main]
+  # For re-running a verification by hand against any published tag, without waiting for a merge.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Published image tag to verify (default: this workflow file ref)'
+        required: false
+
+concurrency:
+  group: quality-verification
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify the published image behind an edge
+    # A failed publish has nothing to verify, and reporting that as a quality failure would point at
+    # the wrong thing entirely.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      # Job-level, not step-level: the LAN guard runs in startup.sh's --local branch before the
+      # action is dispatched, so --clean trips it exactly as the start does. Set on only the start
+      # step, the teardown dies and the volume survives into whatever runs next.
+      #
+      # The one place this bypass is legitimate: a throwaway runner, destroyed with the job. The
+      # guard exists to keep this stack off the production VPS, which a runner is not.
+      ANKOBRA_QUALITY_ALLOW_ANY_HOST: '1'
+
+    permissions:
+      contents: read
+      # Pulling the image. The package may well be public, but a job that only works while it stays
+      # public breaks silently the day somebody tightens it.
+      packages: read
+
+    steps:
+      # The commit that was actually published, not the branch head — by the time this runs, main may
+      # have moved, and verifying a different commit's edge config against this commit's image is a
+      # confusing way to fail.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+
+      - name: Work out which tag to verify
+        id: tag
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            # publish.yml tags with the first 7 characters of the SHA; derive it the same way rather
+            # than trusting `git rev-parse --short`, whose length is configurable per repository.
+            SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+            TAG="${SHA:0:7}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "verifying ghcr.io/${{ github.repository_owner }}/ankobra-web:$TAG"
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # The suite verifies THROUGH an edge — that is the whole point of it, and the SEC-14 finding is
+      # what proves the point: the headers were present on API responses and absent from GET /, which
+      # is the one request every visitor makes. A runner has no nginx, so the job stands one up with
+      # the repository's own vhost. Pointing the checks at the container port instead would drop the
+      # hop being tested and quietly convert this into a weaker suite that still reports success.
+      - name: Stand up the edge
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq nginx >/dev/null
+          # The distro default site owns port 80 as default_server; removing it leaves exactly one
+          # candidate and keeps the failure modes here the same as on a real host.
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo ln -sfn "$PWD/deploy/quality-testing/host-site.conf" \
+                       /etc/nginx/sites-enabled/jojoaddison.local.conf
+          echo '127.0.0.1 jojoaddison.local' | sudo tee -a /etc/hosts >/dev/null
+          sudo nginx -t
+          sudo systemctl reload nginx
+
+      - name: Run the quality stack and verify it
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          REGISTRY: ghcr.io/${{ github.repository_owner }}
+        run: ./deploy/quality-testing/startup.sh --local
+
+      # Only on failure, and worth having: the checks report what was wrong with the response, and
+      # the answer to why is almost always in the application log.
+      - name: Application logs
+        if: failure()
+        run: |
+          cd ~/webroot/01-jojoaddison/quality 2>/dev/null || exit 0
+          docker compose -f compose.yml logs --tail 200 app || true
+
+      # Runners are discarded, so this is not about reclaiming resources — it is about the volume.
+      # Leaving it behind would let a later run on a reused runner start against a database that
+      # already has rows, and the honeypot check counts rows.
+      - name: Tear down
+        if: always()
+        run: ./deploy/quality-testing/startup.sh --local --clean || true
