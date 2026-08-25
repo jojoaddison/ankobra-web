@@ -29,3 +29,12 @@ js/empty-password-in-configuration-file src/main/resources/config/application-se
 # Grafana provisioning for the local docker monitoring stack, scraping a Prometheus that requires no
 # auth. The file's own comments read "if used". Not a deployed credential.
 js/empty-password-in-configuration-file src/main/docker/grafana/provisioning/datasources/datasource.yml # local docker Prometheus datasource, which takes no auth
+
+# The single-file prototype at the repository root, which CLAUDE.md keeps as the authoritative source
+# for design tokens, layout, copy and the domain model. It builds table rows by string concatenation,
+# which is genuine XSS in a page that is served — and this one is not: it is in no build, no image and
+# no deployment, and nothing imports from it. It is a specification that happens to be executable.
+#
+# Not fixed rather than fixed, because editing it to satisfy a scanner would edit the reference the
+# application was built against, to no benefit for anything that ships.
+js/xss-through-dom jojoaddison-consultancy-demo.html # reference prototype; never built, served or imported

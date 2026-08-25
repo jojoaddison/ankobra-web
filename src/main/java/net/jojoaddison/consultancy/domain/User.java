@@ -272,7 +272,10 @@ public class User extends AbstractAuditingEntity<Long> implements Serializable {
             ", imageUrl='" + imageUrl + '\'' +
             ", activated='" + activated + '\'' +
             ", langKey='" + langKey + '\'' +
-            ", activationKey='" + activationKey + '\'' +
+            // activationKey is deliberately absent, and this is a divergence from what the generator
+            // emits. It is a credential: whoever holds it can activate the account. UserService logs
+            // whole User objects in six places, so leaving it here put the key into the log from
+            // every one of them — including paths that have nothing to do with activation.
             "}";
     }
 }
