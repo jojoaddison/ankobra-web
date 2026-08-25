@@ -97,7 +97,17 @@ jobs:
                        /etc/nginx/sites-enabled/jojoaddison.local.conf
           echo '127.0.0.1 jojoaddison.local' | sudo tee -a /etc/hosts >/dev/null
           sudo nginx -t
-          sudo systemctl reload nginx
+          # restart, not reload: apt installs nginx without starting it, and `reload` on a stopped
+          # service fails with "nginx.service is not active, cannot reload" — which is what the first
+          # run of this workflow did, after the config test had already passed.
+          sudo systemctl restart nginx
+          # Prove the edge is actually up before the stack starts, so a later failure cannot be
+          # misread as the application. 502 is the expected answer here and a good one: nginx is
+          # listening and proxying to a port nothing is on yet. A connection refused would mean the
+          # vhost never came up, and that is worth failing on now rather than thirty lines later.
+          edge=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://jojoaddison.local/ || echo 000)
+          [ "$edge" = "000" ] && { echo "::error::the edge is not answering — nginx did not come up"; exit 1; }
+          echo "edge is up (answered $edge with no application behind it yet)"
 
       - name: Run the quality stack and verify it
         env:
